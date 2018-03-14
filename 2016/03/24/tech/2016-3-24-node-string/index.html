@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next pisces" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.5" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon-next.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/uploads/favicon-16x16.png?v=6.0.5">
+
+
+  <link rel="mask-icon" href="/uploads/logo.svg?v=6.0.5" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.0.5',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Android,java,String" />
+
+
+<meta name="description" content="抽空总结了下 java 字符串相关知识点，平常使用最多的就是 String 类了，用于处理一些简单的字符串问题，比如：常量；当遇到相对复杂一些并且需要频繁拼接字符串时，就需要用到StringBuffer和StringBuilder了，以下都是自己平时的纪录方便查漏补缺，有些也摘自网上，这里做下整理，如果有侵犯您的内容，请通知我会及时修改。 大概情况：String 字符串常量 StringBuffe">
+<meta name="keywords" content="Android,java,String">
+<meta property="og:type" content="article">
+<meta property="og:title" content="String、StringBuffer、StringBuilder 纪录">
+<meta property="og:url" content="http://whiskeyfei.github.io/2016/03/24/tech/2016-3-24-node-string/index.html">
+<meta property="og:site_name" content="無名小子的杂货铺">
+<meta property="og:description" content="抽空总结了下 java 字符串相关知识点，平常使用最多的就是 String 类了，用于处理一些简单的字符串问题，比如：常量；当遇到相对复杂一些并且需要频繁拼接字符串时，就需要用到StringBuffer和StringBuilder了，以下都是自己平时的纪录方便查漏补缺，有些也摘自网上，这里做下整理，如果有侵犯您的内容，请通知我会及时修改。 大概情况：String 字符串常量 StringBuffe">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-03-14T15:06:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="String、StringBuffer、StringBuilder 纪录">
+<meta name="twitter:description" content="抽空总结了下 java 字符串相关知识点，平常使用最多的就是 String 类了，用于处理一些简单的字符串问题，比如：常量；当遇到相对复杂一些并且需要频繁拼接字符串时，就需要用到StringBuffer和StringBuilder了，以下都是自己平时的纪录方便查漏补缺，有些也摘自网上，这里做下整理，如果有侵犯您的内容，请通知我会及时修改。 大概情况：String 字符串常量 StringBuffe">
+
+
+
+
+
+
+  <link rel="canonical" href="http://whiskeyfei.github.io/2016/03/24/tech/2016-3-24-node-string/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>String、StringBuffer、StringBuilder 纪录 | 無名小子的杂货铺</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">無名小子的杂货铺</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">越努力越幸运</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/24/tech/2016-3-24-node-string/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">String、StringBuffer、StringBuilder 纪录</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-24T11:26:35+08:00">2016-03-24</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常/" itemprop="url" rel="index"><span itemprop="name">日常</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>抽空总结了下 java 字符串相关知识点，平常使用最多的就是 String 类了，用于处理一些简单的字符串问题，比如：常量；当遇到相对复杂一些并且需要频繁拼接字符串时，就需要用到StringBuffer和StringBuilder了，以下都是自己平时的纪录方便查漏补缺，有些也摘自网上，这里做下整理，如果有侵犯您的内容，请通知我会及时修改。</p>
+<h2 id="大概情况："><a href="#大概情况：" class="headerlink" title="大概情况："></a>大概情况：</h2><p>String 字符串常量</p>
+<p>StringBuffer 字符串变量（线程安全）</p>
+<p>StringBuilder 字符串变量（非线程安全）</p>
+<h2 id="单个理解："><a href="#单个理解：" class="headerlink" title="单个理解："></a>单个理解：</h2><p>String:是不可改变的量，创建后不能在修改,多用于不经常改变的的常量，无频繁拼接操作的场景；</p>
+<p>StringBuffer:</p>
+<pre><code>* A modifiable {@link CharSequence sequence of characters} for use in creating
+
+* strings, where all accesses are synchronized. This class has mostly been replaced
+
+* by {@link StringBuilder} because this synchronization is rarely useful. This
+
+* class is mainly used to interact with legacy APIs that expose it.
+</code></pre><p>StringBuilder:</p>
+<pre><code>* A modifiable {@link CharSequence sequence of characters} for use in creating
+
+* strings. This class is intended as a direct replacement of
+
+* {@link StringBuffer} for non-concurrent use; unlike {@code StringBuffer} this
+
+* class is not synchronized.
+</code></pre><p>看下两个的源码解释就很清楚了，两者都是可变字符串序列，基本用法和 String 一样，不同点就是 StringBuffer 是线程安全的，StringBuilder 是线程不安全的，其实就是同步和不同步的问题；</p>
+<h3 id="插播一条如何理解线程安全和线程不安全。。"><a href="#插播一条如何理解线程安全和线程不安全。。" class="headerlink" title="插播一条如何理解线程安全和线程不安全。。"></a>插播一条如何理解线程安全和线程不安全。。</h3><p>比如一个 ArrayList 类，在添加一个元素的时候，它可能会有两步来完成：</p>
+<p>1、在Items[Size] 的位置存放此元素；<br><br>2、增大 Size 的值；</p>
+<p>在单线程运行的情况下，如果 Size = 0，添加一个元素后，此元素在位置 0，而且 Size=1；<br>而如果是在多线程情况下，比如有两个线程，线程 A 先将元素1存放在位置 0。但是此时 CPU 调度线程A暂停，线程 B 得到运行的机会。<br>线程B向此 ArrayList 添加元素2，因为此时 Size 仍然等于 0 （注意，我们假设的是添加一个元素是要两个步骤，而线程A仅仅完成了步骤1），<br>所以线程B也将元素存放在位置0。然后线程A和线程B都继续运行，都增加 Size 的值，结果Size都等于1。<br>那好，我们来看看 ArrayList 的情况，期望的元素应该有2个，而 实际元素是在0位置，造成丢失元素，故Size 等于 1。<br>这就是“线程不安全”了。<br>还让我联想到另外一个例子，就是银行存取钱过程，这里就不展开说了，大家想想对比一下实际情况就能明白。</p>
+<p>赶紧扯回来String。。</p>
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>1、String</p>
+<pre><code>String a = &quot;abc&quot;;
+a.replace(&apos;a&apos;, &apos;d&apos;);
+System.out.println(a);//结果abc，不改变
+</code></pre><p>2、StringBuffer</p>
+<p>StringBuffer对象的初始化不像String类的初始化一样，Java提供的有特殊的语法，而通常情况下一般使用构造方法进行初始化</p>
+<pre><code>StringBuffer sb = new StringBuffer(&quot;123&quot;);
+sb.append(&quot;123&quot;).append(&quot;123&quot;);
+</code></pre><p>注：在使用 StringBuffer 的时候，需要注意不能想用 String 它一样使用</p>
+<pre><code>StringBuffer result = null;  
+结果警告：Null pointer access: The variable result can only be null at this location
+</code></pre><p>3、StringBuilder</p>
+<p>使用方式和 StringBuffer 一样，还有一些基本操作字符串函数的方法，append、deleteCharAt、insert等等，这里就不一一介绍如何使用了，看名字就知道怎么用了。</p>
+<p>注：StringBuffer和String属于不同的类型，也不能直接进行强制类型转换，下面的代码都是错误的：</p>
+<pre><code>StringBuffer s = “abc”;               //赋值类型不匹配
+StringBuffer s = (StringBuffer)”abc”;    //不存在继承关系，无法进行强转
+</code></pre><p>StringBuffer对象和String对象之间的互转的代码如下：</p>
+<pre><code>String s = “abc”;
+StringBuffer sb1 = new StringBuffer(“123”);
+StringBuffer sb2 = new StringBuffer(s);   //String转换为StringBuffer
+String s1 = sb1.toString();              //StringBuffer转换为String
+</code></pre><h2 id="性能对比"><a href="#性能对比" class="headerlink" title="性能对比"></a>性能对比</h2><h3 id="String"><a href="#String" class="headerlink" title="String"></a>String</h3><p>String是不可变的对象, 因此每次对 String 类型进行改变的时候都等同于生成了一个新的 String 对象，然后将指针指向新的 String 对象，所以经常改变内容的字符串最好不要用 String ，因为每次生成对象都会对系统性能产生影响，特别当内存中无引用对象多了以后， JVM 的 GC 就会开始工作，会影响运行速度。</p>
+<p>而 StringBuffer 类则结果就不一样，每次结果都会对 StringBuffer 对象本身进行操作，而不生成新的对象，再改变对象引用。<br>所以在一般情况下我们推荐使用 StringBuffer ，特别是字符串对象经常改变的情况下。而在某些特别情况下，<br>String 对象的字符串拼接其实是被 JVM 解释成了 StringBuffer 对象的拼接，所以这些时候 String 对象的速度并不会比 StringBuffer 对象慢，<br>而特别是以下的字符串对象生成中， String 效率是远要比 StringBuffer 快的：</p>
+<pre><code>String S1 = “This is only a” + “ simple” + “ test”;
+StringBuffer Sb = new StringBuilder(“This is only a”).append(“ simple”).append(“ test”);
+你会很惊讶的发现，生成 String S1 对象的速度简直太快了，而这个时候 StringBuffer 居然速度上根本一点都不占优势。
+其实这是 JVM 的一个把戏，在 JVM 眼里，这个
+String S1 = “This is only a” + “ simple” + “test”; 其实就是：
+String S1 = “This is only a simple test”;
+所以当然不需要太多的时间了。但大家这里要注意的是，如果你的字符串是来自另外的 String 对象的话，速度就没那么快了，譬如：
+String S2 = “This is only a”;
+String S3 = “ simple”;
+String S4 = “ test”;
+String S1 = S2 +S3 + S4;
+
+这时候 JVM 会规规矩矩的按照原来的方式去做
+当然这种简单的方式我们也不会去选择 StringBuffer 来拼接了，用 String 就好了。
+</code></pre><h3 id="StringBuffer"><a href="#StringBuffer" class="headerlink" title="StringBuffer"></a>StringBuffer</h3><p>在大部分情况下 StringBuffer &gt; String</p>
+<p>Java.lang.StringBuffer线程安全的可变字符序列。一个类似于 String 的字符串缓冲区，但不能修改。<br>虽然在任意时间点上它都包含某种特定的字符序列，但通过某些方法调用可以改变该序列的长度和内容。</p>
+<p>可将字符串缓冲区安全地用于多个线程。可以在必要时对这些方法进行同步，因此任意特定实例上的所有操作就好像是以串行顺序发生的，该顺序与所涉及的每个线程进行的方法调用顺序一致。<br>StringBuffer 上的主要操作是 append 和 insert 方法，可重载这些方法，以接受任意类型的数据。每个方法都能有效地将给定的数据转换成字符串，然后将该字符串的字符追加或插入到字符串缓冲区中。append 方法始终将这些字符添加到缓冲区的末端；而 insert 方法则在指定的点添加字符。</p>
+<p>例如，如果 z 引用一个当前内容是“start”的字符串缓冲区对象，则此方法调用 z.append(“le”) 会使字符串缓冲区包含“startle”，而 z.insert(4, “le”) 将更改字符串缓冲区，使之包含“starlet”。</p>
+<h3 id="StringBuilder"><a href="#StringBuilder" class="headerlink" title="StringBuilder"></a>StringBuilder</h3><p>在大部分情况下 StringBuilder &gt; StringBuffer</p>
+<p>java.lang.StringBuilder一个可变的字符序列是5.0新增的。此类提供一个与 StringBuffer 兼容的 API，但不保证同步。<br>该类被设计用作 StringBuffer 的一个简易替换，用在字符串缓冲区被单个线程使用的时候（这种情况很普遍）。<br>如果可能，建议优先采用该类，因为在大多数实现中，它比 StringBuffer 要快，两者的方法基本相同。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="http://github.thinkingbar.com/how-to-use-string/" target="_blank" rel="noopener">浅谈 Java 字符串</a></li>
+<li><a href="http://www.cnblogs.com/zwq194/archive/2012/06/26/2563567.html" target="_blank" rel="noopener">什么是线程安全和线程不安全</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/uploads/alipay.jpg" alt="無名 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>无名</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://whiskeyfei.github.io/2016/03/24/tech/2016-3-24-node-string/" title="String、StringBuffer、StringBuilder 纪录">http://whiskeyfei.github.io/2016/03/24/tech/2016-3-24-node-string/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/日常/" rel="tag"># 日常</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/09/tech/2016-3-8-gson/" rel="next" title="Gson库项目使用 - @SerializedName">
+                <i class="fa fa-chevron-left"></i> Gson库项目使用 - @SerializedName
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/25/android/2016-11-06-rxjava-demo/" rel="prev" title="RxJava语法练习">
+                RxJava语法练习 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/face.jpg"
+                alt="無名" />
+            
+              <p class="site-author-name" itemprop="name">無名</p>
+              <p class="site-description motion-element" itemprop="description">记录学习、生活</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">46</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/whiskeyfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:whiskeyfei@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/fa272f63280a" target="_blank" title="简书"><i class="fa fa-fw fa-google"></i>简书</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/whiskeyfei" target="_blank" title="Twitter"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#大概情况："><span class="nav-number">1.</span> <span class="nav-text">大概情况：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单个理解："><span class="nav-number">2.</span> <span class="nav-text">单个理解：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#插播一条如何理解线程安全和线程不安全。。"><span class="nav-number">2.1.</span> <span class="nav-text">插播一条如何理解线程安全和线程不安全。。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本用法"><span class="nav-number">3.</span> <span class="nav-text">基本用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能对比"><span class="nav-number">4.</span> <span class="nav-text">性能对比</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#String"><span class="nav-number">4.1.</span> <span class="nav-text">String</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StringBuffer"><span class="nav-number">4.2.</span> <span class="nav-text">StringBuffer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#StringBuilder"><span class="nav-number">4.3.</span> <span class="nav-text">StringBuilder</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">無名</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Pisces</a> v6.0.5</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.5"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.5"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.5"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.5"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.5"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

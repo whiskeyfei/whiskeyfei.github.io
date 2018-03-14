@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next pisces" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.5" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon-next.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/uploads/favicon-16x16.png?v=6.0.5">
+
+
+  <link rel="mask-icon" href="/uploads/logo.svg?v=6.0.5" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.0.5',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Android,RxJava,RxAndroid" />
+
+
+<meta name="description" content="很早之前就听Rxjava 多么神奇，各种评论都有，说学习坡度高，难等等，于是亲自上手试试，说实话刚开始看到这些用法立马就蒙比了，和我们之前的方式不太一样，理解起来还是挺别扭的，之后找了一篇给 Android 开发者的 RxJava 详解 抛物线的，好好研究上几天，认真理解每个例子并自己动手敲出来，也就慢慢能体会到 rxjava 的好用之处了。 内容包含如下： 如何获取，观察者模式，基本语法，操作符">
+<meta name="keywords" content="Android,RxJava,RxAndroid">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RxJava语法练习">
+<meta property="og:url" content="http://whiskeyfei.github.io/2016/03/25/android/2016-11-06-rxjava-demo/index.html">
+<meta property="og:site_name" content="無名小子的杂货铺">
+<meta property="og:description" content="很早之前就听Rxjava 多么神奇，各种评论都有，说学习坡度高，难等等，于是亲自上手试试，说实话刚开始看到这些用法立马就蒙比了，和我们之前的方式不太一样，理解起来还是挺别扭的，之后找了一篇给 Android 开发者的 RxJava 详解 抛物线的，好好研究上几天，认真理解每个例子并自己动手敲出来，也就慢慢能体会到 rxjava 的好用之处了。 内容包含如下： 如何获取，观察者模式，基本语法，操作符">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-03-14T15:01:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RxJava语法练习">
+<meta name="twitter:description" content="很早之前就听Rxjava 多么神奇，各种评论都有，说学习坡度高，难等等，于是亲自上手试试，说实话刚开始看到这些用法立马就蒙比了，和我们之前的方式不太一样，理解起来还是挺别扭的，之后找了一篇给 Android 开发者的 RxJava 详解 抛物线的，好好研究上几天，认真理解每个例子并自己动手敲出来，也就慢慢能体会到 rxjava 的好用之处了。 内容包含如下： 如何获取，观察者模式，基本语法，操作符">
+
+
+
+
+
+
+  <link rel="canonical" href="http://whiskeyfei.github.io/2016/03/25/android/2016-11-06-rxjava-demo/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>RxJava语法练习 | 無名小子的杂货铺</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">無名小子的杂货铺</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">越努力越幸运</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-11-06-rxjava-demo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">RxJava语法练习</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-25T10:59:01+08:00">2016-03-25</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>很早之前就听Rxjava 多么神奇，各种评论都有，说学习坡度高，难等等，于是亲自上手试试，说实话刚开始看到这些用法立马就蒙比了，和我们之前的方式不太一样，理解起来还是挺别扭的，之后找了一篇<a href="http://gank.io/post/560e15be2dca930e00da1083" target="_blank" rel="noopener">给 Android 开发者的 RxJava 详解</a> 抛物线的，好好研究上几天，认真理解每个例子并自己动手敲出来，也就慢慢能体会到 rxjava 的好用之处了。</p>
+<p>内容包含如下：<br> 如何获取，观察者模式，基本语法，操作符使用，线程控制使用</p>
+<blockquote>
+<p>注意：以下部分内容部分段落部分引用自<a href="http://gank.io/post/560e15be2dca930e00da1083" target="_blank" rel="noopener">给 Android 开发者的 RxJava 详解</a>，如有冒犯之处，我会及时删除。</p>
+</blockquote>
+<h2 id="一、如何获取"><a href="#一、如何获取" class="headerlink" title="一、如何获取"></a>一、如何获取</h2><p><strong><a href="https://github.com/ReactiveX/RxJava" target="_blank" rel="noopener">RxJava</a></strong><br><strong><a href="https://github.com/ReactiveX/RxAndroid" target="_blank" rel="noopener">RxAndroid</a></strong><br>在项目中引入依赖就好了，我这里用的不是最新版本</p>
+<pre><code>compile &apos;io.reactivex:rxandroid:1.1.0&apos;
+compile &apos;io.reactivex:rxjava:1.1.0&apos;
+</code></pre><h2 id="二、观察者模式"><a href="#二、观察者模式" class="headerlink" title="二、观察者模式"></a>二、观察者模式</h2><p>这个模式基本上都听过，使用过的就可以直接略过了。</p>
+<p>先说下设计模式中的观察者模式：</p>
+<p>当对象间存在一对多关系时，则使用观察者模式（Observer Pattern） 比如，当一个对象被修改时，则会自动通知它的依赖对象，观察者模式属于行为型模式。</p>
+<p>使用在java中实现观察者模式需要用到java.util包中提供的Observable类和Observer接口，java已经给我们提供好类使用。</p>
+<p>Observable可以查看java源码，下面是Observer接口：</p>
+<pre><code>public interface Observer {
+    void update(Observable observable, Object data);
+}
+</code></pre><p>举个简单例子：</p>
+<p>古董被观察，观察者为people用来观察古董价钱波动<br>被观察者：</p>
+<pre><code>public class Antique extends Observable {
+    private float mPrice;// 价钱
+
+    public Antique(float price) {
+        this.mPrice = price;
+    }
+
+    public float getPrice() {
+        return this.mPrice;
+    }
+
+    public void setPrice(float price) {
+        super.setChanged();
+        super.notifyObservers(price);// 价格被改变
+        this.mPrice = price;
+    }
+
+    public String toString() {
+        return &quot;古董价格为：&quot; + this.mPrice;
+    }
+}
+</code></pre><p> 观察者实现Observer接口，重写update方法即可</p>
+<pre><code>public class People implements Observer{
+
+    private String name;
+
+    public People(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.e(&quot;&quot;,&quot;People update() -&gt; update name:&quot;+ this.name + &quot;,price:&quot;+ ((Float)data).floatValue());
+    }
+
+}
+</code></pre><p>   主函数调用</p>
+<pre><code>Antique house = new Antique(1222f);
+People p1 = new People(&quot;p1&quot;);
+People p2 = new People(&quot;p2&quot;);
+People p3 = new People(&quot;p3&quot;);
+house.addObserver(p1);
+house.addObserver(p2);
+house.addObserver(p3);
+Log.e(&quot;&quot;, house+&quot;&quot;); // 输出价格
+house.setPrice(111f);
+Log.e(&quot;&quot;, house+&quot;&quot;); // 输出价格
+</code></pre><p>这样只要价格发生变化，就会通知所有订阅的人，也就实现了简单的观察者模式。</p>
+<h4 id="RxJava-中的观察者模式"><a href="#RxJava-中的观察者模式" class="headerlink" title="RxJava 中的观察者模式"></a>RxJava 中的观察者模式</h4><p>观察者：Observer;<br><br>被观察者：Observable;<br><br>订阅：subscribe();<br></p>
+<h5 id="观察者"><a href="#观察者" class="headerlink" title="观察者"></a>观察者</h5><p>Observer即为观察者，处理事件发生后逻辑，如古董例子，价格改变后，需要updae信息，不过 Rxjava 这里多了几种处理情况，onCompleted(),onError(),onNext(),具体用法看 dmeo 就可以了。</p>
+<h5 id="被观察者"><a href="#被观察者" class="headerlink" title="被观察者"></a>被观察者</h5><p>Observable 即被观察者，它决定什么时候触发事件以及触发怎样的事件。可以使用create()、just(T…)、from(T[])或from(Iterable&lt;? extends T&gt;)来创建一个 Observable ，并为它定义事件触发规则。</p>
+<h5 id="订阅"><a href="#订阅" class="headerlink" title="订阅"></a>订阅</h5><p>创建了Observable和Observer之后，再用subscribe()方法将它们联结起来。</p>
+<h2 id="三、基本语法"><a href="#三、基本语法" class="headerlink" title="三、基本语法"></a>三、基本语法</h2><p>1、打印 Hello World</p>
+<pre><code>Observable.create(new Observable.OnSubscribe&lt;String&gt;() {
+
+     @Override
+     public void call(Subscriber&lt;? super String&gt; subscriber) {
+         subscriber.onNext(&quot;Hello World&quot;);
+         subscriber.onCompleted();
+     }
+ }).subscribe(new Observer&lt;String&gt;() {
+     @Override
+     public void onCompleted() {
+         System.out.println(&quot;onCompleted:&quot;);
+     }
+
+     @Override
+     public void onError(Throwable e) {
+         System.out.println(&quot;onError e:&quot;+e);
+     }
+
+     @Override
+     public void onNext(String s) {
+         System.out.println(&quot;onNext s:&quot;+s);
+     }
+ });
+
+//还可以这么写
+
+ Observable.just(&quot;hello World&quot;).subscribe(new Action1&lt;String&gt;() {
+     @Override
+     public void call(String s) {
+         System.out.println(&quot;call s:&quot;+s);
+     }
+ });
+</code></pre><p>2、将字符串数组 names 中的所有字符串依次打印出来</p>
+<pre><code> String[] names = {&quot;111&quot;, &quot;222&quot;, &quot;333&quot;};
+ Observable.from(names).subscribe(new Action1&lt;String&gt;() {
+     @Override
+     public void call(String name) {
+         System.out.println(&quot;test1 name:&quot; + name);
+     }
+ });
+// 输出
+test1 name:111
+test1 name:222
+test1 name:333
+
+另一种写法
+
+ @Test
+ public void test4(){
+     //1:被观察者
+     String [] names ={&quot;111&quot;,&quot;222&quot;,&quot;333&quot;};
+     Observable observable = Observable.from(names);
+
+     //2:观察者
+     Action1 onNextAction = new Action1&lt;String&gt;() {
+         @Override
+         public void call(String s) {
+             System.out.println(&quot;test4 call&quot;+s);
+         }
+     };
+
+     Action1&lt;Throwable&gt; onErrorAction = new Action1&lt;Throwable&gt;() {
+         @Override
+         public void call(Throwable e) {
+             System.out.println(&quot;test4 call e:&quot;+e);
+       }
+     };
+
+     Action0 onCompletedAction = new Action0() {
+         @Override
+         public void call() {
+             System.out.println(&quot;test4 call onCompletedAction&quot;);
+         }
+     };
+     //3:订阅:被观察者被观察者订阅
+     observable.subscribe(onNextAction, onErrorAction, onCompletedAction);
+ }
+</code></pre><p>3、just 将传入的参数依次打印</p>
+<pre><code>@Test
+public void test2(){
+    Observable.just(&quot;1&quot;,&quot;2&quot;,&quot;3&quot;).subscribe(new Observer&lt;String&gt;() {
+        @Override
+        public void onCompleted() {
+            System.out.println(&quot;test2 onCompleted&quot;);
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            System.out.println(&quot;test2 e:&quot;+e);
+        }
+
+        @Override
+        public void onNext(String s) {
+            System.out.println(&quot;onNext:&quot;+s);
+        }
+    });
+}
+  //    onNext:1
+ //    onNext:2
+//    onNext:3
+//    test2 onCompleted
+</code></pre><p>4、 循环输出list</p>
+<pre><code>@Test
+public void test5(){
+    Observable.from(Data.getCats().get(0).getlist()).subscribe(new Action1&lt;String&gt;() {
+        @Override
+        public void call(String s) {
+            System.out.println(&quot;test5 call :&quot;+s);
+        }
+    });
+}
+
+//    test5 call :list:0
+//    test5 call :list:1
+//    test5 call :list:2
+//    test5 call :list:3
+//    test5 call :list:4
+//    test5 call :list:5
+//    test5 call :list:6
+//    test5 call :list:7
+//    test5 call :list:8
+//    test5 call :list:9
+</code></pre><h2 id="四、操作符使用"><a href="#四、操作符使用" class="headerlink" title="四、操作符使用"></a>四、操作符使用</h2><p>1、map：遍历list中的name，使用map操作符来获取list中的单项</p>
+<pre><code>@Test
+public void test7(){
+    Observable.from(Data.getCats(10)).map(new Func1&lt;Cat, String&gt;() {
+
+      @Override
+      public String call(Cat cat) {
+          return cat.toCat();//获取cat name
+      }
+  }).subscribe(new Observer&lt;String&gt;() {
+      @Override
+      public void onCompleted() {
+          System.out.println(&quot;test7 onCompleted:&quot;);
+      }
+
+      @Override
+      public void onError(Throwable e) {
+          System.out.println(&quot;test7 onCompleted e:&quot;+e);
+      }
+
+      @Override
+      public void onNext(String s) {
+          System.out.println(&quot;test7 onNext :&quot;+s);
+      }
+  });
+}
+
+//  test7 onNext :0
+//  test7 onNext :1
+//  test7 onNext :2
+//  test7 onNext :3
+//  test7 onNext :4
+//  test7 onNext :5
+//  test7 onNext :6
+//  test7 onNext :7
+//  test7 onNext :8
+//  test7 onNext :9
+//  test7 onCompleted:
+</code></pre><p>2、flatMap：<br>  循环List<cat> -&gt; cat里面的list -&gt; list 中的 String</cat></p>
+<pre><code> @Test
+ public void test8() {
+     //循环List&lt;Cat&gt; -&gt; cat里面的list -&gt; list 中的 String
+     Observable
+             .from(Data.getCats())
+             .flatMap(new Func1&lt;Cat, Observable&lt;String&gt;&gt;() {
+                 @Override
+                 public Observable&lt;String&gt; call(Cat cat) {
+                     System.out.println(&quot;test8 call #########&quot; + cat.toCat());
+                     return Observable.from(cat.getlist());
+                 }
+             })
+             .subscribe(new Action1&lt;String&gt;() {
+                 @Override
+                 public void call(String s) {
+                     System.out.println(&quot;test8 call :&quot; + s);
+                 }
+     });
+ }
+//  部分log
+//  test8 call #########Cat0
+//  test8 call :0:list
+//  test8 call :1:list
+//  test8 call :2:list
+//  test8 call :3:list
+//  test8 call :4:list
+//  test8 call #########Cat1
+//  test8 call :0:list
+//  test8 call :1:list
+//  test8 call :2:list
+//  test8 call :3:list
+//  test8 call :4:list
+//  test8 call #########Cat2
+//  test8 call :0:list
+//  test8 call :1:list
+//  test8 call :2:list
+//  test8 call :3:list
+//  test8 call :4:list
+</code></pre><h2 id="五、线程控制使用"><a href="#五、线程控制使用" class="headerlink" title="五、线程控制使用"></a>五、线程控制使用</h2><p>以上的测试例子中，事件的发起和消费都是在同一个线程执行的，等同于 RxJava 是同步执行(学习使用)，但是，观察者模式本身就是等触发后才通知其他订阅者，所以来了解下 RxJava 如何使用线程的。</p>
+<p>在不指定线程的情况下， RxJava 遵循的是线程不变的原则，即：在哪个线程调用 subscribe()<br>，就在哪个线程生产事件；在哪个线程生产事件，就在哪个线程消费事件。如果需要切换线程，就需要用到 Scheduler （调度器）。</p>
+<p>  1) Scheduler 的 API (一)</p>
+<p> 在RxJava 中，Scheduler ——调度器，相当于线程控制器，RxJava 通过它来指定每一段代码应该运行在什么样的线程。RxJava 已经内置了几个 Scheduler ，它们已经适合大多数的使用场景：</p>
+<p>  1、Schedulers.immediate(): 直接在当前线程运行，相当于不指定线程。这是默认的 Scheduler。</p>
+<p>  2、Schedulers.newThread(): 总是启用新线程，并在新线程执行操作。</p>
+<p>  3、Schedulers.io(): I/O 操作（读写文件、读写数据库、网络信息交互等）所使用的 Scheduler。行为模式和 newThread() 差不多，区别在于 io() 的内部实现是是用一个无数量上限的线程池，可以重用空闲的线程，因此多数情况下 io() 比 newThread() 更有效率。不要把计算工作放在 io() 中，可以避免创建不必要的线程。</p>
+<p>  4、 Schedulers.computation(): 计算所使用的 Scheduler。这个计算指的是 CPU 密集型计算，即不会被 I/O 等操作限制性能的操作，例如图形的计算。这个 Scheduler 使用的固定的线程池，大小为 CPU 核数。不要把 I/O 操作放在 computation() 中，否则 I/O 操作的等待时间会浪费 CPU。</p>
+<p>  5、另外， Android 还有一个专用的 AndroidSchedulers.mainThread()，它指定的操作将在 Android 主线程运行。</p>
+<p>  有了这几个 Scheduler ，就可以使用 subscribeOn() 和 observeOn() 两个方法来对线程进行控制了。 <em> subscribeOn(): 指定 subscribe() 所发生的线程，即 Observable.OnSubscribe 被激活时所处的线程。或者叫做事件产生的线程。 </em> observeOn(): 指定 Subscriber 所运行在的线程。或者叫做事件消费的线程。</p>
+<pre><code>ImageView显示图片：
+
+
+       Observable.just(R.drawable.ic_launcher).map(new Func1&lt;Integer, Drawable&gt;() {
+
+        @Override
+        public Drawable call(Integer integer) {
+            return getResources().getDrawable(integer);
+        }
+        }).subscribeOn(Schedulers.io()) // 指定 subscribe() 发生在 IO 线程
+            .observeOn(AndroidSchedulers.mainThread()) // 指定 Subscriber 的回调发生在主线程
+        .subscribe(new Observer&lt;Drawable&gt;() {
+        @Override
+        public void onCompleted() {
+
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            Toast.makeText(MainActivity.this, &quot;Error!&quot;, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onNext(Drawable drawable) {
+            mImageView.setImageDrawable(drawable);
+        }
+        });
+</code></pre><h5 id="多次切换线程"><a href="#多次切换线程" class="headerlink" title="多次切换线程"></a>多次切换线程</h5><pre><code>Observable.just(1, 2, 3, 4)
+.subscribeOn(Schedulers.newThread()) // 指定 subscribe() 发生在 IO 线程
+.observeOn(Schedulers.io()) // 指定在IO线程处理
+.map(new Func1&lt;Integer, Integer&gt;() {
+
+    @Override
+    public Integer call(Integer integer) {
+        return integer+1;
+    }
+})
+.observeOn(AndroidSchedulers.mainThread())// 指定 Subscriber 的回调发生在主线程
+.subscribe(new Action1&lt;Integer&gt;() {
+    @Override
+    public void call(Integer number) {
+        Log.d(TAG, &quot;number:&quot; + number);
+    }
+});
+</code></pre><h2 id="六、参考"><a href="#六、参考" class="headerlink" title="六、参考"></a>六、参考</h2><ul>
+<li><a href="https://github.com/whiskeyfei/Node-for-Android/blob/master/Design/%E8%A7%82%E5%AF%9F%E8%80%85.md" target="_blank" rel="noopener">观察者</a></li>
+<li><a href="http://gank.io/post/560e15be2dca930e00da1083" target="_blank" rel="noopener">给 Android 开发者的 RxJava 详解</a></li>
+</ul>
+<h2 id="七、小结"><a href="#七、小结" class="headerlink" title="七、小结"></a>七、小结</h2><p>代码已上传 <a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFRxJavaDemo" target="_blank" rel="noopener">WFRxJavaDemo</a>，欢迎指正。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/uploads/alipay.jpg" alt="無名 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>无名</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://whiskeyfei.github.io/2016/03/25/android/2016-11-06-rxjava-demo/" title="RxJava语法练习">http://whiskeyfei.github.io/2016/03/25/android/2016-11-06-rxjava-demo/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/RxJava/" rel="tag"># RxJava</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/24/tech/2016-3-24-node-string/" rel="next" title="String、StringBuffer、StringBuilder 纪录">
+                <i class="fa fa-chevron-left"></i> String、StringBuffer、StringBuilder 纪录
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/25/android/2016-4-8-android-overdraw-note/" rel="prev" title="Android Overdraw 初识及如何优化">
+                Android Overdraw 初识及如何优化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/face.jpg"
+                alt="無名" />
+            
+              <p class="site-author-name" itemprop="name">無名</p>
+              <p class="site-description motion-element" itemprop="description">记录学习、生活</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">46</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/whiskeyfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:whiskeyfei@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/fa272f63280a" target="_blank" title="简书"><i class="fa fa-fw fa-google"></i>简书</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/whiskeyfei" target="_blank" title="Twitter"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、如何获取"><span class="nav-number">1.</span> <span class="nav-text">一、如何获取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、观察者模式"><span class="nav-number">2.</span> <span class="nav-text">二、观察者模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RxJava-中的观察者模式"><span class="nav-number">2.0.1.</span> <span class="nav-text">RxJava 中的观察者模式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#观察者"><span class="nav-number">2.0.1.1.</span> <span class="nav-text">观察者</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#被观察者"><span class="nav-number">2.0.1.2.</span> <span class="nav-text">被观察者</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#订阅"><span class="nav-number">2.0.1.3.</span> <span class="nav-text">订阅</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、基本语法"><span class="nav-number">3.</span> <span class="nav-text">三、基本语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、操作符使用"><span class="nav-number">4.</span> <span class="nav-text">四、操作符使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、线程控制使用"><span class="nav-number">5.</span> <span class="nav-text">五、线程控制使用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#多次切换线程"><span class="nav-number">5.0.0.1.</span> <span class="nav-text">多次切换线程</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、参考"><span class="nav-number">6.</span> <span class="nav-text">六、参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、小结"><span class="nav-number">7.</span> <span class="nav-text">七、小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">無名</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Pisces</a> v6.0.5</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.5"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.5"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.5"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.5"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.5"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next pisces" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.5" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon-next.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/uploads/favicon-16x16.png?v=6.0.5">
+
+
+  <link rel="mask-icon" href="/uploads/logo.svg?v=6.0.5" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.0.5',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="code review," />
+
+
+<meta name="description" content="对 没错 又是近况，去年八月份写过一篇近况，这一晃半年多又过去了，其实无非也还是那几件事，上次谈的是 Code Review、思考工作、运动，这次都有，顺便加上积累、理财和懒惰。 所以聊聊这几个关键字： Code Review、思考、运动、积累、理财、懒惰。 1、Code Review老生常谈的话题，只要从事编码工作，就无法逃离这个话题，我们经常听到”提交代码前要找人 Review 下“这样的声音">
+<meta name="keywords" content="code review">
+<meta property="og:type" content="article">
+<meta property="og:title" content="近况 2017.05.16">
+<meta property="og:url" content="http://whiskeyfei.github.io/2017/05/22/life/2017-5-16-review/index.html">
+<meta property="og:site_name" content="無名小子的杂货铺">
+<meta property="og:description" content="对 没错 又是近况，去年八月份写过一篇近况，这一晃半年多又过去了，其实无非也还是那几件事，上次谈的是 Code Review、思考工作、运动，这次都有，顺便加上积累、理财和懒惰。 所以聊聊这几个关键字： Code Review、思考、运动、积累、理财、懒惰。 1、Code Review老生常谈的话题，只要从事编码工作，就无法逃离这个话题，我们经常听到”提交代码前要找人 Review 下“这样的声音">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-03-14T15:05:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="近况 2017.05.16">
+<meta name="twitter:description" content="对 没错 又是近况，去年八月份写过一篇近况，这一晃半年多又过去了，其实无非也还是那几件事，上次谈的是 Code Review、思考工作、运动，这次都有，顺便加上积累、理财和懒惰。 所以聊聊这几个关键字： Code Review、思考、运动、积累、理财、懒惰。 1、Code Review老生常谈的话题，只要从事编码工作，就无法逃离这个话题，我们经常听到”提交代码前要找人 Review 下“这样的声音">
+
+
+
+
+
+
+  <link rel="canonical" href="http://whiskeyfei.github.io/2017/05/22/life/2017-5-16-review/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>近况 2017.05.16 | 無名小子的杂货铺</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">無名小子的杂货铺</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">越努力越幸运</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2017/05/22/life/2017-5-16-review/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">近况 2017.05.16</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T13:37:16+08:00">2017-05-22</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/生活/" itemprop="url" rel="index"><span itemprop="name">生活</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>对 没错 又是近况，去年八月份写过一篇近况，这一晃半年多又过去了，其实无非也还是那几件事，上次谈的是 Code Review、思考工作、运动，这次都有，顺便加上积累、理财和懒惰。</p>
+<p>所以聊聊这几个关键字： Code Review、思考、运动、积累、理财、懒惰。</p>
+<h4 id="1、Code-Review"><a href="#1、Code-Review" class="headerlink" title="1、Code Review"></a>1、Code Review</h4><p>老生常谈的话题，只要从事编码工作，就无法逃离这个话题，我们经常听到”提交代码前要找人 Review 下“这样的声音，然而往往坚持不了几次就拉倒了，自认为写的逻辑没有问题，出问题结果恍然大悟，感叹原来还有这一层逻辑要处理。</p>
+<p>上次说的编码规范、风格、重复等方面，这次就不细说了，说多了就烦了，这些原本就是应该掌握的东西，是本能。上次也说了可扩展、可测试，这次说说易用、兼容、出错排查，顺便再说说扩展。</p>
+<p>易用：就是方便使用，提供的功能模块外部调用是否方便，是否轻松调用一个方法就可以了，在写模块的时候，首先要将自己作为一个第三方使用者来思考，思考我想这个应该怎么用才最简单最方便最安全。</p>
+<p>兼容：通常是向上向下兼容，或者兼容最低版本，这里就会涉及到框架设计知识，注意变的东西要统一，不能随便更改，更改能及时发现，对比也能特别鲜明，和面向接口编程思想是类似的，接口提供哪些方法就只能调到这些方法，其他的不能使用。</p>
+<p>出错排查：这段时间有很多不知道怎么处理的问题，好在最后都处理掉了，之前写过《谈对接》一文，就是说为了防止出问题，如何在一些对接事情做的严谨，我的建议是从大往小、从表征到本质，如果有出错过程log配合最好。对于不知道是哪出错的问题，就采用排除法一一排除，缩小出错代码范围，逐步调试。</p>
+<p>扩展：这次领会到的有点随意拼接的意思，就是这个模块是一个完整的功能模块，但是同时又是又不同的小模块组合而成，而彼此依赖的只有接口，各个模块应该感知不到具体的实现，而只是我需要这个结果，你给我提供就好，具体怎么实现我不关心，及时更换实现过程，其他模块也丝毫感知不到。另外每一个小模块又可以当一个小功能来使用，这是我认为最有意思的的地方。跟七巧板似的，随意组合随意拼接成不同的团图案。</p>
+<h4 id="2、思考"><a href="#2、思考" class="headerlink" title="2、思考"></a>2、思考</h4><p>思考是必须要的，不然就真的死掉了，去思考如何把性能提升10ms，如果将页面载入速度提高5ms等等。就是要去思考如何越来越好，然后找几个点就开始干，2017 不就是应该撸起袖子就是干吗！！</p>
+<h4 id="3、积累"><a href="#3、积累" class="headerlink" title="3、积累"></a>3、积累</h4><p>有时候到写周报的时候才发现不知道这周干了啥，然后就一个劲的回忆，我也这么干过，所以好记性不如烂笔杆，适当的使用工具来帮助自己记录平时，我是使用Tower来记录每一件事每一个问题每一个bug，完成就划掉，同时将解决问题中学到的只是积累的印象笔记中，抽空要将这写东西在总结在升华，这就是我目前的方式。</p>
+<h4 id="4、懒惰"><a href="#4、懒惰" class="headerlink" title="4、懒惰"></a>4、懒惰</h4><p>很伤心我也很懒惰，至少在学英语这件事上，我已经败了，掏了钱没去上课没去学习，课下也没有去练习，这方面确实懒。。。根本原因还是没有找到兴趣点，原因我也知道，只是不知道怎么解决，碎事情很多，我知道这不是理由，但是我还是败给了懒惰，谁都不能怨。</p>
+<h4 id="5、理财"><a href="#5、理财" class="headerlink" title="5、理财"></a>5、理财</h4><p>你不理财，财不离你，善用每一分去撬动另一分，别的不多说，现在理财文章一对一对的，最重要是要有理财意识。</p>
+<h4 id="6、运动"><a href="#6、运动" class="headerlink" title="6、运动"></a>6、运动</h4><p>2017 恢复打羽毛球，很开森，平均一周两次，以后要多多练习，自由泳也在进行中，之后继续。</p>
+<p>有进步也有退步，2017 着重要加强核心竞争力，女朋友常说的：你可以的，不管真的能不能要相信自己可以的。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/uploads/alipay.jpg" alt="無名 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>无名</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://whiskeyfei.github.io/2017/05/22/life/2017-5-16-review/" title="近况 2017.05.16">http://whiskeyfei.github.io/2017/05/22/life/2017-5-16-review/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/code-review/" rel="tag"># code review</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/17/tech/2017-1-16-gson_translate/" rel="next" title="Gson 系列文章翻译 End">
+                <i class="fa fa-chevron-left"></i> Gson 系列文章翻译 End
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/22/life/2017-10-14-life_ten/" rel="prev" title="打球这十年">
+                打球这十年 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/face.jpg"
+                alt="無名" />
+            
+              <p class="site-author-name" itemprop="name">無名</p>
+              <p class="site-description motion-element" itemprop="description">记录学习、生活</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">46</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/whiskeyfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:whiskeyfei@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/fa272f63280a" target="_blank" title="简书"><i class="fa fa-fw fa-google"></i>简书</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/whiskeyfei" target="_blank" title="Twitter"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、Code-Review"><span class="nav-number">1.</span> <span class="nav-text">1、Code Review</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、思考"><span class="nav-number">2.</span> <span class="nav-text">2、思考</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、积累"><span class="nav-number">3.</span> <span class="nav-text">3、积累</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、懒惰"><span class="nav-number">4.</span> <span class="nav-text">4、懒惰</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5、理财"><span class="nav-number">5.</span> <span class="nav-text">5、理财</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6、运动"><span class="nav-number">6.</span> <span class="nav-text">6、运动</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">無名</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Pisces</a> v6.0.5</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.5"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.5"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.5"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.5"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.5"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

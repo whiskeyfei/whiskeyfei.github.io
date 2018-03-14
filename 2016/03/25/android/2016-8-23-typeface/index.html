@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next pisces" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.5" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon-next.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/uploads/favicon-16x16.png?v=6.0.5">
+
+
+  <link rel="mask-icon" href="/uploads/logo.svg?v=6.0.5" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.0.5',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Android,Font,Typeface" />
+
+
+<meta name="description" content="之前调研客户端动态换字体，尝试过很多方案，也走过很多弯路，总结下心路历程 1、和 Rom 无关，限 App 内2、支持动态切换3、方式（自定义 、遍历、替换） 一、归根结底归根结底都是改变 Typeface 然后通过 setTypeface() 设置字体，包括系统的控件和 cavas 的 paint。 二、基础系统提供从 asset 目录和普通目录获取Typeface方法，如下： Typeface">
+<meta name="keywords" content="Android,Font,Typeface">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 换字体总结">
+<meta property="og:url" content="http://whiskeyfei.github.io/2016/03/25/android/2016-8-23-typeface/index.html">
+<meta property="og:site_name" content="無名小子的杂货铺">
+<meta property="og:description" content="之前调研客户端动态换字体，尝试过很多方案，也走过很多弯路，总结下心路历程 1、和 Rom 无关，限 App 内2、支持动态切换3、方式（自定义 、遍历、替换） 一、归根结底归根结底都是改变 Typeface 然后通过 setTypeface() 设置字体，包括系统的控件和 cavas 的 paint。 二、基础系统提供从 asset 目录和普通目录获取Typeface方法，如下： Typeface">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-03-14T15:02:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 换字体总结">
+<meta name="twitter:description" content="之前调研客户端动态换字体，尝试过很多方案，也走过很多弯路，总结下心路历程 1、和 Rom 无关，限 App 内2、支持动态切换3、方式（自定义 、遍历、替换） 一、归根结底归根结底都是改变 Typeface 然后通过 setTypeface() 设置字体，包括系统的控件和 cavas 的 paint。 二、基础系统提供从 asset 目录和普通目录获取Typeface方法，如下： Typeface">
+
+
+
+
+
+
+  <link rel="canonical" href="http://whiskeyfei.github.io/2016/03/25/android/2016-8-23-typeface/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Android 换字体总结 | 無名小子的杂货铺</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">無名小子的杂货铺</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">越努力越幸运</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-8-23-typeface/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 换字体总结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-25T10:59:01+08:00">2016-03-25</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前调研客户端动态换字体，尝试过很多方案，也走过很多弯路，总结下心路历程</p>
+<p>1、和 Rom 无关，限 App 内<br><br>2、支持动态切换<br><br>3、方式（自定义 、遍历、替换）<br></p>
+<h4 id="一、归根结底"><a href="#一、归根结底" class="headerlink" title="一、归根结底"></a>一、归根结底</h4><p>归根结底都是改变 Typeface 然后通过 setTypeface() 设置字体，包括系统的控件和 cavas 的 paint。</p>
+<h4 id="二、基础"><a href="#二、基础" class="headerlink" title="二、基础"></a>二、基础</h4><p>系统提供从 asset 目录和普通目录获取Typeface方法，如下：</p>
+<pre><code>Typeface.createFromAsset(mContext.getAssets(), name);
+Typeface.createFromFile(path);
+</code></pre><p>有了Typeface 就能更好的为换字体提供支持</p>
+<h4 id="三、方式"><a href="#三、方式" class="headerlink" title="三、方式"></a>三、方式</h4><h5 id="1、自定义"><a href="#1、自定义" class="headerlink" title="1、自定义"></a>1、自定义</h5><p>先来说说比较笨的方式，自定义所有能显示文字的控件，重写 setTypeface 方法，设置自己的 typeface 即可</p>
+<p>优点：直观一劳永逸，后期如果有其他需求，可以跟进开发，例如：不仅是字体样式，还有 Style 样式动态改变的情况；</p>
+<p>代码示例：</p>
+<pre><code>@Override
+public void setTypeface(Typeface tf) {
+    Typeface currentTypeface = TypefaceHelper.getInstance().getCurrentTypeface();
+        if (currentTypeface != null) {
+            super.setTypeface(currentTypeface);
+            return;
+        }
+    super.setTypeface(tf);
+}
+</code></pre><h5 id="2、遍历："><a href="#2、遍历：" class="headerlink" title="2、遍历："></a>2、遍历：</h5><p>查过很多资料也翻过 github 上的代码，有很多采用对当前页面 view 进行遍历的方式，遇到 继承自 TextView 的 View 就动态设置 typeface；</p>
+<p>优点：不用更改 xml、只在使用时候更改字体；</p>
+<p>缺点：<br></p>
+<ul>
+<li>循环遍历消耗性能，对大量 view 的界面不太适合，容易造成页面卡顿现象；</li>
+<li>对采用 cavas 的自定义画布的方式需要单独处理里面的文字显示；</li>
+</ul>
+<p>代码示例：</p>
+<pre><code>private void applyForView(View view, Typeface typeface) {
+    if (view instanceof TextView) {
+        TextView textView = (TextView) view;
+        TextPaint paint = textView.getPaint();
+        paint.setTypeface(typeface);
+        textView.invalidate();
+    }
+}
+</code></pre><h5 id="3、替换掉系统字体"><a href="#3、替换掉系统字体" class="headerlink" title="3、替换掉系统字体"></a>3、替换掉系统字体</h5><p>在程序启动初始化的时候，将系统的字体通过反射的方式替换掉我们的字体包，这个是目前改动最小的地方</p>
+<p>优点：<br></p>
+<ul>
+<li>不用更改 xml、和动态更改 typeface；<br></li>
+</ul>
+<p>缺点：<br></p>
+<ul>
+<li>干涉了系统字体，可能会造成影响;<br></li>
+</ul>
+<p>参考：<a href="https://github.com/whiskeyfei/FontOverrideExample" target="_blank" rel="noopener">https://github.com/whiskeyfei/FontOverrideExample</a><br></p>
+<p>代码示例：</p>
+<pre><code>final Typeface normal_monospace = Typeface.createFromAsset(getAssets(), DEFAULT_MONOSPACE_NORMAL_FONT_FILENAME);
+Field monospaceDefaultField = Typeface.class.getDeclaredField(&quot;MONOSPACE&quot;);
+monospaceDefaultField.setAccessible(true);
+monospaceDefaultField.set(null, normal_monospace);
+</code></pre><h3 id="四、动态改变："><a href="#四、动态改变：" class="headerlink" title="四、动态改变："></a>四、动态改变：</h3><p>1、采用观察者模式，字体改变通知所以订阅着改变自己的字体；<br><br>2、ViewGroup做监听，遍历所有子 view，还需要注意的动态新添加的 view 也要绑定监听，不然新 view 不能动态改变;<br></p>
+<p>这两种方式都试过，由于 view 较多，影响效率，也就放弃了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上简单总结了 Android 换字体使用的方案，可以翻看参考的 github 库来实践。</p>
+<p>注意：如果是中文字体，一定要注意字体包的完整性，有一些是个人做的，可能会有一些问题，我遇到的就是中英文字体 padding 不一样，造成显示效果不一样。<br></p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p>一些关于字体的开源库：<br></p>
+<ul>
+<li><a href="https://github.com/chrisjenx/Calligraphy" target="_blank" rel="noopener">https://github.com/chrisjenx/Calligraphy</a></li>
+<li><a href="https://github.com/johnkil/Android-Icon-Fonts" target="_blank" rel="noopener">https://github.com/johnkil/Android-Icon-Fonts</a></li>
+<li><a href="https://github.com/GcsSloop/FontsManager" target="_blank" rel="noopener">https://github.com/GcsSloop/FontsManager</a></li>
+<li><a href="https://github.com/vsvankhede/EasyFonts" target="_blank" rel="noopener">https://github.com/vsvankhede/EasyFonts</a></li>
+<li><a href="https://github.com/Pixplicity/letterpress" target="_blank" rel="noopener">https://github.com/Pixplicity/letterpress</a></li>
+<li><a href="https://github.com/svendvd/Fontinator" target="_blank" rel="noopener">https://github.com/svendvd/Fontinator</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/uploads/alipay.jpg" alt="無名 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>无名</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://whiskeyfei.github.io/2016/03/25/android/2016-8-23-typeface/" title="Android 换字体总结">http://whiskeyfei.github.io/2016/03/25/android/2016-8-23-typeface/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/Android-Font、Typeface/" rel="tag"># Android Font、Typeface</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/25/android/2016-3-26-node-rxjava/" rel="next" title="RxJava 初学和在 Android 项目中的简单应用">
+                <i class="fa fa-chevron-left"></i> RxJava 初学和在 Android 项目中的简单应用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/25/android/2016-11-06-gson/" rel="prev" title="梦里 Gson @SerializedName 知多少">
+                梦里 Gson @SerializedName 知多少 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/face.jpg"
+                alt="無名" />
+            
+              <p class="site-author-name" itemprop="name">無名</p>
+              <p class="site-description motion-element" itemprop="description">记录学习、生活</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">46</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/whiskeyfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:whiskeyfei@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/fa272f63280a" target="_blank" title="简书"><i class="fa fa-fw fa-google"></i>简书</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/whiskeyfei" target="_blank" title="Twitter"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、归根结底"><span class="nav-number">1.</span> <span class="nav-text">一、归根结底</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、基础"><span class="nav-number">2.</span> <span class="nav-text">二、基础</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三、方式"><span class="nav-number">3.</span> <span class="nav-text">三、方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1、自定义"><span class="nav-number">3.1.</span> <span class="nav-text">1、自定义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2、遍历："><span class="nav-number">3.2.</span> <span class="nav-text">2、遍历：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3、替换掉系统字体"><span class="nav-number">3.3.</span> <span class="nav-text">3、替换掉系统字体</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四、动态改变："><span class="nav-number"></span> <span class="nav-text">四、动态改变：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number"></span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#参考"><span class="nav-number">1.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">無名</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Pisces</a> v6.0.5</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.5"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.5"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.5"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.5"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.5"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

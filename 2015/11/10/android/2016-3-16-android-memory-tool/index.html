@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next pisces" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.0.5" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/uploads/apple-touch-icon-next.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/uploads/favicon-32x32.png?v=6.0.5">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/uploads/favicon-16x16.png?v=6.0.5">
+
+
+  <link rel="mask-icon" href="/uploads/logo.svg?v=6.0.5" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.0.5',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Android,memory，Mat" />
+
+
+<meta name="description" content="最近的一次事件让我对 Android 开发中内存泄漏重视起来，平时只忙着开发新的功能，往往会忽略掉内存，cpu 等方面的使用情况，然而遇到 内存泄露或者ANR 问题就要彻底解决，由于Android设备规格不一，好一些的设备上不会出现问题，在一些低端的设备上就会出现各种问题，所以平时也要注意内存泄漏和 cpu 使用问题. 内存泄漏(memory leak)A memory leak is a par">
+<meta name="keywords" content="Android,memory，Mat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 内存泄漏工具使用分析">
+<meta property="og:url" content="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/index.html">
+<meta property="og:site_name" content="無名小子的杂货铺">
+<meta property="og:description" content="最近的一次事件让我对 Android 开发中内存泄漏重视起来，平时只忙着开发新的功能，往往会忽略掉内存，cpu 等方面的使用情况，然而遇到 内存泄露或者ANR 问题就要彻底解决，由于Android设备规格不一，好一些的设备上不会出现问题，在一些低端的设备上就会出现各种问题，所以平时也要注意内存泄漏和 cpu 使用问题. 内存泄漏(memory leak)A memory leak is a par">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/!--￼0--%3E/mat01.png">
+<meta property="og:image" content="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/!--￼1--%3E/mat02.png">
+<meta property="og:image" content="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/!--￼2--%3E/mat03.png">
+<meta property="og:image" content="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/!--￼3--%3E/mat04.png">
+<meta property="og:image" content="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/!--￼4--%3E/mat05.png">
+<meta property="og:image" content="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/!--￼5--%3E/mat06.png">
+<meta property="og:updated_time" content="2018-03-14T15:02:13.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 内存泄漏工具使用分析">
+<meta name="twitter:description" content="最近的一次事件让我对 Android 开发中内存泄漏重视起来，平时只忙着开发新的功能，往往会忽略掉内存，cpu 等方面的使用情况，然而遇到 内存泄露或者ANR 问题就要彻底解决，由于Android设备规格不一，好一些的设备上不会出现问题，在一些低端的设备上就会出现各种问题，所以平时也要注意内存泄漏和 cpu 使用问题. 内存泄漏(memory leak)A memory leak is a par">
+<meta name="twitter:image" content="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/!--￼0--%3E/mat01.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+  <title>Android 内存泄漏工具使用分析 | 無名小子的杂货铺</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> 
+
+<div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">無名小子的杂货铺</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">越努力越幸运</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+          
+  <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-about">
+    <a href="/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-tags">
+    <a href="/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-categories">
+    <a href="/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+</li>
+
+      
+        
+        
+          
+  <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+</li>
+
+      
+
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 内存泄漏工具使用分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T18:28:39+08:00">2015-11-10</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近的一次事件让我对 Android 开发中内存泄漏重视起来，平时只忙着开发新的功能，往往会忽略掉内存，cpu 等方面的使用情况，然而遇到 内存泄露或者ANR 问题就要彻底解决，由于Android设备规格不一，好一些的设备上不会出现问题，在一些低端的设备上就会出现各种问题，所以平时也要注意内存泄漏和 cpu 使用问题.</p>
+<h2 id="内存泄漏-memory-leak"><a href="#内存泄漏-memory-leak" class="headerlink" title="内存泄漏(memory leak)"></a>内存泄漏(memory leak)</h2><p>A memory leak is a particular type of unintentional memory consumption by a computer program where the program fails to release memory when no longer needed. This condition is normally the result of a bug in a program that prevents it from freeing up memory that it no longer needs.This term has the potential to be confusing, since memory is not physically lost from the computer. Rather, memory is allocated to a program, and that program subsequently loses the ability to access it due to program logic flaws.</p>
+<p>看不懂 pass。。。知道有这么回事就可以了</p>
+<h2 id="初步判断"><a href="#初步判断" class="headerlink" title="初步判断"></a>初步判断</h2><h4 id="现象判断"><a href="#现象判断" class="headerlink" title="现象判断"></a>现象判断</h4><p>从现象入手，如果肉眼能看出页面卡顿，那肯定是有问题的，首先，尝试连续多次打开应用，观察界面卡顿,动画现象，并截取 log，观察 log 中的 GC 输出<br>日志，频繁打印GC日志,说明系统频繁触发GC来释放内存,初步推断可能存在内存泄漏，具体使用 DDMS HEAP 工具分析，以下有介绍</p>
+<h4 id="内存命令分析"><a href="#内存命令分析" class="headerlink" title="内存命令分析"></a>内存命令分析</h4><p>前期可以通过一些 ADB 命令来简单查看下内存相关信息，做初步判断，有一次在项目中发现，开启／关闭某个模块，观察内存状态，竟然差了4M，果断修复。</p>
+<h4 id="查看内存系统信息"><a href="#查看内存系统信息" class="headerlink" title="查看内存系统信息"></a>查看内存系统信息</h4><pre><code>adb shell cat proc/meminfo
+
+➜  ~ adb shell cat proc/meminfo
+MemTotal:        2052484 kB
+MemFree:         1450748 kB
+Buffers:           23212 kB
+Cached:           342548 kB
+SwapCached:            0 kB
+Active:           338056 kB
+Inactive:         203652 kB
+Active(anon):     175960 kB
+Inactive(anon):     6912 kB
+Active(file):     162096 kB
+Inactive(file):   196740 kB
+..
+</code></pre><h4 id="查看某一应用占用内存"><a href="#查看某一应用占用内存" class="headerlink" title="查看某一应用占用内存"></a>查看某一应用占用内存</h4><pre><code>adb shell dumpsys meminfo + packageName
+e.g: adb shell dumpsys meminfo com.dangbeimarket
+
+➜  ~ adb shell dumpsys meminfo com.whiskeyfei.tab
+Applications Memory Usage (kB):
+Uptime: 16199425 Realtime: 16199425
+
+** MEMINFO in pid 14522 [com.whiskeyfei.tab] **
+                   Pss  Private  Private  Swapped     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------
+  Native Heap     3474     3356        0        0    15475    15475    13196
+  Dalvik Heap     2861     2788        0        0     3156     2561      595
+ Dalvik Other      340      328        0        0
+        Stack      104      104        0        0
+    Other dev        5        0        4        0
+     .so mmap     1162      144       48        0
+    .apk mmap      220        0       16        0
+    .ttf mmap      126        0       16        0
+    .dex mmap     2648        0     2644        0
+    code mmap     1220        0       88        0
+   image mmap     1051      508        8        0
+   Other mmap       23        4        0        0
+      Unknown       89       88        0        0
+        TOTAL    13323     7320     2824        0    18631    18036    13791        
+</code></pre><h4 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h4><ul>
+<li>Native Heap:    C++层内存分配。</li>
+<li>Dalvik Heap:    Java层内存分配。</li>
+<li>Ashmem :        匿名共享内存。</li>
+<li>Stack:        栈区分配的内存。</li>
+<li>so mmap:        C库代码占用。</li>
+<li>jar mmap ：    Java文件占用。</li>
+<li>apk mmap:     apk代码占用。</li>
+<li>ttf mmap:     ttf文件占用。</li>
+<li>dex mmap:     dex文件代码占用的内存。</li>
+<li>Other mmap:    其他文件占用的内存</li>
+</ul>
+<p>我们要关注 Dalvik Heap 和 Native Heap 占用内存，在使用应用过程中实时查看内存信息状态，来初步判断是否内存使用不当。</p>
+<h2 id="DDMS-HEAP-工具"><a href="#DDMS-HEAP-工具" class="headerlink" title="DDMS HEAP 工具"></a>DDMS HEAP 工具</h2><p>Android DDMS 内存监测工具 Heap，可以检测一个进程的内存变化，根据这个数值变化可以测试应用是否存在泄漏。<br>用过debug肯定会用 Heap 了，连接设备启动 app，点 debug 右边的按钮即可（Update Heap 鼠标放上去能看到）</p>
+<p><img src="!--￼0--&gt;/mat01.png" alt=""></p>
+<p>开始GC，然后就操作 app 观察，Heap视图中部有一个data object，即数据对象，也就是我们的程序中对象<br>正常情况下 Total Size 值都会稳定在一个范围内，反之如果则 data object 的 Total Size 值在每次GC后不会有明显的回落<br>随着操作次数的增多 Total Size 的值会越来越大，就证明可能存在内存泄漏，然后通过其他工具来找出泄漏的地方；</p>
+<p><img src="!--￼1--&gt;/mat02.png" alt=""></p>
+<h2 id="MAT-Memory-Analyzer-Tool"><a href="#MAT-Memory-Analyzer-Tool" class="headerlink" title="MAT( Memory Analyzer Tool )"></a>MAT( Memory Analyzer Tool )</h2><h3 id="定位问题"><a href="#定位问题" class="headerlink" title="定位问题"></a>定位问题</h3><p>通过 MAT 分析分析内存中占用比较大的对象   </p>
+<p>MAT 是一个内存分析工具，在使用 DEAP 初步判断页面存在内存泄露后，使用 MAT 具体分析出哪写对象没有释放，导致了内存没有释放,关于MAT工具安装，请自行 Google，操作 app，例如：进入某个页面，退出，点击 Dump Hprof file 按钮，等一会会打开MAT视图，没有安装会生成一个文件；</p>
+<p><img src="!--￼2--&gt;/mat03.png" alt=""></p>
+<p>先观察“Leak suspects”，找出比较大的问题，通过 Dominator Tree 来查看 heap 中比较大的对象，也可以通过 Histogram 查找引用链;<br>Histogram 显示内存中每个对象的数量大小等信息，可以通过关键字来过滤</p>
+<p><img src="!--￼3--&gt;/mat04.png" alt=""></p>
+<p>例如：搜索 com.main.*;这样就能查找出这些包下面类引用情况，自行右键获得信息，通过提示找出有问题的类或对象，这样就可以找出内存占用多或者泄露的问题了；</p>
+<p><img src="!--￼4--&gt;/mat05.png" alt="">  </p>
+<p>本例子中查看 Dominator Tree -&gt; 右键某一条 -&gt; Path to GC Roots -&gt; exclude weak references</p>
+<p><img src="!--￼5--&gt;/mat06.png" alt=""></p>
+<p>Shallow Heap:对象本身的大小<br>Retained Heap:对象本身以及它持有的对象的内存总和</p>
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>通过查看 Histogram 内存中的类以及实例个数</p>
+<p>###安装地址</p>
+<p><a href="https://eclipse.org/mat/downloads.php" target="_blank" rel="noopener">MAT分析工具</a></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总结了一些常用的工具，用来分析内存问题，以下是注意的步骤</p>
+<ul>
+<li>使用 ADB 命令初步分析内存</li>
+<li>操作应用观察 HEAP update 查看当前内存变化，判断是否存在内存泄露</li>
+<li>使用 MAT 来确定哪些代码引起了内存</li>
+</ul>
+<h2 id="如何避免"><a href="#如何避免" class="headerlink" title="如何避免"></a>如何避免</h2>  <ul><br>    <li>严格遵守生命周期，创建时创建，销毁时记得回收</li><br>    <li>Bitmip 和 Drawable 记得手动回收</li><br>    <li>静态对象引用 Context，导致对象无法释放，从而导致 Activity 无法释放</li><br>    <li>自定义静态 Handler，Runnable和 Handler 回收</li><br>    <li>使用 Application Context,少使用 Activity Context</li><br>  </ul>
+
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<li><a href="http://my.oschina.net/u/2285044/blog/471027#OSC_h3_8" target="_blank" rel="noopener">Android内存泄漏分析实战</a></li>
+<li><a href="http://www.cnblogs.com/kissazi2/p/4121852.html" target="_blank" rel="noopener">【译】什么导致了Context泄露：Handler&amp;内部类</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/uploads/alipay.jpg" alt="無名 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>无名</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/" title="Android 内存泄漏工具使用分析">http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-tool/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明出处！</li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/Android-memory/" rel="tag"># Android memory</a>
+          
+            <a href="/tags/Mat/" rel="tag"># Mat</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/11/10/android/2015-11-17-android-use-mvp/" rel="next" title="Android MVP 简单使用">
+                <i class="fa fa-chevron-left"></i> Android MVP 简单使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/10/android/2016-3-16-android-memory-demo/" rel="prev" title="Android 内存泄漏案例分析总结(Handler)">
+                Android 内存泄漏案例分析总结(Handler) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/face.jpg"
+                alt="無名" />
+            
+              <p class="site-author-name" itemprop="name">無名</p>
+              <p class="site-description motion-element" itemprop="description">记录学习、生活</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">46</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/whiskeyfei" target="_blank" title="GitHub"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:whiskeyfei@gmail.com" target="_blank" title="E-Mail"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://www.jianshu.com/u/fa272f63280a" target="_blank" title="简书"><i class="fa fa-fw fa-google"></i>简书</a>
+                  
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="https://twitter.com/whiskeyfei" target="_blank" title="Twitter"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                  
+                </span>
+              
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存泄漏-memory-leak"><span class="nav-number">1.</span> <span class="nav-text">内存泄漏(memory leak)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初步判断"><span class="nav-number">2.</span> <span class="nav-text">初步判断</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#现象判断"><span class="nav-number">2.0.1.</span> <span class="nav-text">现象判断</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内存命令分析"><span class="nav-number">2.0.2.</span> <span class="nav-text">内存命令分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看内存系统信息"><span class="nav-number">2.0.3.</span> <span class="nav-text">查看内存系统信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#查看某一应用占用内存"><span class="nav-number">2.0.4.</span> <span class="nav-text">查看某一应用占用内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#名词解释"><span class="nav-number">2.0.5.</span> <span class="nav-text">名词解释</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DDMS-HEAP-工具"><span class="nav-number">3.</span> <span class="nav-text">DDMS HEAP 工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MAT-Memory-Analyzer-Tool"><span class="nav-number">4.</span> <span class="nav-text">MAT( Memory Analyzer Tool )</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定位问题"><span class="nav-number">4.1.</span> <span class="nav-text">定位问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证"><span class="nav-number">4.2.</span> <span class="nav-text">验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何避免"><span class="nav-number">6.</span> <span class="nav-text">如何避免</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文章"><span class="nav-number">7.</span> <span class="nav-text">参考文章</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">無名</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Pisces</a> v6.0.5</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.5"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.0.5"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.0.5"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.5"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.5"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.5"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
