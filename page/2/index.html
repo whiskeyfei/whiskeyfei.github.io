@@ -1298,7 +1298,7 @@ git commit -m “xxx&quot;
           
             <p>不知道大家平时有没有遇到大量使用单例类的情况，当我们的项目变得庞大，人员分组变的复杂，出现各种分支，简单易用的单例类使用就会泛滥。</p>
 <p>这里总结下项目中遇到并使用的方法，基本思路都是 Registry of Singleton 模式，将单例类使用数据结构保存起来，通过Key Value 一一对应。</p>
-<h3 id="1、Reflection-机制"><a href="#1、Reflection-机制" class="headerlink" title="1、Reflection 机制"></a>1、Reflection 机制</h3><pre><code>public class SingletonRegistry {
+<h3 id="Reflection-机制"><a href="#Reflection-机制" class="headerlink" title="Reflection 机制"></a>Reflection 机制</h3><pre><code>public class SingletonRegistry {
     private static Map&lt;String, Object&gt; registry = new HashMap&lt;String, Object&gt;();
 
     private SingletonRegistry() {}
@@ -1320,7 +1320,7 @@ git commit -m “xxx&quot;
 
         return singleton;
     }
-</code></pre><h3 id="2、Registry-机制"><a href="#2、Registry-机制" class="headerlink" title="2、Registry 机制"></a>2、Registry 机制</h3><pre><code>public class SingletonRegistry {
+</code></pre><h3 id="Registry-机制"><a href="#Registry-机制" class="headerlink" title="Registry 机制"></a>Registry 机制</h3><pre><code>public class SingletonRegistry {
     private static Map&lt;String, Object&gt; registry = new HashMap&lt;String, Object&gt;();
     private static Singleton instance;
 
@@ -1334,41 +1334,16 @@ git commit -m “xxx&quot;
         return registry.get(classname);
     }
 </code></pre><p>以上两种方式是最简单通用的方式，但是使用object作为参数难免会觉得无法控制无法感知，所就利用以上思想就有了现在的方式。</p>
-<h3 id="3、接口包装"><a href="#3、接口包装" class="headerlink" title="3、接口包装"></a>3、接口包装</h3><ul>
+<h3 id="接口包装"><a href="#接口包装" class="headerlink" title="接口包装"></a>接口包装</h3><ul>
 <li>基本思路同上，注册方式来保证 key value 一一对应</li>
 <li>面向接口   </li>
 <li>对每一个对应的单例类接口自行处理 object 转化类型，也就是转成当前的类型</li>
 <li>封装 key 对应的工具类，统一入口获取单例类</li>
 </ul>
-<pre><code>public class SingletonManager {
-     private static SingletonManager mInstance = new SingletonManager();
-
-     private final Map&lt;String, ISingletonWrapper&gt; mMap = new HashMap&lt;String, ISingletonWrapper&gt;();
-
-     private SingletonManager() {
-}
-
-     public static SingletonManager get() {
-          return mInstance;
-}
-
-     public void register(String key, ISingletonWrapper ifWrapper) {
-          mMap.put(key, ifWrapper);
-}
-
-     public void unRegister(String key) {
-          mMap.remove(key);
-}
-
-     public ISingletonWrapper get(String key) {
-          return mMap.get(key);
-}
-}
-</code></pre><p>ISingletonWrapper 是个接口 只有一个方法，返回 object</p>
-<pre><code>public interface ISingletonWrapper {
-    Object getInterface();
-}
-</code></pre><p>剩余就是自由发挥了，对 object 做一个封装，让外界感知都是接口就OK了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SingletonManager</span> </span>&#123;</span><br><span class="line">	 <span class="keyword">private</span> <span class="keyword">static</span> SingletonManager mInstance = <span class="keyword">new</span> SingletonManager();</span><br><span class="line"></span><br><span class="line">	 <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;String, ISingletonWrapper&gt; mMap = <span class="keyword">new</span> HashMap&lt;String, ISingletonWrapper&gt;();</span><br><span class="line"></span><br><span class="line">	 <span class="function"><span class="keyword">private</span> <span class="title">SingletonManager</span><span class="params">()</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">	 <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> SingletonManager <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		  <span class="keyword">return</span> mInstance;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">	 <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">register</span><span class="params">(String key, ISingletonWrapper ifWrapper)</span> </span>&#123;</span><br><span class="line">		  mMap.put(key, ifWrapper);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">	 <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">unRegister</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">		  mMap.remove(key);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">	 <span class="function"><span class="keyword">public</span> ISingletonWrapper <span class="title">get</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">		  <span class="keyword">return</span> mMap.get(key);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ISingletonWrapper 是个接口 只有一个方法，返回 object</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ISingletonWrapper</span> </span>&#123;</span><br><span class="line">    <span class="function">Object <span class="title">getInterface</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>剩余就是自由发挥了，对 object 做一个封装，让外界感知都是接口就OK了</p>
 <p>其余就是对这部分使用的扩展，本组大神压阵，代码就不贴了</p>
 <p>大致提供下思路：</p>
 <p>比如单例类接口为 ITextProvider，将 ITextProvider 继承 ISingletonWrapper 接口，同时声明一个内部类实现 ITextProvider，构造一个静态方法将 object 和 ITextProvider 做强转匹配即可，外层工具类随便写就行了，只能到这了。。</p>

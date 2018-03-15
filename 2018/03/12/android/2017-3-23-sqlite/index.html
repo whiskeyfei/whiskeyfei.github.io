@@ -109,7 +109,7 @@
 <meta property="og:site_name" content="無名小子的杂货铺">
 <meta property="og:description" content="写在前面看完本文你将掌握以下内容  掌握简单 SQL 语法 掌握 SQLite 的简单操作  基础知识SQL 语法至于什么是 SQL 是什么，额，自行 Google。。总之强大的 SQL 能帮我完成很多功能，最简单的就是数据库增删改查，对一些要求比较高的功能也是在这四种操作基础之上扩展的。 (这里省略了数据库介绍，我们主要介绍 SQLite 使用，so。。MySQL、SQL Server 介绍等就">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-03-14T15:01:48.000Z">
+<meta property="og:updated_time" content="2018-03-15T13:02:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android SQLite 使用纪录">
 <meta name="twitter:description" content="写在前面看完本文你将掌握以下内容  掌握简单 SQL 语法 掌握 SQLite 的简单操作  基础知识SQL 语法至于什么是 SQL 是什么，额，自行 Google。。总之强大的 SQL 能帮我完成很多功能，最简单的就是数据库增删改查，对一些要求比较高的功能也是在这四种操作基础之上扩展的。 (这里省略了数据库介绍，我们主要介绍 SQLite 使用，so。。MySQL、SQL Server 介绍等就">
@@ -388,12 +388,12 @@
       
 
       
-        <h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>看完本文你将掌握以下内容</p>
+        <h4 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h4><p>看完本文你将掌握以下内容</p>
 <ul>
 <li>掌握简单 SQL 语法</li>
 <li>掌握 SQLite 的简单操作</li>
 </ul>
-<h3 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h3><h5 id="SQL-语法"><a href="#SQL-语法" class="headerlink" title="SQL 语法"></a>SQL 语法</h5><p>至于什么是 SQL 是什么，额，自行 Google。。总之强大的 SQL 能帮我完成很多功能，最简单的就是数据库增删改查，对一些要求比较高的功能也是在这四种操作基础之上扩展的。</p>
+<h4 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h4><h5 id="SQL-语法"><a href="#SQL-语法" class="headerlink" title="SQL 语法"></a>SQL 语法</h5><p>至于什么是 SQL 是什么，额，自行 Google。。总之强大的 SQL 能帮我完成很多功能，最简单的就是数据库增删改查，对一些要求比较高的功能也是在这四种操作基础之上扩展的。</p>
 <p>(这里省略了数据库介绍，我们主要介绍 SQLite 使用，so。。MySQL、SQL Server 介绍等就略过了，相信大家都多多少少了解过)</p>
 <p>我这里介绍下最简单的四种操作：</p>
 <p>1、SELECT</p>
@@ -414,41 +414,9 @@ DELETE FROM test WHERE testid =&apos;2&apos;;//删除testid ＝ &apos;2&apos;的
 <p>例如下面的 TestDBHelper 用于创建数据和检表用，要访问您的数据库，需要实例化 TestDBHelper</p>
 <pre><code>TestDBHelper mTestDBHelper = new TestDBHelper(App.getContext());
 </code></pre><p>例如：</p>
-<pre><code>public class TestDBHelper extends SQLiteOpenHelper {
-
-private static final int DB_VERSION = 1;
-public static final String DB_NAME = &quot;test.db&quot;;
-public static final String TABLE_NAME = &quot;test&quot;;
-
-private static final String COLUMN_ID = &quot;_id&quot;;
-public static final String COLUMN_ALBUMID = &quot;testid&quot;;
-public static final String COLUMN_TIME = &quot;time&quot;;
-
-public TestDBHelper(Context context) {
-    super(context, DB_NAME, null, DB_VERSION);
-}
-
-@Override
-public void onCreate(SQLiteDatabase db) {
-    //如果你的建表语句过多，一定要是用 StringBuilder 来拼接语句，使用 &quot;+&quot; 会消耗性能
-    StringBuilder sb = new StringBuilder(&quot;CREATE TABLE IF NOT EXISTS &quot;);
-    sb.append(TABLE_NAME)
-            .append(&apos;(&apos;)
-            .append(COLUMN_ID).append(&quot; INTEGER PRIMARY KEY,&quot;)
-            .append(COLUMN_ALBUMID).append(&quot; TEXT,&quot;)
-            .append(COLUMN_TIME).append(&quot; INTEGER&quot;)
-            .append(&apos;)&apos;);
-    db.execSQL(sb.toString());
-}
-
-@Override
-public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    db.execSQL(&quot;DROP TABLE IF EXISTS &quot; + TABLE_NAME);
-    onCreate(db);
-}
-}
-</code></pre><p>具体数据类型参考：<a href="http://www.runoob.com/sql/sql-datatypes-general.html" target="_blank" rel="noopener">SQL 数据类型快速参考手册</a></p>
-<h3 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h3><p>1、插入数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestDBHelper</span> <span class="keyword">extends</span> <span class="title">SQLiteOpenHelper</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DB_VERSION = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DB_NAME = <span class="string">"test.db"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String TABLE_NAME = <span class="string">"test"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String COLUMN_ID = <span class="string">"_id"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String COLUMN_ALBUMID = <span class="string">"testid"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String COLUMN_TIME = <span class="string">"time"</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">TestDBHelper</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(context, DB_NAME, <span class="keyword">null</span>, DB_VERSION);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(SQLiteDatabase db)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//如果你的建表语句过多，一定要是用 StringBuilder 来拼接语句，使用 "+" 会消耗性能</span></span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder(<span class="string">"CREATE TABLE IF NOT EXISTS "</span>);</span><br><span class="line">    sb.append(TABLE_NAME)</span><br><span class="line">            .append(<span class="string">'('</span>)</span><br><span class="line">            .append(COLUMN_ID).append(<span class="string">" INTEGER PRIMARY KEY,"</span>)</span><br><span class="line">            .append(COLUMN_ALBUMID).append(<span class="string">" TEXT,"</span>)</span><br><span class="line">            .append(COLUMN_TIME).append(<span class="string">" INTEGER"</span>)</span><br><span class="line">            .append(<span class="string">')'</span>);</span><br><span class="line">    db.execSQL(sb.toString());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onUpgrade</span><span class="params">(SQLiteDatabase db, <span class="keyword">int</span> oldVersion, <span class="keyword">int</span> newVersion)</span> </span>&#123;</span><br><span class="line">    db.execSQL(<span class="string">"DROP TABLE IF EXISTS "</span> + TABLE_NAME);</span><br><span class="line">    onCreate(db);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>具体数据类型参考：<a href="http://www.runoob.com/sql/sql-datatypes-general.html" target="_blank" rel="noopener">SQL 数据类型快速参考手册</a></p>
+<h5 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h5><p>1、插入数据</p>
 <p>通过将一个 ContentValues 对象传递至 insert() 方法将数据插入数据库：</p>
 <pre><code>public void insert(String id,long time) {
     SQLiteDatabase db = null;
@@ -542,9 +510,9 @@ public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 }
 </code></pre><p>更新操作可将 insert() 的内容值语法与 delete() 的 where 语法相结合</p>
-<h3 id="遇到的坑"><a href="#遇到的坑" class="headerlink" title="遇到的坑"></a>遇到的坑</h3><p>再项目中遇到和别人公用一个数据库问题，同一个数据库不同的表，起初以为没有什么问题，后来测试就发现某些情况下会找不到数据库表问题，经过分析验证，是有两个 SQLiteOpenHelper，且操作可能不对称，具体异常信息忘记了，后面找到再贴吧，所以，在写数据库相关功能时切记开关数据库，防止发生内存泄露。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>简单粗暴的介绍了 SQLite 使用，真正学会使用还需要不断的练习,希望能帮到你。<br><br><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFDataStorageDemo" target="_blank" rel="noopener">Github Demo</a></p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<h5 id="遇到的坑"><a href="#遇到的坑" class="headerlink" title="遇到的坑"></a>遇到的坑</h5><p>再项目中遇到和别人公用一个数据库问题，同一个数据库不同的表，起初以为没有什么问题，后来测试就发现某些情况下会找不到数据库表问题，经过分析验证，是有两个 SQLiteOpenHelper，且操作可能不对称，具体异常信息忘记了，后面找到再贴吧，所以，在写数据库相关功能时切记开关数据库，防止发生内存泄露。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>简单粗暴的介绍了 SQLite 使用，真正学会使用还需要不断的练习,希望能帮到你。<br><br><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFDataStorageDemo" target="_blank" rel="noopener">Github Demo</a></p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><ul>
 <li><a href="https://developer.android.com/training/basics/data-storage/databases.html#WriteDbRow" target="_blank" rel="noopener">在 SQL 数据库中保存数据</a></li>
 <li><a href="https://www.tutorialspoint.com/android/android_sqlite_database.htm" target="_blank" rel="noopener">Android - SQLite Database</a></li>
 <li><a href="http://www.runoob.com/sql/sql-tutorial.html" target="_blank" rel="noopener">sql-tutorial</a></li>
@@ -874,7 +842,7 @@ public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#写在前面"><span class="nav-number">1.</span> <span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基础知识"><span class="nav-number">2.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#SQL-语法"><span class="nav-number">2.0.1.</span> <span class="nav-text">SQL 语法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SQLite"><span class="nav-number">2.0.2.</span> <span class="nav-text">SQLite</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SQLiteOpenHelper"><span class="nav-number">2.0.3.</span> <span class="nav-text">SQLiteOpenHelper</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库操作"><span class="nav-number">3.</span> <span class="nav-text">数据库操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#遇到的坑"><span class="nav-number">4.</span> <span class="nav-text">遇到的坑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#写在前面"><span class="nav-number">1.</span> <span class="nav-text">写在前面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基础知识"><span class="nav-number">2.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#SQL-语法"><span class="nav-number">2.1.</span> <span class="nav-text">SQL 语法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SQLite"><span class="nav-number">2.2.</span> <span class="nav-text">SQLite</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SQLiteOpenHelper"><span class="nav-number">2.3.</span> <span class="nav-text">SQLiteOpenHelper</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#数据库操作"><span class="nav-number">2.4.</span> <span class="nav-text">数据库操作</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#遇到的坑"><span class="nav-number">2.5.</span> <span class="nav-text">遇到的坑</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>

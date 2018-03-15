@@ -540,7 +540,7 @@
       
         
           
-            <p>前几天遇到 fd 泄露问题，这里记录下 fd 查询方法</p>
+            <h4 id="记录"><a href="#记录" class="headerlink" title="记录"></a>记录</h4><p>前几天遇到 fd 泄露问题，这里记录下 fd 查询方法</p>
 <p>fd 其实是系统中的文件目录，存在 /proc/[pid]/fd，包含进程打开文件的情况。</p>
 <p>打印 fd：</p>
 <pre><code>root@android:/ # adb shell ls -l /proc/9580/fd                                
@@ -557,7 +557,8 @@ lrwx------ u0_a96   u0_a96            2017-05-15 16:41 133 -&gt; socket:[23937]
 <p>计算个数：</p>
 <pre><code>root@android:/ # adb shell ls -l /proc/9580/fd | wc -l                         
 175
-</code></pre><h5 id="写了一个小脚本来打印pid的-fd个数"><a href="#写了一个小脚本来打印pid的-fd个数" class="headerlink" title="写了一个小脚本来打印pid的 fd个数"></a>写了一个小脚本来打印pid的 fd个数</h5><pre><code>#!/usr/bin/env python
+</code></pre><h4 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h4><p>写了一个小脚本来打印pid的 fd个数</p>
+<pre><code>#!/usr/bin/env python
 #!/bin/bash
 #!/bin/sh
 #coding:utf-8
@@ -716,7 +717,7 @@ p = os.system(command)
       
         
           
-            <h2 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h2><p>两天的 Review 代码，学到很不少东西，记录下</p>
+            <h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>两天的 Review 代码，学到很不少东西，记录下</p>
 <p>首先列下关键字：</p>
 <p><strong>闭包 、类的单一职责、接口编程、层级依赖 、可扩展、慎用单例、工具类、static</strong></p>
 <p>下面一个一个说，只是站在自己理解的层面上</p>
@@ -881,12 +882,12 @@ p = os.system(command)
       
         
           
-            <h3 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h3><p>看完本文你将掌握以下内容</p>
+            <h4 id="写在前面"><a href="#写在前面" class="headerlink" title="写在前面"></a>写在前面</h4><p>看完本文你将掌握以下内容</p>
 <ul>
 <li>掌握简单 SQL 语法</li>
 <li>掌握 SQLite 的简单操作</li>
 </ul>
-<h3 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h3><h5 id="SQL-语法"><a href="#SQL-语法" class="headerlink" title="SQL 语法"></a>SQL 语法</h5><p>至于什么是 SQL 是什么，额，自行 Google。。总之强大的 SQL 能帮我完成很多功能，最简单的就是数据库增删改查，对一些要求比较高的功能也是在这四种操作基础之上扩展的。</p>
+<h4 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h4><h5 id="SQL-语法"><a href="#SQL-语法" class="headerlink" title="SQL 语法"></a>SQL 语法</h5><p>至于什么是 SQL 是什么，额，自行 Google。。总之强大的 SQL 能帮我完成很多功能，最简单的就是数据库增删改查，对一些要求比较高的功能也是在这四种操作基础之上扩展的。</p>
 <p>(这里省略了数据库介绍，我们主要介绍 SQLite 使用，so。。MySQL、SQL Server 介绍等就略过了，相信大家都多多少少了解过)</p>
 <p>我这里介绍下最简单的四种操作：</p>
 <p>1、SELECT</p>
@@ -907,41 +908,9 @@ DELETE FROM test WHERE testid =&apos;2&apos;;//删除testid ＝ &apos;2&apos;的
 <p>例如下面的 TestDBHelper 用于创建数据和检表用，要访问您的数据库，需要实例化 TestDBHelper</p>
 <pre><code>TestDBHelper mTestDBHelper = new TestDBHelper(App.getContext());
 </code></pre><p>例如：</p>
-<pre><code>public class TestDBHelper extends SQLiteOpenHelper {
-
-private static final int DB_VERSION = 1;
-public static final String DB_NAME = &quot;test.db&quot;;
-public static final String TABLE_NAME = &quot;test&quot;;
-
-private static final String COLUMN_ID = &quot;_id&quot;;
-public static final String COLUMN_ALBUMID = &quot;testid&quot;;
-public static final String COLUMN_TIME = &quot;time&quot;;
-
-public TestDBHelper(Context context) {
-    super(context, DB_NAME, null, DB_VERSION);
-}
-
-@Override
-public void onCreate(SQLiteDatabase db) {
-    //如果你的建表语句过多，一定要是用 StringBuilder 来拼接语句，使用 &quot;+&quot; 会消耗性能
-    StringBuilder sb = new StringBuilder(&quot;CREATE TABLE IF NOT EXISTS &quot;);
-    sb.append(TABLE_NAME)
-            .append(&apos;(&apos;)
-            .append(COLUMN_ID).append(&quot; INTEGER PRIMARY KEY,&quot;)
-            .append(COLUMN_ALBUMID).append(&quot; TEXT,&quot;)
-            .append(COLUMN_TIME).append(&quot; INTEGER&quot;)
-            .append(&apos;)&apos;);
-    db.execSQL(sb.toString());
-}
-
-@Override
-public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    db.execSQL(&quot;DROP TABLE IF EXISTS &quot; + TABLE_NAME);
-    onCreate(db);
-}
-}
-</code></pre><p>具体数据类型参考：<a href="http://www.runoob.com/sql/sql-datatypes-general.html" target="_blank" rel="noopener">SQL 数据类型快速参考手册</a></p>
-<h3 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h3><p>1、插入数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestDBHelper</span> <span class="keyword">extends</span> <span class="title">SQLiteOpenHelper</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> DB_VERSION = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DB_NAME = <span class="string">"test.db"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String TABLE_NAME = <span class="string">"test"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String COLUMN_ID = <span class="string">"_id"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String COLUMN_ALBUMID = <span class="string">"testid"</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String COLUMN_TIME = <span class="string">"time"</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">TestDBHelper</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>(context, DB_NAME, <span class="keyword">null</span>, DB_VERSION);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(SQLiteDatabase db)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//如果你的建表语句过多，一定要是用 StringBuilder 来拼接语句，使用 "+" 会消耗性能</span></span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder(<span class="string">"CREATE TABLE IF NOT EXISTS "</span>);</span><br><span class="line">    sb.append(TABLE_NAME)</span><br><span class="line">            .append(<span class="string">'('</span>)</span><br><span class="line">            .append(COLUMN_ID).append(<span class="string">" INTEGER PRIMARY KEY,"</span>)</span><br><span class="line">            .append(COLUMN_ALBUMID).append(<span class="string">" TEXT,"</span>)</span><br><span class="line">            .append(COLUMN_TIME).append(<span class="string">" INTEGER"</span>)</span><br><span class="line">            .append(<span class="string">')'</span>);</span><br><span class="line">    db.execSQL(sb.toString());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onUpgrade</span><span class="params">(SQLiteDatabase db, <span class="keyword">int</span> oldVersion, <span class="keyword">int</span> newVersion)</span> </span>&#123;</span><br><span class="line">    db.execSQL(<span class="string">"DROP TABLE IF EXISTS "</span> + TABLE_NAME);</span><br><span class="line">    onCreate(db);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>具体数据类型参考：<a href="http://www.runoob.com/sql/sql-datatypes-general.html" target="_blank" rel="noopener">SQL 数据类型快速参考手册</a></p>
+<h5 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h5><p>1、插入数据</p>
 <p>通过将一个 ContentValues 对象传递至 insert() 方法将数据插入数据库：</p>
 <pre><code>public void insert(String id,long time) {
     SQLiteDatabase db = null;
@@ -1035,9 +1004,9 @@ public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 }
 </code></pre><p>更新操作可将 insert() 的内容值语法与 delete() 的 where 语法相结合</p>
-<h3 id="遇到的坑"><a href="#遇到的坑" class="headerlink" title="遇到的坑"></a>遇到的坑</h3><p>再项目中遇到和别人公用一个数据库问题，同一个数据库不同的表，起初以为没有什么问题，后来测试就发现某些情况下会找不到数据库表问题，经过分析验证，是有两个 SQLiteOpenHelper，且操作可能不对称，具体异常信息忘记了，后面找到再贴吧，所以，在写数据库相关功能时切记开关数据库，防止发生内存泄露。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>简单粗暴的介绍了 SQLite 使用，真正学会使用还需要不断的练习,希望能帮到你。<br><br><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFDataStorageDemo" target="_blank" rel="noopener">Github Demo</a></p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<h5 id="遇到的坑"><a href="#遇到的坑" class="headerlink" title="遇到的坑"></a>遇到的坑</h5><p>再项目中遇到和别人公用一个数据库问题，同一个数据库不同的表，起初以为没有什么问题，后来测试就发现某些情况下会找不到数据库表问题，经过分析验证，是有两个 SQLiteOpenHelper，且操作可能不对称，具体异常信息忘记了，后面找到再贴吧，所以，在写数据库相关功能时切记开关数据库，防止发生内存泄露。</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>简单粗暴的介绍了 SQLite 使用，真正学会使用还需要不断的练习,希望能帮到你。<br><br><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFDataStorageDemo" target="_blank" rel="noopener">Github Demo</a></p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><ul>
 <li><a href="https://developer.android.com/training/basics/data-storage/databases.html#WriteDbRow" target="_blank" rel="noopener">在 SQL 数据库中保存数据</a></li>
 <li><a href="https://www.tutorialspoint.com/android/android_sqlite_database.htm" target="_blank" rel="noopener">Android - SQLite Database</a></li>
 <li><a href="http://www.runoob.com/sql/sql-tutorial.html" target="_blank" rel="noopener">sql-tutorial</a></li>
@@ -1184,47 +1153,11 @@ public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         
           
             <p>这篇主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。</p>
-<h4 id="1、"><a href="#1、" class="headerlink" title="1、"></a>1、</h4><pre><code>java.lang.NullPointerException
-      at android.webkit.AccessibilityInjector$TextToSpeechWrapper$1.onInit(AccessibilityInjector.java:753)
-      at android.speech.tts.TextToSpeech.dispatchOnInit(TextToSpeech.java:640)
-      at android.speech.tts.TextToSpeech.initTts(TextToSpeech.java:619)
-      at android.speech.tts.TextToSpeech.&lt;init&gt;(TextToSpeech.java:553)
-      at android.webkit.AccessibilityInjector$TextToSpeechWrapper.&lt;init&gt;(AccessibilityInjector.java:676)
-      at android.webkit.AccessibilityInjector.addTtsApis(AccessibilityInjector.java:480)
-      at android.webkit.AccessibilityInjector.addAccessibilityApisIfNecessary(AccessibilityInjector.java:168)
-      at android.webkit.AccessibilityInjector.onPageStarted(AccessibilityInjector.java:340)
-      at android.webkit.WebViewClassic.onPageStarted(WebViewClassic.java:4480)
-      at android.webkit.CallbackProxy.handleMessage(CallbackProxy.java:366)
-      at android.os.Handler.dispatchMessage(Handler.java:107)
-      at android.os.Looper.loop(Looper.java:194)
-      at android.app.ActivityThread.main(ActivityThread.java:5407)
-      at java.lang.reflect.Method.invokeNative(Native Method)
-      at java.lang.reflect.Method.invoke(Method.java:525)
-      at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:833)
-      at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:600)
-      at dalvik.system.NativeStart.main(Native Method)
-</code></pre><p>此问题在4.2.1和4.2.2比较集中，关闭辅助功能，google 下很多结果都是一样的。</p>
+<h4 id="1、TextToSpeechWrapper"><a href="#1、TextToSpeechWrapper" class="headerlink" title="1、TextToSpeechWrapper"></a>1、TextToSpeechWrapper</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">java.lang.NullPointerException</span><br><span class="line">     	at android.webkit.AccessibilityInjector$TextToSpeechWrapper$1.onInit(AccessibilityInjector.java:753)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.dispatchOnInit(TextToSpeech.java:640)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.initTts(TextToSpeech.java:619)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.&lt;init&gt;(TextToSpeech.java:553)</span><br><span class="line">     	at android.webkit.AccessibilityInjector$TextToSpeechWrapper.&lt;init&gt;(AccessibilityInjector.java:676)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.addTtsApis(AccessibilityInjector.java:480)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.addAccessibilityApisIfNecessary(AccessibilityInjector.java:168)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.onPageStarted(AccessibilityInjector.java:340)</span><br><span class="line">     	at android.webkit.WebViewClassic.onPageStarted(WebViewClassic.java:4480)</span><br><span class="line">     	at android.webkit.CallbackProxy.handleMessage(CallbackProxy.java:366)</span><br><span class="line">     	at android.os.Handler.dispatchMessage(Handler.java:107)</span><br><span class="line">     	at android.os.Looper.loop(Looper.java:194)</span><br><span class="line">     	at android.app.ActivityThread.main(ActivityThread.java:5407)</span><br><span class="line">     	at java.lang.reflect.Method.invokeNative(Native Method)</span><br><span class="line">     	at java.lang.reflect.Method.invoke(Method.java:525)</span><br><span class="line">     	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:833)</span><br><span class="line">     	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:600)</span><br><span class="line">     	at dalvik.system.NativeStart.main(Native Method)</span><br></pre></td></tr></table></figure>
+<p>此问题在4.2.1和4.2.2比较集中，关闭辅助功能，google 下很多结果都是一样的。</p>
 <p>修复方法：在初始化 WebView 时调用disableAccessibility方法即可。</p>
-<pre><code>public static void disableAccessibility(Context context) {
-        if (Build.VERSION.SDK_INT == 17/*4.2 (Build.VERSION_CODES.JELLY_BEAN_MR1)*/) {
-            if (context != null) {
-                try {
-                    AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
-                    if (!am.isEnabled()) {
-                        //Not need to disable accessibility
-                        return;
-                    }
-
-                    Method setState = am.getClass().getDeclaredMethod(&quot;setState&quot;, int.class);
-                    setState.setAccessible(true);
-                    setState.invoke(am, 0);/**{@link AccessibilityManager#STATE_FLAG_ACCESSIBILITY_ENABLED}*/
-                } catch (Exception ignored) {
-                    ignored.printStackTrace();
-                }
-            }
-        }
-    }
-</code></pre><h4 id="2、"><a href="#2、" class="headerlink" title="2、"></a>2、</h4><pre><code>AndroidRuntimeException: android.content.pm.PackageManager$NameNotFoundException: com.google.android.webview
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public static void disableAccessibility(Context context) &#123;</span><br><span class="line">		if (Build.VERSION.SDK_INT == 17/*4.2 (Build.VERSION_CODES.JELLY_BEAN_MR1)*/) &#123;</span><br><span class="line">			if (context != null) &#123;</span><br><span class="line">				try &#123;</span><br><span class="line">					AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);</span><br><span class="line">					if (!am.isEnabled()) &#123;</span><br><span class="line">						//Not need to disable accessibility</span><br><span class="line">						return;</span><br><span class="line">					&#125;</span><br><span class="line"></span><br><span class="line">					Method setState = am.getClass().getDeclaredMethod(&quot;setState&quot;, int.class);</span><br><span class="line">					setState.setAccessible(true);</span><br><span class="line">					setState.invoke(am, 0);/**&#123;@link AccessibilityManager#STATE_FLAG_ACCESSIBILITY_ENABLED&#125;*/</span><br><span class="line">				&#125; catch (Exception ignored) &#123;</span><br><span class="line">					ignored.printStackTrace();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2、PackageManager"><a href="#2、PackageManager" class="headerlink" title="2、PackageManager"></a>2、PackageManager</h4><pre><code>AndroidRuntimeException: android.content.pm.PackageManager$NameNotFoundException: com.google.android.webview
     at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4604)
     at android.app.ActivityThread.access$1500(ActivityThread.java:154)
     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1389)
@@ -1271,7 +1204,7 @@ if (trace.contains(&quot;android.content.pm.PackageManager$NameNotFoundException
       throw e;
     }        
 }
-</code></pre><h4 id="3、"><a href="#3、" class="headerlink" title="3、"></a>3、</h4><pre><code>at android.webkit.BrowserFrame.nativeLoadUrl(Native Method)
+</code></pre><h4 id="3、BrowserFrame"><a href="#3、BrowserFrame" class="headerlink" title="3、BrowserFrame"></a>3、BrowserFrame</h4><pre><code>at android.webkit.BrowserFrame.nativeLoadUrl(Native Method)
 System.err:     at android.webkit.BrowserFrame.loadUrl(BrowserFrame.java:279)
 System.err:     at android.webkit.WebViewCore.loadUrl(WebViewCore.java:2011)
 System.err:     at android.webkit.WebViewCore.access$1900(WebViewCore.java:57)
@@ -1618,13 +1551,13 @@ System.err:     at android.os.Looper.loop(Looper.java:137)
 </blockquote>
 <hr>
 <h3 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h3><p><img src="http://upload-images.jianshu.io/upload_images/877678-858a41d06f0df835.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="目录"></p>
-<h3 id="一、简介"><a href="#一、简介" class="headerlink" title="一、简介"></a>一、简介</h3><p>这部分主要介绍下 WebView，WebView 是一个用来显示 Web 网页的控件，继承自 AbsoluteLayout，和使用系统其他控件没什么区别，只是 WeView 控件方法比较多比较丰富。因为它就是一个微型浏览器，包含一个浏览器该有的基本功能，例如：滚动、缩放、前进、后退下一页、搜索、执行 Js等功能。</p>
+<h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>这部分主要介绍下 WebView，WebView 是一个用来显示 Web 网页的控件，继承自 AbsoluteLayout，和使用系统其他控件没什么区别，只是 WeView 控件方法比较多比较丰富。因为它就是一个微型浏览器，包含一个浏览器该有的基本功能，例如：滚动、缩放、前进、后退下一页、搜索、执行 Js等功能。</p>
 <blockquote>
 <p>在 Android 4.4 之前使用 WebKit 作为渲染内核，4.4 之后采用 chrome 内核。Api 使用兼容低版本。</p>
 </blockquote>
 <p><a href="https://developer.android.com/reference/android/webkit/WebView.html" target="_blank" rel="noopener">官方 WebView.html</a><br>A View that displays web pages. This class is the basis upon which you can roll your own web browser or simply display some online content within your Activity. It uses the WebKit rendering engine to display web pages and includes methods to navigate forward and backward through a history, zoom in and out, perform text searches and more.</p>
 <hr>
-<h3 id="二、基本使用"><a href="#二、基本使用" class="headerlink" title="二、基本使用"></a>二、基本使用</h3><pre><code>//配置网络权限
+<h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><pre><code>//配置网络权限
 &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot;/&gt;
 
  //布局
@@ -1648,7 +1581,7 @@ System.err:     at android.os.Looper.loop(Looper.java:137)
   mWebView.addJavascriptInterface(new NativeInterface(this), &quot;AndroidNative&quot;);
   mWebView.loadUrl(&quot;http://www.jianshu.com/u/fa272f63280a&quot;);
 </code></pre><hr>
-<h3 id="三、WebView-方法"><a href="#三、WebView-方法" class="headerlink" title="三、WebView 方法"></a>三、WebView 方法</h3><blockquote>
+<h3 id="WebView"><a href="#WebView" class="headerlink" title="WebView"></a>WebView</h3><blockquote>
 <p>主要包含 WebView 的使用方法。 我们基于这些方法能扩展很多其他功能，例如：JsBridge、缓存等。</p>
 </blockquote>
 <h4 id="常用方法"><a href="#常用方法" class="headerlink" title="常用方法"></a>常用方法</h4><ul>
@@ -1682,37 +1615,18 @@ System.err:     at android.os.Looper.loop(Looper.java:137)
 </ul>
 <p><strong>我这里在介绍下下面几组方法，比较重要，项目当中可能会遇到坑</strong></p>
 <ul>
-<li>onPause() 尽力尝试暂停可以暂停的任何处理，如动画和地理位置。 不会暂停JavaScript。 要全局暂停JavaScript，可使用pauseTimers。</li>
-<li><p>onResume() 恢复onPause() 停掉的操作；</p>
-</li>
-<li><p>pauseTimers() 暂停所有WebView的布局，解析和JavaScript定时器。 这个是一个全局请求，不仅限于这个WebView。</p>
-</li>
+<li>onPause() 尽力尝试暂停可以暂停的任何处理，如动画和地理位置。不会暂停JavaScript。 要全局暂停JavaScript，可使用pauseTimers。</li>
+<li>onResume() 恢复onPause() 停掉的操作；</li>
+<li>pauseTimers() 暂停所有WebView的布局，解析和JavaScript定时器。 这个是一个全局请求，不仅限于这个WebView。</li>
 <li>resumeTimers() 恢复所有WebView的所有布局，解析和JavaScript计时器，将恢复调度所有计时器.</li>
 </ul>
 <blockquote>
 <p>另外注意 JS 端setTimeout()、setInterval() 方法使用，自测来看，当不使用 pauseTimers()  和 pauseTimers() ，从 Activity 返回上一个包含WebView 的Activity时，页面里的 setTimeout() 是不执行的，setInterval() 是可以恢复执行的。</p>
 </blockquote>
 <p>在适当的生命周期使用 pauseTimers()  和 pauseTimers() 既可以恢复setTimeout() 执行。</p>
-<h4 id="一份-WebView-方法使用清单"><a href="#一份-WebView-方法使用清单" class="headerlink" title="一份 WebView 方法使用清单"></a>一份 WebView 方法使用清单</h4><pre><code>mWebView.loadUrl(&quot;http://www.jianshu.com/u/fa272f63280a&quot;);// 加载url，也可以执行js函数
-mWebView.setWebViewClient(new SafeWebViewClient());// 设置 WebViewClient
-mWebView.setWebChromeClient(new SafeWebChromeClient());// 设置 WebChromeClient
-mWebView.onResume();// 生命周期onResume
-mWebView.resumeTimers();//生命周期resumeTimers
-mWebView.onPause();//生命周期onPause
-mWebView.pauseTimers();//生命周期pauseTimers (上数四个方法都是成对出现)
-mWebView.stopLoading();// 停止当前加载
-mWebView.clearMatches();// 清除网页查找的高亮匹配字符。
-mWebView.clearHistory();// 清除当前 WebView 访问的历史记录
-mWebView.clearSslPreferences();//清除ssl信息
-mWebView.clearCache(true);//清空网页访问留下的缓存数据。需要注意的时，由于缓存是全局的，所以只要是WebView用到的缓存都会被清空，即便其他地方也会使用到。该方法接受一个参数，从命名即可看出作用。若设为false，则只清空内存里的资源缓存，而不清空磁盘里的。
-mWebView.loadUrl(&quot;about:blank&quot;);// 清空当前加载
-mWebView.removeAllViews();// 清空子 View
-if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.JELLY_BEAN_MR2) {
-    mWebView.removeJavascriptInterface(&quot;AndroidNative&quot;);// 向 Web端注入 java 对象
-}
-mWebView.destroy();// 生命周期销毁
-</code></pre><hr>
-<h3 id="四、常用属性"><a href="#四、常用属性" class="headerlink" title="四、常用属性"></a>四、常用属性</h3><blockquote>
+<h4 id="WebView-方法使用清单"><a href="#WebView-方法使用清单" class="headerlink" title="WebView 方法使用清单"></a>WebView 方法使用清单</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">mWebView.loadUrl(&quot;http://www.jianshu.com/u/fa272f63280a&quot;);// 加载url，也可以执行js函数</span><br><span class="line">mWebView.setWebViewClient(new SafeWebViewClient());// 设置 WebViewClient</span><br><span class="line">mWebView.setWebChromeClient(new SafeWebChromeClient());// 设置 WebChromeClient</span><br><span class="line">mWebView.onResume();// 生命周期onResume</span><br><span class="line">mWebView.resumeTimers();//生命周期resumeTimers</span><br><span class="line">mWebView.onPause();//生命周期onPause</span><br><span class="line">mWebView.pauseTimers();//生命周期pauseTimers (上数四个方法都是成对出现)</span><br><span class="line">mWebView.stopLoading();// 停止当前加载</span><br><span class="line">mWebView.clearMatches();// 清除网页查找的高亮匹配字符。</span><br><span class="line">mWebView.clearHistory();// 清除当前 WebView 访问的历史记录</span><br><span class="line">mWebView.clearSslPreferences();//清除ssl信息</span><br><span class="line">mWebView.clearCache(true);//清空网页访问留下的缓存数据。需要注意的时，由于缓存是全局的，所以只要是WebView用到的缓存都会被清空，即便其他地方也会使用到。该方法接受一个参数，从命名即可看出作用。若设为false，则只清空内存里的资源缓存，而不清空磁盘里的。</span><br><span class="line">mWebView.loadUrl(&quot;about:blank&quot;);// 清空当前加载</span><br><span class="line">mWebView.removeAllViews();// 清空子 View</span><br><span class="line">if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.JELLY_BEAN_MR2) &#123;</span><br><span class="line">    mWebView.removeJavascriptInterface(&quot;AndroidNative&quot;);// 向 Web端注入 java 对象</span><br><span class="line">&#125;</span><br><span class="line">mWebView.destroy();// 生命周期销毁</span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
 <p>主要包含三部分：WebSettings、WebViewClient、WebChromeClient。</p>
 </blockquote>
 <h4 id="WebSettings"><a href="#WebSettings" class="headerlink" title="WebSettings"></a>WebSettings</h4><h5 id="常用方法-1"><a href="#常用方法-1" class="headerlink" title="常用方法"></a>常用方法</h5><ul>
@@ -1731,7 +1645,7 @@ mWebView.destroy();// 生命周期销毁
 <li>setAllowUniversalAccessFromFileURLs(boolean flag):允许通过 file url 加载的 Javascript 可以访问其他的源，包括其他的文件和 http，https 等其他的源，Android 4.1 之前默认是true，在 Android 4.1 及以后默认是false,也就是禁止如果此设置是允许，则 setAllowFileAccessFromFileURLs 不起做用。</li>
 <li>boolean getLoadsImagesAutomatically():是否支持自动加载图片。</li>
 </ul>
-<h5 id="一份使用清单"><a href="#一份使用清单" class="headerlink" title="一份使用清单"></a>一份使用清单</h5><pre><code>WebSettings webSettings = mWebView.getSettings();
+<h5 id="使用清单"><a href="#使用清单" class="headerlink" title="使用清单"></a>使用清单</h5><pre><code>WebSettings webSettings = mWebView.getSettings();
 if (webSettings == null) return;
 // 支持 Js 使用
 webSettings.setJavaScriptEnabled(true);
@@ -1767,7 +1681,7 @@ webSettings.setAllowFileAccessFromFileURLs(false);
 // Android 4.1 之前默认是true，在 Android 4.1 及以后默认是false,也就是禁止
 // 如果此设置是允许，则 setAllowFileAccessFromFileURLs 不起做用
 webSettings.setAllowUniversalAccessFromFileURLs(false);
-</code></pre><h4 id="WebViewClient"><a href="#WebViewClient" class="headerlink" title="WebViewClient"></a>WebViewClient</h4><h5 id="1、常用方法"><a href="#1、常用方法" class="headerlink" title="1、常用方法"></a>1、常用方法</h5><ul>
+</code></pre><h4 id="WebViewClient"><a href="#WebViewClient" class="headerlink" title="WebViewClient"></a>WebViewClient</h4><h5 id="常用方法-2"><a href="#常用方法-2" class="headerlink" title="常用方法"></a>常用方法</h5><ul>
 <li>onPageStarted(WebView view, String url, Bitmap favicon):WebView 开始加载页面时回调，一次Frame加载对应一次回调。</li>
 <li>onLoadResource(WebView view, String url):WebView 加载页面资源时会回调，每一个资源产生的一次网络加载，除非本地有当前 url 对应有缓存，否则就会加载。</li>
 <li>shouldInterceptRequest(WebView view, String url):WebView 可以拦截某一次的 request 来返回我们自己加载的数据，这个方法在后面缓存会有很大作用。</li>
@@ -1777,100 +1691,8 @@ webSettings.setAllowUniversalAccessFromFileURLs(false);
 <li>onPageFinished(WebView view, String url):WebView 完成加载页面时回调，一次Frame加载对应一次回调。</li>
 <li>onReceivedError(WebView view, int errorCode, String description, String failingUrl):WebView 访问 url 出错。</li>
 </ul>
-<h5 id="2、一份使用清单"><a href="#2、一份使用清单" class="headerlink" title="2、一份使用清单"></a>2、一份使用清单</h5><pre><code>public class SafeWebViewClient extends WebViewClient {
-
-    /**
-     * 当WebView得页面Scale值发生改变时回调
-     */
-    @Override
-    public void onScaleChanged(WebView view, float oldScale, float newScale) {
-        super.onScaleChanged(view, oldScale, newScale);
-    }
-
-    /**
-     * 是否在 WebView 内加载页面
-     *
-     * @param view
-     * @param url
-     * @return
-     */
-    @Override
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        view.loadUrl(url);
-        return true;
-    }
-
-    /**
-     * WebView 开始加载页面时回调，一次Frame加载对应一次回调
-     *
-     * @param view
-     * @param url
-     * @param favicon
-     */
-    @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
-        super.onPageStarted(view, url, favicon);
-    }
-
-    /**
-     * WebView 完成加载页面时回调，一次Frame加载对应一次回调
-     *
-     * @param view
-     * @param url
-     */
-    @Override
-    public void onPageFinished(WebView view, String url) {
-        super.onPageFinished(view, url);
-    }
-
-    /**
-     * WebView 加载页面资源时会回调，每一个资源产生的一次网络加载，除非本地有当前 url 对应有缓存，否则就会加载。
-     *
-     * @param view WebView
-     * @param url  url
-     */
-    @Override
-    public void onLoadResource(WebView view, String url) {
-        super.onLoadResource(view, url);
-    }
-
-    /**
-     * WebView 可以拦截某一次的 request 来返回我们自己加载的数据，这个方法在后面缓存会有很大作用。
-     *
-     * @param view    WebView
-     * @param request 当前产生 request 请求
-     * @return WebResourceResponse
-     */
-    @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-        return super.shouldInterceptRequest(view, request);
-    }
-
-    /**
-     * WebView 访问 url 出错
-     *
-     * @param view
-     * @param request
-     * @param error
-     */
-    @Override
-    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-        super.onReceivedError(view, request, error);
-    }
-
-    /**
-     * WebView ssl 访问证书出错，handler.cancel()取消加载，handler.proceed()对然错误也继续加载
-     *
-     * @param view
-     * @param handler
-     * @param error
-     */
-    @Override
-    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-        super.onReceivedSslError(view, handler, error);
-    }
-}
-</code></pre><h4 id="WebChromeClient"><a href="#WebChromeClient" class="headerlink" title="WebChromeClient"></a>WebChromeClient</h4><h5 id="1、常用方法-1"><a href="#1、常用方法-1" class="headerlink" title="1、常用方法"></a>1、常用方法</h5><ul>
+<h5 id="使用清单-1"><a href="#使用清单-1" class="headerlink" title="使用清单"></a>使用清单</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line">public class SafeWebViewClient extends WebViewClient &#123;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 当WebView得页面Scale值发生改变时回调</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onScaleChanged(WebView view, float oldScale, float newScale) &#123;</span><br><span class="line">        super.onScaleChanged(view, oldScale, newScale);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 是否在 WebView 内加载页面</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param url</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public boolean shouldOverrideUrlLoading(WebView view, String url) &#123;</span><br><span class="line">        view.loadUrl(url);</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * WebView 开始加载页面时回调，一次Frame加载对应一次回调</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param url</span><br><span class="line">     * @param favicon</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onPageStarted(WebView view, String url, Bitmap favicon) &#123;</span><br><span class="line">        super.onPageStarted(view, url, favicon);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * WebView 完成加载页面时回调，一次Frame加载对应一次回调</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param url</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onPageFinished(WebView view, String url) &#123;</span><br><span class="line">        super.onPageFinished(view, url);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * WebView 加载页面资源时会回调，每一个资源产生的一次网络加载，除非本地有当前 url 对应有缓存，否则就会加载。</span><br><span class="line">     *</span><br><span class="line">     * @param view WebView</span><br><span class="line">     * @param url  url</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onLoadResource(WebView view, String url) &#123;</span><br><span class="line">        super.onLoadResource(view, url);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * WebView 可以拦截某一次的 request 来返回我们自己加载的数据，这个方法在后面缓存会有很大作用。</span><br><span class="line">     *</span><br><span class="line">     * @param view    WebView</span><br><span class="line">     * @param request 当前产生 request 请求</span><br><span class="line">     * @return WebResourceResponse</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) &#123;</span><br><span class="line">        return super.shouldInterceptRequest(view, request);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * WebView 访问 url 出错</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param request</span><br><span class="line">     * @param error</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) &#123;</span><br><span class="line">        super.onReceivedError(view, request, error);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * WebView ssl 访问证书出错，handler.cancel()取消加载，handler.proceed()对然错误也继续加载</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param handler</span><br><span class="line">     * @param error</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) &#123;</span><br><span class="line">        super.onReceivedSslError(view, handler, error);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="WebChromeClient"><a href="#WebChromeClient" class="headerlink" title="WebChromeClient"></a>WebChromeClient</h4><h5 id="常用方法-3"><a href="#常用方法-3" class="headerlink" title="常用方法"></a>常用方法</h5><ul>
 <li>onConsoleMessage(String message, int lineNumber,String sourceID):输出 Web 端日志。</li>
 <li>onProgressChanged(WebView view, int newProgress):当前 WebView 加载网页进度。</li>
 <li>onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result):处理 JS 中的 Prompt对话框</li>
@@ -1878,154 +1700,23 @@ webSettings.setAllowUniversalAccessFromFileURLs(false);
 <li>onReceivedTitle(WebView view, String title):接收web页面的 Title。</li>
 <li>onReceivedIcon(WebView view, Bitmap icon):接收web页面的icon。</li>
 </ul>
-<h5 id="2、一份使用清单-1"><a href="#2、一份使用清单-1" class="headerlink" title="2、一份使用清单"></a>2、一份使用清单</h5><pre><code>public class SafeWebChromeClient extends WebChromeClient {
-
-    @Override
-    public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-        return super.onConsoleMessage(consoleMessage);
-    }
-
-    /**
-     * 当前 WebView 加载网页进度
-     *
-     * @param view
-     * @param newProgress
-     */
-    @Override
-    public void onProgressChanged(WebView view, int newProgress) {
-        super.onProgressChanged(view, newProgress);
-    }
-
-    /**
-     * Js 中调用 alert() 函数，产生的对话框
-     *
-     * @param view
-     * @param url
-     * @param message
-     * @param result
-     * @return
-     */
-    @Override
-    public boolean onJsAlert(WebView view, String url, String message, JsResult result) {
-        return super.onJsAlert(view, url, message, result);
-    }
-
-    /**
-     * 处理 Js 中的 Confirm 对话框
-     *
-     * @param view
-     * @param url
-     * @param message
-     * @param result
-     * @return
-     */
-    @Override
-    public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
-        return super.onJsConfirm(view, url, message, result);
-    }
-
-    /**
-     * 处理 JS 中的 Prompt对话框
-     *
-     * @param view
-     * @param url
-     * @param message
-     * @param defaultValue
-     * @param result
-     * @return
-     */
-    @Override
-    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
-        return super.onJsPrompt(view, url, message, defaultValue, result);
-    }
-
-    /**
-     * 接收web页面的icon
-     *
-     * @param view
-     * @param icon
-     */
-    @Override
-    public void onReceivedIcon(WebView view, Bitmap icon) {
-        super.onReceivedIcon(view, icon);
-    }
-
-    /**
-     * 接收web页面的 Title
-     *
-     * @param view
-     * @param title
-     */
-    @Override
-    public void onReceivedTitle(WebView view, String title) {
-        super.onReceivedTitle(view, title);
-    }
-
-}
-</code></pre><hr>
-<h3 id="五、于-JavaScript-交互"><a href="#五、于-JavaScript-交互" class="headerlink" title="五、于 JavaScript 交互"></a>五、于 JavaScript 交互</h3><h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><blockquote>
+<h5 id="使用清单-2"><a href="#使用清单-2" class="headerlink" title="使用清单"></a>使用清单</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line">public class SafeWebChromeClient extends WebChromeClient &#123;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public boolean onConsoleMessage(ConsoleMessage consoleMessage) &#123;</span><br><span class="line">        return super.onConsoleMessage(consoleMessage);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 当前 WebView 加载网页进度</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param newProgress</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onProgressChanged(WebView view, int newProgress) &#123;</span><br><span class="line">        super.onProgressChanged(view, newProgress);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * Js 中调用 alert() 函数，产生的对话框</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param url</span><br><span class="line">     * @param message</span><br><span class="line">     * @param result</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public boolean onJsAlert(WebView view, String url, String message, JsResult result) &#123;</span><br><span class="line">        return super.onJsAlert(view, url, message, result);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 处理 Js 中的 Confirm 对话框</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param url</span><br><span class="line">     * @param message</span><br><span class="line">     * @param result</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public boolean onJsConfirm(WebView view, String url, String message, JsResult result) &#123;</span><br><span class="line">        return super.onJsConfirm(view, url, message, result);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 处理 JS 中的 Prompt对话框</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param url</span><br><span class="line">     * @param message</span><br><span class="line">     * @param defaultValue</span><br><span class="line">     * @param result</span><br><span class="line">     * @return</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) &#123;</span><br><span class="line">        return super.onJsPrompt(view, url, message, defaultValue, result);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 接收web页面的icon</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param icon</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onReceivedIcon(WebView view, Bitmap icon) &#123;</span><br><span class="line">        super.onReceivedIcon(view, icon);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    /**</span><br><span class="line">     * 接收web页面的 Title</span><br><span class="line">     *</span><br><span class="line">     * @param view</span><br><span class="line">     * @param title</span><br><span class="line">     */</span><br><span class="line">    @Override</span><br><span class="line">    public void onReceivedTitle(WebView view, String title) &#123;</span><br><span class="line">        super.onReceivedTitle(view, title);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="于-JavaScript-交互"><a href="#于-JavaScript-交互" class="headerlink" title="于 JavaScript 交互"></a>于 JavaScript 交互</h3><h4 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h4><blockquote>
 <p>注：这里着重介绍下第一种标准方式，后面会介绍其他两种方式。</p>
 </blockquote>
 <p>1、使用系统方法 addJavascriptInterface 注入 java 对象来实现。</p>
 <p>2、利用 WebViewClient 中 shouldOverrideUrlLoading (WebView view, String url) 接口，拦截操作。这个就是很多公司在用的 scheme  方式，通过制定url协议，双方各自解析，使用iframe来调用native代码，实现互通。</p>
 <p>3、利用 WebChromeClient 中的 onJsAlert、onJsConfirm、onJsPrompt 提示接口，同样也是拦截操作。</p>
-<h4 id="使用清单："><a href="#使用清单：" class="headerlink" title="使用清单："></a>使用清单：</h4><pre><code>//开启Js可用
-mWebView.getSettings().setJavaScriptEnabled(true);
-
-// 创建要注入的 Java 类
-public class NativeInterface {
-
-    private Context mContext;
-
-    public NativeInterface(Context context) {
-        mContext = context;
-    }
-
-    @JavascriptInterface
-    public void hello() {
-        Toast.makeText(mContext, &quot;hello&quot;, Toast.LENGTH_SHORT).show();
-    }
-
-    @JavascriptInterface
-    public void hello(String params) {
-        Toast.makeText(mContext, params, Toast.LENGTH_SHORT).show();
-    }
-
-    @JavascriptInterface
-    public String getAndroid() {
-        Toast.makeText(mContext, &quot;getAndroid&quot;, Toast.LENGTH_SHORT).show();
-        return &quot;Android data&quot;;
-    }
-
-}
-
-// WebView 注入即可
-mWebView.addJavascriptInterface(new NativeInterface(this), &quot;AndroidNative&quot;);
-
-//Js编写
-&lt;script&gt;
-    function callHello(){
-        AndroidNative.hello();
-    }
-
-    function callHello1(){
-        AndroidNative.hello(&apos;hello Android&apos;);
-    }
-
-    function callAndroid(){
-        var temp = AndroidNative.getAndroid();
-        console.log(temp);
-        alert(temp);
-    }  
-
-&lt;/script&gt;
-</code></pre><p>Native 调用 Js：mWebView.loadUrl(js);</p>
-<p>Js 调用 Native :AndroidNative.getAndroid();</p>
+<h4 id="使用清单-3"><a href="#使用清单-3" class="headerlink" title="使用清单"></a>使用清单</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//开启Js可用</span></span><br><span class="line">mWebView.getSettings().setJavaScriptEnabled(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建要注入的 Java 类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NativeInterface</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Context mContext;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">NativeInterface</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        mContext = context;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JavascriptInterface</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Toast.makeText(mContext, <span class="string">"hello"</span>, Toast.LENGTH_SHORT).show();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JavascriptInterface</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hello</span><span class="params">(String params)</span> </span>&#123;</span><br><span class="line">        Toast.makeText(mContext, params, Toast.LENGTH_SHORT).show();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@JavascriptInterface</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getAndroid</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Toast.makeText(mContext, <span class="string">"getAndroid"</span>, Toast.LENGTH_SHORT).show();</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Android data"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// WebView 注入即可</span></span><br><span class="line">mWebView.addJavascriptInterface(<span class="keyword">new</span> NativeInterface(<span class="keyword">this</span>), <span class="string">"AndroidNative"</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Js编写</span></span><br><span class="line">&lt;script&gt;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">callHello</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        AndroidNative.hello();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">callHello1</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        AndroidNative.hello(<span class="string">'hello Android'</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">callAndroid</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> temp = AndroidNative.getAndroid();</span><br><span class="line">        <span class="built_in">console</span>.log(temp);</span><br><span class="line">        alert(temp);</span><br><span class="line">    &#125;  </span><br><span class="line"></span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Native 调用 Js：mWebView.loadUrl(js);<br>Js 调用 Native :AndroidNative.getAndroid();</p>
 <blockquote>
 <p>4.2版本以下会存在漏洞，4.2以上需要添加 @JavascriptInterface 注解才能被调用到，Js 调用方式不变。</p>
 </blockquote>
 <hr>
-<h3 id="六、Js-注入漏洞"><a href="#六、Js-注入漏洞" class="headerlink" title="六、Js 注入漏洞"></a>六、Js 注入漏洞</h3><blockquote>
+<h3 id="Js-注入漏洞"><a href="#Js-注入漏洞" class="headerlink" title="Js 注入漏洞"></a>Js 注入漏洞</h3><blockquote>
 <p>虽然可以通过注入方式来实现 WebView 和 JS 交互，但是实现功能的同时也带了安全问题，通过注入的 Java 类作为桥梁，JS 就可以利用这个漏洞。</p>
 </blockquote>
 <h4 id="常见漏洞"><a href="#常见漏洞" class="headerlink" title="常见漏洞"></a>常见漏洞</h4><p>目前已知的 WebView 漏洞有 4 个,分别是：</p>
@@ -2050,133 +1741,28 @@ if (url.startsWith(&quot;file://&quot;) {
 }
 </code></pre><h4 id="安全修复案例"><a href="#安全修复案例" class="headerlink" title="安全修复案例"></a>安全修复案例</h4><p>推荐 <a href="https://github.com/seven456/SafeWebView" target="_blank" rel="noopener">SafeWebView</a> 这个库中解决了 Android WebView 中 Js 注入漏洞问题，另外还包含了一些异常处理。可以自行下载阅读源码。</p>
 <hr>
-<h3 id="七、一些坑"><a href="#七、一些坑" class="headerlink" title="七、一些坑"></a>七、一些坑</h3><blockquote>
+<h3 id="一些坑"><a href="#一些坑" class="headerlink" title="一些坑"></a>一些坑</h3><blockquote>
 <p>主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。</p>
 </blockquote>
-<h4 id="1、android-webkit-AccessibilityInjector-TextToSpeechWrapper"><a href="#1、android-webkit-AccessibilityInjector-TextToSpeechWrapper" class="headerlink" title="1、android.webkit.AccessibilityInjector$TextToSpeechWrapper"></a>1、android.webkit.AccessibilityInjector$TextToSpeechWrapper</h4><pre><code>java.lang.NullPointerException
-      at android.webkit.AccessibilityInjector$TextToSpeechWrapper$1.onInit(AccessibilityInjector.java:753)
-      at android.speech.tts.TextToSpeech.dispatchOnInit(TextToSpeech.java:640)
-      at android.speech.tts.TextToSpeech.initTts(TextToSpeech.java:619)
-      at android.speech.tts.TextToSpeech.&lt;init&gt;(TextToSpeech.java:553)
-      at android.webkit.AccessibilityInjector$TextToSpeechWrapper.&lt;init&gt;(AccessibilityInjector.java:676)
-      at android.webkit.AccessibilityInjector.addTtsApis(AccessibilityInjector.java:480)
-      at android.webkit.AccessibilityInjector.addAccessibilityApisIfNecessary(AccessibilityInjector.java:168)
-      at android.webkit.AccessibilityInjector.onPageStarted(AccessibilityInjector.java:340)
-      at android.webkit.WebViewClassic.onPageStarted(WebViewClassic.java:4480)
-      at android.webkit.CallbackProxy.handleMessage(CallbackProxy.java:366)
-      at android.os.Handler.dispatchMessage(Handler.java:107)
-      at android.os.Looper.loop(Looper.java:194)
-      at android.app.ActivityThread.main(ActivityThread.java:5407)
-      at java.lang.reflect.Method.invokeNative(Native Method)
-      at java.lang.reflect.Method.invoke(Method.java:525)
-      at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:833)
-      at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:600)
-      at dalvik.system.NativeStart.main(Native Method)
-</code></pre><p>此问题在4.2.1和4.2.2比较集中，关闭辅助功能，google 下很多结果都是一样的。</p>
+<h4 id="1、android-webkit-AccessibilityInjector-TextToSpeechWrapper"><a href="#1、android-webkit-AccessibilityInjector-TextToSpeechWrapper" class="headerlink" title="1、android.webkit.AccessibilityInjector$TextToSpeechWrapper"></a>1、android.webkit.AccessibilityInjector$TextToSpeechWrapper</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">java.lang.NullPointerException</span><br><span class="line">     	at android.webkit.AccessibilityInjector$TextToSpeechWrapper$1.onInit(AccessibilityInjector.java:753)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.dispatchOnInit(TextToSpeech.java:640)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.initTts(TextToSpeech.java:619)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.&lt;init&gt;(TextToSpeech.java:553)</span><br><span class="line">     	at android.webkit.AccessibilityInjector$TextToSpeechWrapper.&lt;init&gt;(AccessibilityInjector.java:676)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.addTtsApis(AccessibilityInjector.java:480)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.addAccessibilityApisIfNecessary(AccessibilityInjector.java:168)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.onPageStarted(AccessibilityInjector.java:340)</span><br><span class="line">     	at android.webkit.WebViewClassic.onPageStarted(WebViewClassic.java:4480)</span><br><span class="line">     	at android.webkit.CallbackProxy.handleMessage(CallbackProxy.java:366)</span><br><span class="line">     	at android.os.Handler.dispatchMessage(Handler.java:107)</span><br><span class="line">     	at android.os.Looper.loop(Looper.java:194)</span><br><span class="line">     	at android.app.ActivityThread.main(ActivityThread.java:5407)</span><br><span class="line">     	at java.lang.reflect.Method.invokeNative(Native Method)</span><br><span class="line">     	at java.lang.reflect.Method.invoke(Method.java:525)</span><br><span class="line">     	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:833)</span><br><span class="line">     	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:600)</span><br><span class="line">     	at dalvik.system.NativeStart.main(Native Method)</span><br></pre></td></tr></table></figure>
+<p>此问题在4.2.1和4.2.2比较集中，关闭辅助功能，google 下很多结果都是一样的。</p>
 <p>修复方法：在初始化 WebView 时调用disableAccessibility方法即可。</p>
-<pre><code>public static void disableAccessibility(Context context) {
-        if (Build.VERSION.SDK_INT == 17/*4.2 (Build.VERSION_CODES.JELLY_BEAN_MR1)*/) {
-            if (context != null) {
-                try {
-                    AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
-                    if (!am.isEnabled()) {
-                        //Not need to disable accessibility
-                        return;
-                    }
-
-                    Method setState = am.getClass().getDeclaredMethod(&quot;setState&quot;, int.class);
-                    setState.setAccessible(true);
-                    setState.invoke(am, 0);/**{@link AccessibilityManager#STATE_FLAG_ACCESSIBILITY_ENABLED}*/
-                } catch (Exception ignored) {
-                    ignored.printStackTrace();
-                }
-            }
-        }
-    }
-</code></pre><h4 id="2、android-content-pm-PackageManager-NameNotFoundException"><a href="#2、android-content-pm-PackageManager-NameNotFoundException" class="headerlink" title="2、android.content.pm.PackageManager$NameNotFoundException"></a>2、android.content.pm.PackageManager$NameNotFoundException</h4><pre><code>AndroidRuntimeException: android.content.pm.PackageManager$NameNotFoundException: com.google.android.webview
-    at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4604)
-    at android.app.ActivityThread.access$1500(ActivityThread.java:154)
-    at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1389)
-    at android.os.Handler.dispatchMessage(Handler.java:102)
-    at android.os.Looper.loop(Looper.java:135)
-    at android.app.ActivityThread.main(ActivityThread.java:5302)
-    at java.lang.reflect.Method.invoke(Native Method)
-    at java.lang.reflect.Method.invoke(Method.java:372)
-    at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:916)
-    at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:711)
-Caused by: android.util.AndroidRuntimeException: android.content.pm.PackageManager$NameNotFoundException: com.google.android.webview
-    at android.webkit.WebViewFactory.getFactoryClass(WebViewFactory.java:174)
-    at android.webkit.WebViewFactory.getProvider(WebViewFactory.java:109)
-    at android.webkit.WebView.getFactory(WebView.java:2194)
-    at android.webkit.WebView.ensureProviderCreated(WebView.java:2189)
-    at android.webkit.WebView.setOverScrollMode(WebView.java:2248)
-    at android.view.View.&lt;init&gt;(View.java:3588)
-    at android.view.View.&lt;init&gt;(View.java:3682)
-    at android.view.ViewGroup.&lt;init&gt;(ViewGroup.java:497)
-    at android.widget.AbsoluteLayout.&lt;init&gt;(AbsoluteLayout.java:55)
-    at android.webkit.WebView.&lt;init&gt;(WebView.java:544)
-    at android.webkit.WebView.&lt;init&gt;(WebView.java:489)
-    at android.webkit.WebView.&lt;init&gt;(WebView.java:472)
-    at android.webkit.WebView.&lt;init&gt;(WebView.java:459)
-    at android.webkit.WebView.&lt;init&gt;(WebView.java:449)
-</code></pre><p>现象：在创建 WebView 时崩溃，跟进栈信息，我们需要在 setOverScrollMode 方法上加异常保护处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public static void disableAccessibility(Context context) &#123;</span><br><span class="line">		if (Build.VERSION.SDK_INT == 17/*4.2 (Build.VERSION_CODES.JELLY_BEAN_MR1)*/) &#123;</span><br><span class="line">			if (context != null) &#123;</span><br><span class="line">				try &#123;</span><br><span class="line">					AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);</span><br><span class="line">					if (!am.isEnabled()) &#123;</span><br><span class="line">						//Not need to disable accessibility</span><br><span class="line">						return;</span><br><span class="line">					&#125;</span><br><span class="line"></span><br><span class="line">					Method setState = am.getClass().getDeclaredMethod(&quot;setState&quot;, int.class);</span><br><span class="line">					setState.setAccessible(true);</span><br><span class="line">					setState.invoke(am, 0);/**&#123;@link AccessibilityManager#STATE_FLAG_ACCESSIBILITY_ENABLED&#125;*/</span><br><span class="line">				&#125; catch (Exception ignored) &#123;</span><br><span class="line">					ignored.printStackTrace();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2、android-content-pm-PackageManager-NameNotFoundException"><a href="#2、android-content-pm-PackageManager-NameNotFoundException" class="headerlink" title="2、android.content.pm.PackageManager$NameNotFoundException"></a>2、android.content.pm.PackageManager$NameNotFoundException</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">AndroidRuntimeException: android.content.pm.PackageManager$NameNotFoundException: com.google.android.webview</span><br><span class="line">	at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4604)</span><br><span class="line">	at android.app.ActivityThread.access$1500(ActivityThread.java:154)</span><br><span class="line">	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1389)</span><br><span class="line">	at android.os.Handler.dispatchMessage(Handler.java:102)</span><br><span class="line">	at android.os.Looper.loop(Looper.java:135)</span><br><span class="line">	at android.app.ActivityThread.main(ActivityThread.java:5302)</span><br><span class="line">	at java.lang.reflect.Method.invoke(Native Method)</span><br><span class="line">	at java.lang.reflect.Method.invoke(Method.java:372)</span><br><span class="line">	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:916)</span><br><span class="line">	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:711)</span><br><span class="line">Caused by: android.util.AndroidRuntimeException: android.content.pm.PackageManager$NameNotFoundException: com.google.android.webview</span><br><span class="line">	at android.webkit.WebViewFactory.getFactoryClass(WebViewFactory.java:174)</span><br><span class="line">	at android.webkit.WebViewFactory.getProvider(WebViewFactory.java:109)</span><br><span class="line">	at android.webkit.WebView.getFactory(WebView.java:2194)</span><br><span class="line">	at android.webkit.WebView.ensureProviderCreated(WebView.java:2189)</span><br><span class="line">	at android.webkit.WebView.setOverScrollMode(WebView.java:2248)</span><br><span class="line">	at android.view.View.&lt;init&gt;(View.java:3588)</span><br><span class="line">	at android.view.View.&lt;init&gt;(View.java:3682)</span><br><span class="line">	at android.view.ViewGroup.&lt;init&gt;(ViewGroup.java:497)</span><br><span class="line">	at android.widget.AbsoluteLayout.&lt;init&gt;(AbsoluteLayout.java:55)</span><br><span class="line">	at android.webkit.WebView.&lt;init&gt;(WebView.java:544)</span><br><span class="line">	at android.webkit.WebView.&lt;init&gt;(WebView.java:489)</span><br><span class="line">	at android.webkit.WebView.&lt;init&gt;(WebView.java:472)</span><br><span class="line">	at android.webkit.WebView.&lt;init&gt;(WebView.java:459)</span><br><span class="line">	at android.webkit.WebView.&lt;init&gt;(WebView.java:449)</span><br></pre></td></tr></table></figure>
+<p>现象：在创建 WebView 时崩溃，跟进栈信息，我们需要在 setOverScrollMode 方法上加异常保护处理</p>
 <p>修复方法：</p>
-<pre><code>try {
-    super.setOverScrollMode(mode);
-} catch (Throwable e) {
-    e.printStackTrace();
-}  
-</code></pre><p>不过上面捕获的异常范围有点广，在github上找到一个更全面的修复方法</p>
-<pre><code>try{
-    super.setOverScrollMode(mode);
-} catch(Throwable e){
-        String messageCause = e.getCause() == null ? e.toString() : e.getCause().toString();
-String trace = Log.getStackTraceString(e);
-if (trace.contains(&quot;android.content.pm.PackageManager$NameNotFoundException&quot;)
-  || trace.contains(&quot;java.lang.RuntimeException: Cannot load WebView&quot;)
-    || trace.contains(&quot;android.webkit.WebViewFactory$MissingWebViewPackageException: Failed to load WebView provider: No WebView installed&quot;)) {
-      e.printStackTrace();
-    }else{
-      throw e;
-    }        
-}
-</code></pre><h4 id="3、android-webkit-WebViewClassic-clearView"><a href="#3、android-webkit-WebViewClassic-clearView" class="headerlink" title="3、android.webkit.WebViewClassic.clearView"></a>3、android.webkit.WebViewClassic.clearView</h4><pre><code>at android.webkit.BrowserFrame.nativeLoadUrl(Native Method)
-System.err:     at android.webkit.BrowserFrame.loadUrl(BrowserFrame.java:279)
-System.err:     at android.webkit.WebViewCore.loadUrl(WebViewCore.java:2011)
-System.err:     at android.webkit.WebViewCore.access$1900(WebViewCore.java:57)
-System.err:     at android.webkit.WebViewCore$EventHub$1.handleMessage(WebViewCore.java:1303)
-System.err:     at android.os.Handler.dispatchMessage(Handler.java:99)
-System.err:     at android.os.Looper.loop(Looper.java:137)
-System.err:     at android.webkit.WebViewCore$WebCoreThread.run(WebViewCore.java:812)
-System.err:     at java.lang.Thread.run(Thread.java:856)
-webcoreglue: *** Uncaught exception returned from Java call!
-System.err: java.lang.NullPointerException
-System.err:     at android.webkit.WebViewClassic.clearView(WebViewClassic.java:2868)
-System.err:     at android.webkit.WebViewCore.setupViewport(WebViewCore.java:2497)
-System.err:     at android.webkit.WebViewCore.updateViewport(WebViewCore.java:2479)
-System.err:     at android.webkit.BrowserFrame.nativeLoadUrl(Native Method)
-System.err:     at android.webkit.BrowserFrame.loadUrl(BrowserFrame.java:279)
-System.err:     at android.webkit.WebViewCore.loadUrl(WebViewCore.java:2011)
-System.err:     at android.webkit.WebViewCore.access$1900(WebViewCore.java:57)
-System.err:     at android.webkit.WebViewCore$EventHub$1.handleMessage(WebViewCore.java:1303)
-System.err:     at android.os.Handler.dispatchMessage(Handler.java:99)
-System.err:     at android.os.Looper.loop(Looper.java:137)
-</code></pre><p>这个bug是在某些设备上发生的，是在调用webView.destroy() 之前调用了loadurl操作发生的，也不是毕现问题，所以只能跟进源码查看，<br>在清空 webview destroy 时，调用清理方法，内部可能时机有问题，会出现，WebViewClassic 中 mWebViewCore 对象为null，其内部为handler消息机制。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">    try &#123;</span><br><span class="line">        super.setOverScrollMode(mode);</span><br><span class="line">    &#125; catch (Throwable e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">```     </span><br><span class="line"></span><br><span class="line">不过上面捕获的异常范围有点广，在github上找到一个更全面的修复方法</span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line">    try&#123;</span><br><span class="line">        super.setOverScrollMode(mode);</span><br><span class="line">    &#125; catch(Throwable e)&#123;</span><br><span class="line">            String messageCause = e.getCause() == null ? e.toString() : e.getCause().toString();</span><br><span class="line">    String trace = Log.getStackTraceString(e);</span><br><span class="line">    if (trace.contains(&quot;android.content.pm.PackageManager$NameNotFoundException&quot;)</span><br><span class="line">      || trace.contains(&quot;java.lang.RuntimeException: Cannot load WebView&quot;)</span><br><span class="line">        || trace.contains(&quot;android.webkit.WebViewFactory$MissingWebViewPackageException: Failed to load WebView provider: No WebView installed&quot;)) &#123;</span><br><span class="line">          e.printStackTrace();</span><br><span class="line">        &#125;else&#123;</span><br><span class="line">          throw e;</span><br><span class="line">        &#125;        </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3、android-webkit-WebViewClassic-clearView"><a href="#3、android-webkit-WebViewClassic-clearView" class="headerlink" title="3、android.webkit.WebViewClassic.clearView"></a>3、android.webkit.WebViewClassic.clearView</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">at android.webkit.BrowserFrame.nativeLoadUrl(Native Method)</span><br><span class="line">System.err: 	at android.webkit.BrowserFrame.loadUrl(BrowserFrame.java:<span class="number">279</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore.loadUrl(WebViewCore.java:<span class="number">2011</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore.access$<span class="number">1900</span>(WebViewCore.java:<span class="number">57</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore$EventHub$<span class="number">1</span>.handleMessage(WebViewCore.java:<span class="number">1303</span>)</span><br><span class="line">System.err: 	at android.os.Handler.dispatchMessage(Handler.java:<span class="number">99</span>)</span><br><span class="line">System.err: 	at android.os.Looper.loop(Looper.java:<span class="number">137</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore$WebCoreThread.run(WebViewCore.java:<span class="number">812</span>)</span><br><span class="line">System.err: 	at java.lang.Thread.run(Thread.java:<span class="number">856</span>)</span><br><span class="line">webcoreglue: *** Uncaught exception returned from Java call!</span><br><span class="line">System.err: java.lang.NullPointerException</span><br><span class="line">System.err: 	at android.webkit.WebViewClassic.clearView(WebViewClassic.java:<span class="number">2868</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore.setupViewport(WebViewCore.java:<span class="number">2497</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore.updateViewport(WebViewCore.java:<span class="number">2479</span>)</span><br><span class="line">System.err: 	at android.webkit.BrowserFrame.nativeLoadUrl(Native Method)</span><br><span class="line">System.err: 	at android.webkit.BrowserFrame.loadUrl(BrowserFrame.java:<span class="number">279</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore.loadUrl(WebViewCore.java:<span class="number">2011</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore.access$<span class="number">1900</span>(WebViewCore.java:<span class="number">57</span>)</span><br><span class="line">System.err: 	at android.webkit.WebViewCore$EventHub$<span class="number">1</span>.handleMessage(WebViewCore.java:<span class="number">1303</span>)</span><br><span class="line">System.err: 	at android.os.Handler.dispatchMessage(Handler.java:<span class="number">99</span>)</span><br><span class="line">System.err: 	at android.os.Looper.loop(Looper.java:<span class="number">137</span>)</span><br></pre></td></tr></table></figure>
+<p>这个bug是在某些设备上发生的，是在调用webView.destroy() 之前调用了loadurl操作发生的，也不是毕现问题，所以只能跟进源码查看，<br>在清空 webview destroy 时，调用清理方法，内部可能时机有问题，会出现，WebViewClassic 中 mWebViewCore 对象为null，其内部为handler消息机制。</p>
 <p>修复方法：</p>
-<pre><code>public void logdUrl(final String url) {
-    try {
-        super.loadUrl(url);
-    } catch (NullPointerException e) {
-        e.printStackTrace();
-    }
-}
-</code></pre><hr>
-<h3 id="八、JSBridge"><a href="#八、JSBridge" class="headerlink" title="八、JSBridge"></a>八、JSBridge</h3><blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">logdUrl</span><span class="params">(<span class="keyword">final</span> String url)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.loadUrl(url);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (NullPointerException e) &#123;</span><br><span class="line">        e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="JSBridge"><a href="#JSBridge" class="headerlink" title="JSBridge"></a>JSBridge</h3><blockquote>
 <p>相信很多都或多或少的了解 JsBridge,不管是 iOS 平台还是 Android平台，特别是 Hybrid 应用，肯定是要用的 JsBridge 这个机制来建立 Native 和 Web 端的通信。</p>
 </blockquote>
 <p>本部分简单阐述下 JsBridge 原理，以及分析两个实际案例。</p>
-<h4 id="JsBridge-介绍："><a href="#JsBridge-介绍：" class="headerlink" title="JsBridge 介绍："></a>JsBridge 介绍：</h4><p>JSBridge 我们可以比喻成一座桥或者一根管道，一端是 Web一端是 Native。我们搭建这个通道的目的就是让 Native 和 Web 之间互相调用更为方便统一和简洁。<br>JSBridge 做得好的一个典型就是微信，微信给开发者提供了 JSSDK，该SDK中暴露了很多微信native层的方法，比如支付，定位等。使用起来非常方便。</p>
-<h4 id="JsBridge-原理："><a href="#JsBridge-原理：" class="headerlink" title="JsBridge 原理："></a>JsBridge 原理：</h4><p>前面我们分析了 WebView 如何于 JavaScript 交互的，JSBridge 就是在这些基础之上做扩展使它支持更复杂的功能，三种形式两种原理分析如下：</p>
+<h4 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h4><p>JSBridge 我们可以比喻成一座桥或者一根管道，一端是 Web一端是 Native。我们搭建这个通道的目的就是让 Native 和 Web 之间互相调用更为方便统一和简洁。<br>JSBridge 做得好的一个典型就是微信，微信给开发者提供了 JSSDK，该SDK中暴露了很多微信native层的方法，比如支付，定位等。使用起来非常方便。</p>
+<h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>前面我们分析了 WebView 如何于 JavaScript 交互的，JSBridge 就是在这些基础之上做扩展使它支持更复杂的功能，三种形式两种原理分析如下：</p>
 <p>1、使用 addJavascriptInterface</p>
 <p>原理：这是Android提供的Js与Native通信的官方解决方案，将 java 对象注入到 Js 中直接作为window的某一变量来使用。</p>
 <p>2、WebViewClient 中 shouldOverrideUrlLoading (WebView view, String url)。</p>
@@ -2187,68 +1773,20 @@ System.err:     at android.os.Looper.loop(Looper.java:137)
 <p>以上就是所有 JsBridge 的原理，自己可以写给demo跑一下，下面看几个问题：</p>
 <p>1、如何避免 JS、Android、iOS 相互调用时，需要事先“约定”方法名称和参数？<br>2、原生调用 JS 方法，能否类似原生开发一样，使用 Callback（block） 做为回调方式？<br>3、JS 调用原生能否使用 function 获得返回值?</p>
 <p>问题来源于网络，基本上都是这几个疑问，下面我们带着疑问去分析三个个方案。</p>
-<h4 id="JsBridge-案例："><a href="#JsBridge-案例：" class="headerlink" title="JsBridge 案例："></a>JsBridge 案例：</h4><h5 id="一、-H5与Native交互之JSBridge技术"><a href="#一、-H5与Native交互之JSBridge技术" class="headerlink" title="一、 H5与Native交互之JSBridge技术"></a>一、 <a href="https://tech.youzan.com/jsbridge" target="_blank" rel="noopener">H5与Native交互之JSBridge技术</a></h5><blockquote>
+<h4 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h4><h5 id="H5与Native交互之JSBridge技术"><a href="#H5与Native交互之JSBridge技术" class="headerlink" title="H5与Native交互之JSBridge技术"></a><a href="https://tech.youzan.com/jsbridge" target="_blank" rel="noopener">H5与Native交互之JSBridge技术</a></h5><blockquote>
 <p>本案例为有赞技术团队博客分享的H5与Native交互之JSBridge技术，并没有最终完全的代码，不过很清楚的分析了IOS和Android与Javascript的底层交互原理。</p>
 </blockquote>
-<p>1、<strong>实现原理</strong></p>
+<p><strong>实现原理</strong></p>
 <p>通过schema方式，使用shouldOverrideUrlLoading方法对url协议进行解析。</p>
-<pre><code>var url = &apos;jsbridge://doAction?title=分享标题&amp;desc=分享描述&amp;link=http%3A%2F%2Fwww.baidu.com&apos;;  
-var iframe = document.createElement(&apos;iframe&apos;);  
-iframe.style.width = &apos;1px&apos;;  
-iframe.style.height = &apos;1px&apos;;  
-iframe.style.display = &apos;none&apos;;  
-iframe.src = url;  
-document.body.appendChild(iframe);  
-setTimeout(function() {  
-    iframe.remove();
-}, 100);
-</code></pre><p>可以到看有赞技术是通过自定义url协议来作为传输媒介，这样 Android 就可以拦截这个请求，从而解析出相应的方法和参数</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> url = <span class="string">'jsbridge://doAction?title=分享标题&amp;desc=分享描述&amp;link=http%3A%2F%2Fwww.baidu.com'</span>;  </span><br><span class="line"><span class="keyword">var</span> iframe = <span class="built_in">document</span>.createElement(<span class="string">'iframe'</span>);  </span><br><span class="line">iframe.style.width = <span class="string">'1px'</span>;  </span><br><span class="line">iframe.style.height = <span class="string">'1px'</span>;  </span><br><span class="line">iframe.style.display = <span class="string">'none'</span>;  </span><br><span class="line">iframe.src = url;  </span><br><span class="line"><span class="built_in">document</span>.body.appendChild(iframe);  </span><br><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;  </span><br><span class="line">    iframe.remove();</span><br><span class="line">&#125;, <span class="number">100</span>);</span><br></pre></td></tr></table></figure>
+<p>可以到看有赞技术是通过自定义url协议来作为传输媒介，这样 Android 就可以拦截这个请求，从而解析出相应的方法和参数</p>
 <p>不过此 url 中的参数是以键值对的方式传递，我是建议使用 Json 作为传输参数比较好，灵活清楚。</p>
-<p>2、<strong>库的封装</strong></p>
+<p><strong>库的封装</strong></p>
 <p>有赞将 Js与 Native 通讯封装了一个通用的方法，我这里直接复制过来分析下：</p>
-<pre><code>YouzanJsBridge = {  
-    doCall: function(functionName, data, callback) {
-        var _this = this;
-        // 解决连续调用问题
-        if (this.lastCallTime &amp;&amp; (Date.now() - this.lastCallTime) &lt; 100) {
-            setTimeout(function() {
-                _this.doCall(functionName, data, callback);
-            }, 100);
-            return;
-        }
-        this.lastCallTime = Date.now();
-
-        data = data || {};
-        if (callback) {
-            $.extend(data, { callback: callback });
-        }
-
-        if (UA.isIOS()) {
-            $.each(data, function(key, value) {
-                if ($.isPlainObject(value) || $.isArray(value)) {
-                    data[key] = JSON.stringify(value);
-                }
-            });
-            var url = Args.addParameter(&apos;youzanjs://&apos; + functionName, data);
-            var iframe = document.createElement(&apos;iframe&apos;);
-            iframe.style.width = &apos;1px&apos;;
-            iframe.style.height = &apos;1px&apos;;
-            iframe.style.display = &apos;none&apos;;
-            iframe.src = url;
-            document.body.appendChild(iframe);
-            setTimeout(function() {
-                iframe.remove();
-            }, 100);
-        } else if (UA.isAndroid()) {
-            window.androidJS &amp;&amp; window.androidJS[functionName] &amp;&amp; window.androidJS[functionName](JSON.stringify(data));
-        } else {
-            console.error(&apos;未获取platform信息，调取api失败&apos;);
-        }
-    }
-}
-</code></pre><p>这样不管是和iOS通信还是 Android，都只需要调用 YouzanJsBridge.doCall() 方法即可，讲两个平台的不同屏蔽在封装基础上，这样也有利于 Web 端代码的整洁和代码兼容。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">YouzanJsBridge = &#123;  </span><br><span class="line">    doCall: <span class="function"><span class="keyword">function</span>(<span class="params">functionName, data, callback</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> _this = <span class="keyword">this</span>;</span><br><span class="line">        <span class="comment">// 解决连续调用问题</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.lastCallTime &amp;&amp; (<span class="built_in">Date</span>.now() - <span class="keyword">this</span>.lastCallTime) &lt; <span class="number">100</span>) &#123;</span><br><span class="line">            setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                _this.doCall(functionName, data, callback);</span><br><span class="line">            &#125;, <span class="number">100</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.lastCallTime = <span class="built_in">Date</span>.now();</span><br><span class="line"></span><br><span class="line">        data = data || &#123;&#125;;</span><br><span class="line">        <span class="keyword">if</span> (callback) &#123;</span><br><span class="line">            $.extend(data, &#123; <span class="attr">callback</span>: callback &#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (UA.isIOS()) &#123;</span><br><span class="line">            $.each(data, <span class="function"><span class="keyword">function</span>(<span class="params">key, value</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">if</span> ($.isPlainObject(value) || $.isArray(value)) &#123;</span><br><span class="line">                    data[key] = <span class="built_in">JSON</span>.stringify(value);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            <span class="keyword">var</span> url = Args.addParameter(<span class="string">'youzanjs://'</span> + functionName, data);</span><br><span class="line">            <span class="keyword">var</span> iframe = <span class="built_in">document</span>.createElement(<span class="string">'iframe'</span>);</span><br><span class="line">            iframe.style.width = <span class="string">'1px'</span>;</span><br><span class="line">            iframe.style.height = <span class="string">'1px'</span>;</span><br><span class="line">            iframe.style.display = <span class="string">'none'</span>;</span><br><span class="line">            iframe.src = url;</span><br><span class="line">            <span class="built_in">document</span>.body.appendChild(iframe);</span><br><span class="line">            setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                iframe.remove();</span><br><span class="line">            &#125;, <span class="number">100</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (UA.isAndroid()) &#123;</span><br><span class="line">            <span class="built_in">window</span>.androidJS &amp;&amp; <span class="built_in">window</span>.androidJS[functionName] &amp;&amp; <span class="built_in">window</span>.androidJS[functionName](<span class="built_in">JSON</span>.stringify(data));</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.error(<span class="string">'未获取platform信息，调取api失败'</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样不管是和iOS通信还是 Android，都只需要调用 YouzanJsBridge.doCall() 方法即可，讲两个平台的不同屏蔽在封装基础上，这样也有利于 Web 端代码的整洁和代码兼容。</p>
 <p>当然这里的Android 平台是没有 callback 回调的，如果你想实现两端互调的机制，请参考下一个案例，里面会详细介绍这部分。</p>
-<p>3、<strong>一些优化</strong></p>
+<p><strong>一些优化</strong></p>
 <p>将项目通用方法抽象</p>
 <p>例如：</p>
 <p>1.getData(datatype, callback, extra) H5从Native APP获取数据<br>使用场景：H5需要从Native APP获取某些数据的时候，可以调用这个方法。</p>
@@ -2257,115 +1795,12 @@ setTimeout(function() {
 <p>4.doAction(action, data) 功能上的一些操作</p>
 <p>等等其他方法，我相信如果你自己写过 native和js 调用demo，上面抽象出来的方法并不陌生，所以，如果你的业务没有那么复杂，没有像微信那样，需要提供给数以万计开发者去用去扩展，这种抽象出一些通用方法的方式不是为一种节省成本，快速迭代，方便的方式。</p>
 <p>小结：总之万变不离其宗，所有封装或者框架的东西，使用的东西都还是最基本的方法，只是对基础做一个什么样程度扩展，或深或浅，唯一的只要用着舒服就行。</p>
-<h5 id="二：JsBridge"><a href="#二：JsBridge" class="headerlink" title="二：JsBridge"></a>二：<a href="https://github.com/lzyzsd/JsBridge" target="_blank" rel="noopener">JsBridge</a></h5><p><strong>1、使用方法:</strong></p>
+<h5 id="JsBridge"><a href="#JsBridge" class="headerlink" title="JsBridge"></a><a href="https://github.com/lzyzsd/JsBridge" target="_blank" rel="noopener">JsBridge</a></h5><p><strong>使用方法</strong></p>
 <blockquote>
 <p>注意Android 和 Web 使用方式</p>
 </blockquote>
-<pre><code>webView.registerHandler(&quot;submitFromWeb&quot;, new BridgeHandler() {
-
-    @Override
-    public void handler(String data, CallBackFunction function) {
-      function.onCallBack(&quot;native submitFromWeb 方法, 返回 data&quot;);
-    }
-  });
-
-  webView.callHandler(&quot;functionInJs&quot;, new Gson().toJson(user), new CallBackFunction() {
-    @Override
-    public void onCallBack(String data) {
-      Log.i(TAG, &quot;onCallBack : &quot; + data);
-    }
-  });
-
-  window.WebViewJavascriptBridge.callHandler(
-      &apos;submitFromWeb&apos;
-      , {&apos;param&apos;: &apos;中文测试&apos;}
-            , function(responseData) {
-    document.getElementById(&quot;show&quot;).innerHTML = &quot;send get responseData from Android 端, data = &quot; + responseData
-  }
-        );
-
-  bridge.registerHandler(&quot;functionInJs&quot;, function(data, responseCallback) {
-    document.getElementById(&quot;show&quot;).innerHTML = (&quot;data from Java: = &quot; + data);
-    var responseData = &quot;call functionInJs success,return android!&quot;;
-    responseCallback(responseData);
-  });
-</code></pre><p><strong>2、关键类作用：</strong></p>
-<blockquote>
-<p>在讲 JsBridge 的实现之前，首先要讲下各个文件的作用</p>
-</blockquote>
-<ul>
-<li>Message.java:JsBridge 中的消息对象，用来封装native与js交互时的json数据，包含：callid、responseid、responseData、handlerName等字段。</li>
-<li>WebViewJavascriptBridge.js:改js文件会被注入到各个页面，和native中封装处理Message消息逻辑类似，同样提供了初始化、注册Handler、调用Handler等方法，之后js都是通过此文件中的方法和native统一沟通。</li>
-<li>WebViewJavascriptBridge.java:native 端，Bridge接口类,定义了发送信息的方法，由BridgeWebView来实现，之后调用可以通过webview.send()方式调用。</li>
-<li>BridgeWebView.java:WebView的子类，实现了WebViewJavascriptBridge接口，并提供了注册、调用 Handler等方法，之后都是通过webview.registerHandler()或者webview.callHandler()方式调用js.</li>
-<li>BridgeWebViewClient.java:WebViewClient的子类，重写了ShouldOverrideUrlLoading，onPageFinish，onPageStart等方法。</li>
-<li>BridgeHandler.java:作为native与web交互的通道。native通过Handler的名称来找到响应的Handler来操作，这样才能实现js回调给native端，也就是registerHandler时候注册的监听。</li>
-<li>CallBackFunction.java:native定义的回调函数， Handler处理完成后，用来给Js发送消息，对应处理js中function中。</li>
-</ul>
-<p><strong>3、实现原理：</strong></p>
-<p>看完这些主要类的作用，在看流程就清晰了。</p>
-<p>native 调 js：</p>
-<p>1、WebView.callHandler(‘handlerName’,’{}’,callBack);<br><br>2、doSend 中组装 要传输的 Message 对象，并设置setCallbackId（生成唯一的id是为了方便在js回调回来的时候在android端查找对于的 callback）<br><br>3、dispatchMessage javascript:WebViewJavascriptBridge._handleMessageFromNative(message);方法 message 为上一步的Message 对象对应的 Json 数据。<br><br>4、在 Js _dispatchMessageFromNative 函数中，根据 messageJSON json 数据中的字段 handlerName 找到对对应的 handler 方法执行。<br><br>  handler = messageHandlers[message.handlerName];handler 这个就是在 html 中 registerHandler 注册的回调function(data, responseCallback)函数<br><br>5、之后执行 html 中 responseCallback(responseData); 会触发 WebViewJavascriptBridge.js 文件中的 _doSend函数，_doSend 通过 messagingIframe.src 形式传给 android端，shouldOverrideUrlLoading 接受，并拦截内容处理。<br><br>6、第一次：拦截执行到 webView.flushMessageQueue()方法，并调用 responseCallbacks.put(jsUrl,returnCallback);，同时调用 javascript:WebViewJavascriptBridge._fetchQueue(); 来查询消息的返回值，并执行一次messagingIframe.src。<br><br>7、第二次：拦截执行到 webView.handlerReturnData() 方法，并调用上一步注册的 CallBackFunction.onCallBack，然后根据responseId 即 android 传过来的 message.callbackId，找到 使用者注册的 CallBackFunction 回调。<br></p>
-<p>本次的流程就走完了,看几十遍就看懂了哈。</p>
-<p>Js -&gt; android:</p>
-<p>1、window.WebViewJavascriptBridge.callHandler<br><br>2、执行 Js 函数 _doSend() 触发 messagingIframe.src<br><br>3、android 端拦截，shouldOverrideUrlLoading<br><br>4、第一次：拦截执行到 webView.flushMessageQueue()方法，并调用 responseCallbacks.put(jsUrl,returnCallback);，同时调用 javascript:WebViewJavascriptBridge._fetchQueue(); 来查询消息的返回值，并执行一次messagingIframe.src。<br><br>5、第二次：拦截执行到 webView.handlerReturnData() 方法，并调用上一步注册的 CallBackFunction.onCallBack -&gt; responseId 为空 -&gt; handler.handler(m.getData(), responseFunction)-&gt; 外部回调（ function.onCallBack(“native submitFromWeb 方法, 返回 data”);）-&gt; queueMessage -&gt; dispatchMessage -&gt;loadUrl(javascriptCommand) -&gt; 回调结束<br></p>
-<p>注意两端的每一次通讯，Android 端的 shouldOverrideUrlLoading 方法都会执行两次，但是携带url不同，这里要注意两次访问是相互配合的，没有第一次的消息查询，也就不会有第二次的数据返回回调。</p>
-<p><strong>4、小结</strong></p>
-<p>通过url拦截方式，注入一个本地js文件，来桥接native和web，屏蔽了一些通性工作，在使用上方式相同，好理解，通过两次来回调用实现了可回调function。</p>
-<p>github 上也有很多类似的方案，这里就不一一分析了，如果你不是看的这个库，建议好好看看，挺巧妙的机制。</p>
-<p>这块逻辑也是看了好久，挺绕的，可以结合打log和debug来分析。</p>
-<h5 id="三：DSBridge-Android"><a href="#三：DSBridge-Android" class="headerlink" title="三：DSBridge-Android"></a>三：<a href="https://github.com/wendux/DSBridge-Android" target="_blank" rel="noopener">DSBridge-Android</a></h5><p><strong>1、使用方法</strong></p>
-<blockquote>
-<p>注意Android 和 Web 使用方式</p>
-</blockquote>
-<pre><code> webView.callHandler(&quot;addValue&quot;,new Object[]{1,&quot;hello&quot;},new CallBackFunction(){
-     @Override
-     public void onCallBack(String retValue) {
-         Log.d(&quot;jsbridge&quot;,&quot;call succeed,return value is &quot;+retValue);
-     }
- });
-webView.callHandler(&quot;test&quot;,null);
-
-dsBridge.call(&quot;testNever&quot;, {msg: &quot;testSyn&quot;});
-
-dsBridge.call(&quot;testNoArgAsyn&quot;, function (v) {
-    alert(v);
-});
-</code></pre><p><strong>2、关键类作用：</strong></p>
-<ul>
-<li>DWebView:WebView的子类，提供了注册、调用 Handler等方法，之后都是通过 webview.callHandler()方式调用js.</li>
-<li>CompletionHandler:作为native与web交互的通道，异步回调的关键操作类。</li>
-<li>OnReturnValue:js 回调 android的接口，根据 handlerMap 储存的id作为 handler 标示即OnReturnValue实现类。</li>
-<li>JsApi:需要注册到 Js java 类。</li>
-</ul>
-<p>看完这些主要类的作用，在看流程就清晰了。</p>
-<p><strong>3、实现原理：</strong></p>
-<blockquote>
-<p>本质还是使用的系统默认 addJavascriptInterface 方式，其中做了扩展。</p>
-</blockquote>
-<p>首先需要将这段js注入到 Web 页面</p>
-<pre><code>function getJsBridge() {
-    window._dsf = window._dsf || {};
-    return {
-        call: function(b, a, c) {
-            &quot;function&quot; == typeof a &amp;&amp; (c = a, a = {});
-            if (&quot;function&quot; == typeof c) {
-                window.dscb = window.dscb || 0;
-                var d = &quot;dscb&quot; + window.dscb++;
-                window[d] = c;
-                a._dscbstub = d
-            }
-            a = JSON.stringify(a || {});
-            return window._dswk ? prompt(window._dswk + b, a) : &quot;function&quot; == typeof _dsbridge ? _dsbridge(b, a) : _dsbridge.call(b, a)
-        },
-        register: function(b, a) {
-            &quot;object&quot; == typeof b ? Object.assign(window._dsf, b) : window._dsf[b] = a
-        }
-    }
-}
-
-dsBridge = getJsBridge();
-</code></pre><p>native -&gt; js：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line">    webView.registerHandler(<span class="string">"submitFromWeb"</span>, <span class="keyword">new</span> BridgeHandler() &#123;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handler</span><span class="params">(String data, CallBackFunction function)</span> </span>&#123;</span><br><span class="line">          function.onCallBack(<span class="string">"native submitFromWeb 方法, 返回 data"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      webView.callHandler(<span class="string">"functionInJs"</span>, <span class="keyword">new</span> Gson().toJson(user), <span class="keyword">new</span> CallBackFunction() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCallBack</span><span class="params">(String data)</span> </span>&#123;</span><br><span class="line">          Log.i(TAG, <span class="string">"onCallBack : "</span> + data);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      window.WebViewJavascriptBridge.callHandler(</span><br><span class="line">          <span class="string">'submitFromWeb'</span></span><br><span class="line">          , &#123;<span class="string">'param'</span>: <span class="string">'中文测试'</span>&#125;</span><br><span class="line">                , function(responseData) &#123;</span><br><span class="line">        document.getElementById(<span class="string">"show"</span>).innerHTML = <span class="string">"send get responseData from Android 端, data = "</span> + responseData</span><br><span class="line">      &#125;</span><br><span class="line">            );</span><br><span class="line"></span><br><span class="line">      bridge.registerHandler(<span class="string">"functionInJs"</span>, function(data, responseCallback) &#123;</span><br><span class="line">        document.getElementById(<span class="string">"show"</span>).innerHTML = (<span class="string">"data from Java: = "</span> + data);</span><br><span class="line">        var responseData = <span class="string">"call functionInJs success,return android!"</span>;</span><br><span class="line">        responseCallback(responseData);</span><br><span class="line">      &#125;);</span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line">**关键类作用：**</span><br><span class="line"></span><br><span class="line">&gt; 在讲 JsBridge 的实现之前，首先要讲下各个文件的作用</span><br><span class="line"></span><br><span class="line">* Message.java:JsBridge 中的消息对象，用来封装<span class="keyword">native</span>与js交互时的json数据，包含：callid、responseid、responseData、handlerName等字段。</span><br><span class="line">* WebViewJavascriptBridge.js:改js文件会被注入到各个页面，和<span class="keyword">native</span>中封装处理Message消息逻辑类似，同样提供了初始化、注册Handler、调用Handler等方法，之后js都是通过此文件中的方法和<span class="keyword">native</span>统一沟通。</span><br><span class="line">* WebViewJavascriptBridge.java:<span class="keyword">native</span> 端，Bridge接口类,定义了发送信息的方法，由BridgeWebView来实现，之后调用可以通过webview.send()方式调用。</span><br><span class="line">* BridgeWebView.java:WebView的子类，实现了WebViewJavascriptBridge接口，并提供了注册、调用 Handler等方法，之后都是通过webview.registerHandler()或者webview.callHandler()方式调用js.</span><br><span class="line">* BridgeWebViewClient.java:WebViewClient的子类，重写了ShouldOverrideUrlLoading，onPageFinish，onPageStart等方法。</span><br><span class="line">* BridgeHandler.java:作为<span class="keyword">native</span>与web交互的通道。<span class="keyword">native</span>通过Handler的名称来找到响应的Handler来操作，这样才能实现js回调给<span class="keyword">native</span>端，也就是registerHandler时候注册的监听。</span><br><span class="line">* CallBackFunction.java:<span class="keyword">native</span>定义的回调函数， Handler处理完成后，用来给Js发送消息，对应处理js中function中。</span><br><span class="line"></span><br><span class="line">**<span class="number">3</span>、实现原理：**</span><br><span class="line"></span><br><span class="line">看完这些主要类的作用，在看流程就清晰了。</span><br><span class="line"></span><br><span class="line"><span class="keyword">native</span> 调 js：</span><br><span class="line"></span><br><span class="line">* WebView.callHandler(<span class="string">'handlerName'</span>,<span class="string">'&#123;&#125;'</span>,callBack);</span><br><span class="line">* doSend 中组装 要传输的 Message 对象，并设置setCallbackId（生成唯一的id是为了方便在js回调回来的时候在android端查找对于的 callback</span><br><span class="line">* dispatchMessage javascript:WebViewJavascriptBridge._handleMessageFromNative(message);方法 message 为上一步的Message 对象对应的 Json 数据</span><br><span class="line">* 在 Js _dispatchMessageFromNative 函数中，根据 messageJSON json 数据中的字段 handlerName 找到对对应的 handler 方法执行,handler = messageHandlers[message.handlerName];handler 这个就是在 html 中 registerHandler 注册的回调function(data, responseCallback)函数&lt;br/&gt;</span><br><span class="line">* 之后执行 html 中 responseCallback(responseData); 会触发 WebViewJavascriptBridge.js 文件中的 _doSend函数，_doSend 通过 messagingIframe.src 形式传给 android端，shouldOverrideUrlLoading 接受，并拦截内容处理。&lt;br/&gt;</span><br><span class="line">* 第一次：拦截执行到 webView.flushMessageQueue()方法，并调用 responseCallbacks.put(jsUrl,returnCallback);，同时调用 javascript:WebViewJavascriptBridge._fetchQueue(); 来查询消息的返回值，并执行一次messagingIframe.src。&lt;br/&gt;</span><br><span class="line">* 第二次：拦截执行到 webView.handlerReturnData() 方法，并调用上一步注册的 CallBackFunction.onCallBack，然后根据responseId 即 android 传过来的 message.callbackId，找到 使用者注册的 CallBackFunction 回调。&lt;br/&gt;</span><br><span class="line"></span><br><span class="line">本次的流程就走完了,看几十遍就看懂了哈。</span><br><span class="line"></span><br><span class="line">Js -&gt; android:</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>、window.WebViewJavascriptBridge.callHandler&lt;br/&gt;</span><br><span class="line"><span class="number">2</span>、执行 Js 函数 _doSend() 触发 messagingIframe.src&lt;br/&gt;</span><br><span class="line"><span class="number">3</span>、android 端拦截，shouldOverrideUrlLoading&lt;br/&gt;</span><br><span class="line"><span class="number">4</span>、第一次：拦截执行到 webView.flushMessageQueue()方法，并调用 responseCallbacks.put(jsUrl,returnCallback);，同时调用 javascript:WebViewJavascriptBridge._fetchQueue(); 来查询消息的返回值，并执行一次messagingIframe.src。&lt;br/&gt;</span><br><span class="line"><span class="number">5</span>、第二次：拦截执行到 webView.handlerReturnData() 方法，并调用上一步注册的 CallBackFunction.onCallBack -&gt; responseId 为空 -&gt; handler.handler(m.getData(), responseFunction)-&gt; 外部回调（ function.onCallBack(<span class="string">"native submitFromWeb 方法, 返回 data"</span>);）-&gt; queueMessage -&gt; dispatchMessage -&gt;loadUrl(javascriptCommand) -&gt; 回调结束&lt;br/&gt;</span><br><span class="line"></span><br><span class="line">注意两端的每一次通讯，Android 端的 shouldOverrideUrlLoading 方法都会执行两次，但是携带url不同，这里要注意两次访问是相互配合的，没有第一次的消息查询，也就不会有第二次的数据返回回调。</span><br><span class="line"></span><br><span class="line">**<span class="number">4</span>、小结**</span><br><span class="line"></span><br><span class="line">通过url拦截方式，注入一个本地js文件，来桥接<span class="keyword">native</span>和web，屏蔽了一些通性工作，在使用上方式相同，好理解，通过两次来回调用实现了可回调function。</span><br><span class="line"></span><br><span class="line">github 上也有很多类似的方案，这里就不一一分析了，如果你不是看的这个库，建议好好看看，挺巧妙的机制。</span><br><span class="line"></span><br><span class="line">这块逻辑也是看了好久，挺绕的，可以结合打log和debug来分析。</span><br><span class="line"></span><br><span class="line">##### [DSBridge-Android](https://github.com/wendux/DSBridge-Android)</span><br><span class="line"></span><br><span class="line">**<span class="number">1</span>、使用方法**</span><br><span class="line"></span><br><span class="line">  &gt; 注意Android 和 Web 使用方式</span><br><span class="line"></span><br><span class="line">        webView.callHandler(<span class="string">"addValue"</span>,<span class="keyword">new</span> Object[]&#123;<span class="number">1</span>,<span class="string">"hello"</span>&#125;,<span class="keyword">new</span> CallBackFunction()&#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCallBack</span><span class="params">(String retValue)</span> </span>&#123;</span><br><span class="line">                Log.d(<span class="string">"jsbridge"</span>,<span class="string">"call succeed,return value is "</span>+retValue);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">       webView.callHandler(<span class="string">"test"</span>,<span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">       dsBridge.call(<span class="string">"testNever"</span>, &#123;msg: <span class="string">"testSyn"</span>&#125;);</span><br><span class="line"></span><br><span class="line">       dsBridge.call(<span class="string">"testNoArgAsyn"</span>, function (v) &#123;</span><br><span class="line">           alert(v);</span><br><span class="line">       &#125;);</span><br><span class="line"></span><br><span class="line">**<span class="number">2</span>、关键类作用：**</span><br><span class="line"></span><br><span class="line">* DWebView:WebView的子类，提供了注册、调用 Handler等方法，之后都是通过 webview.callHandler()方式调用js.</span><br><span class="line">* CompletionHandler:作为<span class="keyword">native</span>与web交互的通道，异步回调的关键操作类。</span><br><span class="line">* OnReturnValue:js 回调 android的接口，根据 handlerMap 储存的id作为 handler 标示即OnReturnValue实现类。</span><br><span class="line">* JsApi:需要注册到 Js java 类。</span><br><span class="line"></span><br><span class="line">看完这些主要类的作用，在看流程就清晰了。</span><br><span class="line"></span><br><span class="line">**<span class="number">3</span>、实现原理：**</span><br><span class="line"></span><br><span class="line">&gt; 本质还是使用的系统默认 addJavascriptInterface 方式，其中做了扩展。</span><br><span class="line"></span><br><span class="line">首先需要将这段js注入到 Web 页面</span><br><span class="line"></span><br><span class="line">```javascript</span><br><span class="line">    <span class="function">function <span class="title">getJsBridge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        window._dsf = window._dsf || &#123;&#125;;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            call: function(b, a, c) &#123;</span><br><span class="line">                <span class="string">"function"</span> == typeof a &amp;&amp; (c = a, a = &#123;&#125;);</span><br><span class="line">                <span class="keyword">if</span> (<span class="string">"function"</span> == typeof c) &#123;</span><br><span class="line">                    window.dscb = window.dscb || <span class="number">0</span>;</span><br><span class="line">                    var d = <span class="string">"dscb"</span> + window.dscb++;</span><br><span class="line">                    window[d] = c;</span><br><span class="line">                    a._dscbstub = d</span><br><span class="line">                &#125;</span><br><span class="line">                a = JSON.stringify(a || &#123;&#125;);</span><br><span class="line">                <span class="keyword">return</span> window._dswk ? prompt(window._dswk + b, a) : <span class="string">"function"</span> == typeof _dsbridge ? _dsbridge(b, a) : _dsbridge.call(b, a)</span><br><span class="line">            &#125;,</span><br><span class="line">            register: function(b, a) &#123;</span><br><span class="line">                <span class="string">"object"</span> == typeof b ? Object.assign(window._dsf, b) : window._dsf[b] = a</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    dsBridge = getJsBridge();</span><br></pre></td></tr></table></figure>
+<p>native -&gt; js：</p>
 <p>1、webview.callHandler(method,args,handler)；<br><br>2、拼接Js，并生成唯一的callID，将 handler保存到map中；<br><br>3、执行js，同时回调 java returnValue()，然后回调使用者调用。<br></p>
 <p>js -&gt; android:</p>
 <p>1、dsBridge.call(method,json,function)-&gt; native call(methodName,args)；<br><br>2、通过反射来查找methodName对应的方法，并注册 CompletionHandler；<br><br>3、JsApi 通过 handler.complete() 方法，并拼装js方法和参数，再次调用js函数实现回调操作，并删除上一次的 callback id。<br></p>
@@ -2378,7 +1813,7 @@ dsBridge = getJsBridge();
 })
 </code></pre><p>可能和内核执行有关系，我这做了修复，放到 function 函数中执行就可以了，如果你也遇到，可以参考我的修复方法 <a href="https://github.com/whiskeyfei/DSBridge-Android" target="_blank" rel="noopener">DSBridge-Android</a></p>
 <hr>
-<h3 id="九、WebView-缓存原理分析和应用"><a href="#九、WebView-缓存原理分析和应用" class="headerlink" title="九、WebView 缓存原理分析和应用"></a>九、WebView 缓存原理分析和应用</h3><p>这部分内容可以参考这两篇博文:</p>
+<h3 id="WebView-缓存原理分析和应用"><a href="#WebView-缓存原理分析和应用" class="headerlink" title="WebView 缓存原理分析和应用"></a>WebView 缓存原理分析和应用</h3><p>这部分内容可以参考这两篇博文:</p>
 <ul>
 <li><a href="http://unclechen.github.io/2017/05/13/WebView%E7%BC%93%E5%AD%98%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%92%8C%E5%BA%94%E7%94%A8/" target="_blank" rel="noopener">WebView缓存原理分析和应用</a></li>
 <li><a href="http://dev.qq.com/topic/591d537a5bf956911a014c63" target="_blank" rel="noopener">H5 缓存机制浅析 移动端 Web 加载性能优化</a></li>
@@ -2388,12 +1823,12 @@ dsBridge = getJsBridge();
 <p>1、WebView 的5中缓存类型，以及每个缓存类型工作原理、相同点和不同点、。<br>2、缓存在手机上的存储。<br>3、每种缓存机制案例。</p>
 <p>如果你想通过过滤来减缓 WebView 请求网络，可以参考 <a href="https://github.com/douban/rexxar-android" target="_blank" rel="noopener">rexxar-android</a> 中关于拦截url操作读取本地操作。</p>
 <hr>
-<h3 id="十、性能、体验分析与优化"><a href="#十、性能、体验分析与优化" class="headerlink" title="十、性能、体验分析与优化"></a>十、性能、体验分析与优化</h3><p>参考美团：<a href="https://tech.meituan.com/WebViewPerf.html" target="_blank" rel="noopener">WebView性能、体验分析与优化</a></p>
+<h3 id="性能、体验分析与优化"><a href="#性能、体验分析与优化" class="headerlink" title="性能、体验分析与优化"></a>性能、体验分析与优化</h3><p>参考美团：<a href="https://tech.meituan.com/WebViewPerf.html" target="_blank" rel="noopener">WebView性能、体验分析与优化</a></p>
 <p>这部分美团的技术博客已经写的很好了，不仅从性能、内存消耗、体验、安全几个维度，来系统的分析客户端默认 WebView 的问题，还给出了对应的优化方案。</p>
 <blockquote>
 <p>我的感受：文章中也提到了 QQ 的 Hybrid 架构演进，主要的优化方向和内容和下面的Hybrid 开源框架 <a href="https://github.com/Tencent/VasSonic" target="_blank" rel="noopener">VasSonic</a> 基本一直，当然都是腾讯东东，应该是有所借鉴的。而且关于 WebView 的优化也就是那几部分，串行该并行、缓存 WebView、客户端代替 WebView 网络请求，WebView 拦截url加载本地资源，还有Web 端(cdn 神马的，哈哈，不太熟悉)等等几个主要方面，但是能将上数几个方面都完美的结合到一起的市面上很少，<a href="https://github.com/Tencent/VasSonic" target="_blank" rel="noopener">VasSonic</a>就做到了。</p>
 </blockquote>
-<h3 id="十一、Hybrid-开源框架"><a href="#十一、Hybrid-开源框架" class="headerlink" title="十一、Hybrid 开源框架"></a>十一、Hybrid 开源框架</h3><h5 id="1、VasSonic"><a href="#1、VasSonic" class="headerlink" title="1、VasSonic"></a>1、<a href="https://github.com/Tencent/VasSonic" target="_blank" rel="noopener">VasSonic</a></h5><p><a href="https://github.com/Tencent/VasSonic" target="_blank" rel="noopener">VasSonic</a> 是腾讯出品的一个轻量级的高性能的Hybrid框架，专注于提升页面首屏加载速度，完美支持静态直出页面和动态直出页面，兼容离线包等方案。</p>
+<h3 id="Hybrid-开源框架"><a href="#Hybrid-开源框架" class="headerlink" title="Hybrid 开源框架"></a>Hybrid 开源框架</h3><h4 id="VasSonic"><a href="#VasSonic" class="headerlink" title="VasSonic"></a><a href="https://github.com/Tencent/VasSonic" target="_blank" rel="noopener">VasSonic</a></h4><p><a href="https://github.com/Tencent/VasSonic" target="_blank" rel="noopener">VasSonic</a> 是腾讯出品的一个轻量级的高性能的Hybrid框架，专注于提升页面首屏加载速度，完美支持静态直出页面和动态直出页面，兼容离线包等方案。</p>
 <blockquote>
 <p>我的感受：比豆瓣的框架复杂很多，不是一个量级的，可能和业务也相关吧，毕竟鹅厂用户很多服务也很多啊。我也是断断续续看了很久，逻辑还是挺复杂的，不过思路挺清晰，就是能利用上的资源统统要利用，不能让 CPU 或者网络空等，主要是在WebView 和加载之间做一个完美的桥接，让内容不管在什么情况下都能衔接自如。不过，其中并不包含 JsBridge 部分内容。</p>
 </blockquote>
@@ -2401,7 +1836,7 @@ dsBridge = getJsBridge();
 <p><a href="https://github.com/Tencent/VasSonic/wiki" target="_blank" rel="noopener">VasSonic/wiki</a> wiki 写的也特别清楚，值得好好去研究，另外这个库的QQ群也特别活跃，里面有负责维护的同学帮忙解答疑问，值得点赞！</p>
 </blockquote>
 <p>辛辛苦苦开源了，作为平时想提高 WebView 访问速度的朋友肯定不会错过这么好的内容，强烈建议大家去阅读源码，库更新也很快。</p>
-<h5 id="2、rexxar-android"><a href="#2、rexxar-android" class="headerlink" title="2、rexxar-android"></a>2、<a href="https://github.com/douban/rexxar-android" target="_blank" rel="noopener">rexxar-android</a></h5><p>rexxar-android 是豆瓣的混合开发框架，包含 Web、iOS、Android 三端，Android 部分主要内容围绕路由表、容器、缓存。其他部分可以阅读<a href="http://lincode.github.io/Rexxar-OpenSource" target="_blank" rel="noopener">豆瓣的混合开发框架 – Rexxar</a> 更详细介绍。</p>
+<h4 id="rexxar-android"><a href="#rexxar-android" class="headerlink" title="rexxar-android"></a><a href="https://github.com/douban/rexxar-android" target="_blank" rel="noopener">rexxar-android</a></h4><p>rexxar-android 是豆瓣的混合开发框架，包含 Web、iOS、Android 三端，Android 部分主要内容围绕路由表、容器、缓存。其他部分可以阅读<a href="http://lincode.github.io/Rexxar-OpenSource" target="_blank" rel="noopener">豆瓣的混合开发框架 – Rexxar</a> 更详细介绍。</p>
 <blockquote>
 <p>我的感觉：rexxar-android 在缓存部分还是值得学习的，缓存 Cache 分为两部分：本地预装、本地 file 缓存。其中将每一个需要 Native 完成的功能抽象成一个 widget ，通过制定url协议，过滤并解析url的携带的参数。</p>
 </blockquote>
@@ -2416,8 +1851,8 @@ dsBridge = getJsBridge();
 <li><a href="http://www.jianshu.com/p/a89dd82648ff" target="_blank" rel="noopener">Rexxar Android 系列学习(6) 缓存机制</a></li>
 </ul>
 <hr>
-<h3 id="十二、完整dmeo"><a href="#十二、完整dmeo" class="headerlink" title="十二、完整dmeo"></a>十二、完整dmeo</h3><h5 id="Android-WebView"><a href="#Android-WebView" class="headerlink" title="Android_WebView"></a><strong><a href="https://github.com/whiskeyfei/Android_WebView" target="_blank" rel="noopener">Android_WebView</a></strong></h5><hr>
-<h3 id="十三、参考"><a href="#十三、参考" class="headerlink" title="十三、参考"></a>十三、参考</h3><ul>
+<h3 id="完整dmeo"><a href="#完整dmeo" class="headerlink" title="完整dmeo"></a>完整dmeo</h3><h4 id="Android-WebView"><a href="#Android-WebView" class="headerlink" title="Android_WebView"></a><strong><a href="https://github.com/whiskeyfei/Android_WebView" target="_blank" rel="noopener">Android_WebView</a></strong></h4><hr>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
 <li><a href="http://blog.csdn.net/self_study/article/details/54928371" target="_blank" rel="noopener">http://blog.csdn.net/self_study/article/details/54928371</a></li>
 <li><a href="http://blog.csdn.net/self_study/article/details/55046348" target="_blank" rel="noopener">http://blog.csdn.net/self_study/article/details/55046348</a></li>
 <li><a href="https://tech.youzan.com/jsbridge" target="_blank" rel="noopener">https://tech.youzan.com/jsbridge</a></li>

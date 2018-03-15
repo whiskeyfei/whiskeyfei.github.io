@@ -101,18 +101,18 @@
   <meta name="keywords" content="Android" />
 
 
-<meta name="description" content="这篇主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。 1、java.lang.NullPointerException       at android.webkit.Acces">
+<meta name="description" content="这篇主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。 1、TextToSpeechWrapper12345678910111213141516171819java.lang.Nu">
 <meta name="keywords" content="Android">
 <meta property="og:type" content="article">
 <meta property="og:title" content="记录 Android WebView 开发过程的坑和解决方法">
 <meta property="og:url" content="http://whiskeyfei.github.io/2018/03/11/android/2017-10-22-webview_bug/index.html">
 <meta property="og:site_name" content="無名小子的杂货铺">
-<meta property="og:description" content="这篇主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。 1、java.lang.NullPointerException       at android.webkit.Acces">
+<meta property="og:description" content="这篇主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。 1、TextToSpeechWrapper12345678910111213141516171819java.lang.Nu">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-03-14T15:16:09.000Z">
+<meta property="og:updated_time" content="2018-03-15T13:04:24.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记录 Android WebView 开发过程的坑和解决方法">
-<meta name="twitter:description" content="这篇主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。 1、java.lang.NullPointerException       at android.webkit.Acces">
+<meta name="twitter:description" content="这篇主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。 1、TextToSpeechWrapper12345678910111213141516171819java.lang.Nu">
 
 
 
@@ -389,47 +389,11 @@
 
       
         <p>这篇主要总结 WebView 相关的疑难 bug，由于 Android 版本严重碎片化，在使用 WebView 的时候也会遇到各种个样的坑，特别是 4.4 之后更换了 WebView 内核，4.2 以下有部分漏洞，所以想把经历过的 WebView 这些坑记录下来，仅供参考。</p>
-<h4 id="1、"><a href="#1、" class="headerlink" title="1、"></a>1、</h4><pre><code>java.lang.NullPointerException
-      at android.webkit.AccessibilityInjector$TextToSpeechWrapper$1.onInit(AccessibilityInjector.java:753)
-      at android.speech.tts.TextToSpeech.dispatchOnInit(TextToSpeech.java:640)
-      at android.speech.tts.TextToSpeech.initTts(TextToSpeech.java:619)
-      at android.speech.tts.TextToSpeech.&lt;init&gt;(TextToSpeech.java:553)
-      at android.webkit.AccessibilityInjector$TextToSpeechWrapper.&lt;init&gt;(AccessibilityInjector.java:676)
-      at android.webkit.AccessibilityInjector.addTtsApis(AccessibilityInjector.java:480)
-      at android.webkit.AccessibilityInjector.addAccessibilityApisIfNecessary(AccessibilityInjector.java:168)
-      at android.webkit.AccessibilityInjector.onPageStarted(AccessibilityInjector.java:340)
-      at android.webkit.WebViewClassic.onPageStarted(WebViewClassic.java:4480)
-      at android.webkit.CallbackProxy.handleMessage(CallbackProxy.java:366)
-      at android.os.Handler.dispatchMessage(Handler.java:107)
-      at android.os.Looper.loop(Looper.java:194)
-      at android.app.ActivityThread.main(ActivityThread.java:5407)
-      at java.lang.reflect.Method.invokeNative(Native Method)
-      at java.lang.reflect.Method.invoke(Method.java:525)
-      at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:833)
-      at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:600)
-      at dalvik.system.NativeStart.main(Native Method)
-</code></pre><p>此问题在4.2.1和4.2.2比较集中，关闭辅助功能，google 下很多结果都是一样的。</p>
+<h4 id="1、TextToSpeechWrapper"><a href="#1、TextToSpeechWrapper" class="headerlink" title="1、TextToSpeechWrapper"></a>1、TextToSpeechWrapper</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">java.lang.NullPointerException</span><br><span class="line">     	at android.webkit.AccessibilityInjector$TextToSpeechWrapper$1.onInit(AccessibilityInjector.java:753)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.dispatchOnInit(TextToSpeech.java:640)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.initTts(TextToSpeech.java:619)</span><br><span class="line">     	at android.speech.tts.TextToSpeech.&lt;init&gt;(TextToSpeech.java:553)</span><br><span class="line">     	at android.webkit.AccessibilityInjector$TextToSpeechWrapper.&lt;init&gt;(AccessibilityInjector.java:676)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.addTtsApis(AccessibilityInjector.java:480)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.addAccessibilityApisIfNecessary(AccessibilityInjector.java:168)</span><br><span class="line">     	at android.webkit.AccessibilityInjector.onPageStarted(AccessibilityInjector.java:340)</span><br><span class="line">     	at android.webkit.WebViewClassic.onPageStarted(WebViewClassic.java:4480)</span><br><span class="line">     	at android.webkit.CallbackProxy.handleMessage(CallbackProxy.java:366)</span><br><span class="line">     	at android.os.Handler.dispatchMessage(Handler.java:107)</span><br><span class="line">     	at android.os.Looper.loop(Looper.java:194)</span><br><span class="line">     	at android.app.ActivityThread.main(ActivityThread.java:5407)</span><br><span class="line">     	at java.lang.reflect.Method.invokeNative(Native Method)</span><br><span class="line">     	at java.lang.reflect.Method.invoke(Method.java:525)</span><br><span class="line">     	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:833)</span><br><span class="line">     	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:600)</span><br><span class="line">     	at dalvik.system.NativeStart.main(Native Method)</span><br></pre></td></tr></table></figure>
+<p>此问题在4.2.1和4.2.2比较集中，关闭辅助功能，google 下很多结果都是一样的。</p>
 <p>修复方法：在初始化 WebView 时调用disableAccessibility方法即可。</p>
-<pre><code>public static void disableAccessibility(Context context) {
-        if (Build.VERSION.SDK_INT == 17/*4.2 (Build.VERSION_CODES.JELLY_BEAN_MR1)*/) {
-            if (context != null) {
-                try {
-                    AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
-                    if (!am.isEnabled()) {
-                        //Not need to disable accessibility
-                        return;
-                    }
-
-                    Method setState = am.getClass().getDeclaredMethod(&quot;setState&quot;, int.class);
-                    setState.setAccessible(true);
-                    setState.invoke(am, 0);/**{@link AccessibilityManager#STATE_FLAG_ACCESSIBILITY_ENABLED}*/
-                } catch (Exception ignored) {
-                    ignored.printStackTrace();
-                }
-            }
-        }
-    }
-</code></pre><h4 id="2、"><a href="#2、" class="headerlink" title="2、"></a>2、</h4><pre><code>AndroidRuntimeException: android.content.pm.PackageManager$NameNotFoundException: com.google.android.webview
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">public static void disableAccessibility(Context context) &#123;</span><br><span class="line">		if (Build.VERSION.SDK_INT == 17/*4.2 (Build.VERSION_CODES.JELLY_BEAN_MR1)*/) &#123;</span><br><span class="line">			if (context != null) &#123;</span><br><span class="line">				try &#123;</span><br><span class="line">					AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);</span><br><span class="line">					if (!am.isEnabled()) &#123;</span><br><span class="line">						//Not need to disable accessibility</span><br><span class="line">						return;</span><br><span class="line">					&#125;</span><br><span class="line"></span><br><span class="line">					Method setState = am.getClass().getDeclaredMethod(&quot;setState&quot;, int.class);</span><br><span class="line">					setState.setAccessible(true);</span><br><span class="line">					setState.invoke(am, 0);/**&#123;@link AccessibilityManager#STATE_FLAG_ACCESSIBILITY_ENABLED&#125;*/</span><br><span class="line">				&#125; catch (Exception ignored) &#123;</span><br><span class="line">					ignored.printStackTrace();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2、PackageManager"><a href="#2、PackageManager" class="headerlink" title="2、PackageManager"></a>2、PackageManager</h4><pre><code>AndroidRuntimeException: android.content.pm.PackageManager$NameNotFoundException: com.google.android.webview
     at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4604)
     at android.app.ActivityThread.access$1500(ActivityThread.java:154)
     at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1389)
@@ -476,7 +440,7 @@ if (trace.contains(&quot;android.content.pm.PackageManager$NameNotFoundException
       throw e;
     }        
 }
-</code></pre><h4 id="3、"><a href="#3、" class="headerlink" title="3、"></a>3、</h4><pre><code>at android.webkit.BrowserFrame.nativeLoadUrl(Native Method)
+</code></pre><h4 id="3、BrowserFrame"><a href="#3、BrowserFrame" class="headerlink" title="3、BrowserFrame"></a>3、BrowserFrame</h4><pre><code>at android.webkit.BrowserFrame.nativeLoadUrl(Native Method)
 System.err:     at android.webkit.BrowserFrame.loadUrl(BrowserFrame.java:279)
 System.err:     at android.webkit.WebViewCore.loadUrl(WebViewCore.java:2011)
 System.err:     at android.webkit.WebViewCore.access$1900(WebViewCore.java:57)
@@ -831,7 +795,7 @@ System.err:     at android.os.Looper.loop(Looper.java:137)
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、"><span class="nav-number">1.</span> <span class="nav-text">1、</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、"><span class="nav-number">2.</span> <span class="nav-text">2、</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、"><span class="nav-number">3.</span> <span class="nav-text">3、</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、TextToSpeechWrapper"><span class="nav-number">1.</span> <span class="nav-text">1、TextToSpeechWrapper</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、PackageManager"><span class="nav-number">2.</span> <span class="nav-text">2、PackageManager</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、BrowserFrame"><span class="nav-number">3.</span> <span class="nav-text">3、BrowserFrame</span></a></li></ol></div>
             
 
           </div>

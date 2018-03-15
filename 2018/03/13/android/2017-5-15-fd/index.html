@@ -101,18 +101,18 @@
   <meta name="keywords" content="Android、fd" />
 
 
-<meta name="description" content="前几天遇到 fd 泄露问题，这里记录下 fd 查询方法 fd 其实是系统中的文件目录，存在 /proc/[pid]/fd，包含进程打开文件的情况。 打印 fd： root@android:/ # adb shell ls -l /proc/9580/fd                                 lrwx------ u0_a96   u0_a96            20">
+<meta name="description" content="记录前几天遇到 fd 泄露问题，这里记录下 fd 查询方法 fd 其实是系统中的文件目录，存在 /proc/[pid]/fd，包含进程打开文件的情况。 打印 fd： root@android:/ # adb shell ls -l /proc/9580/fd                                 lrwx------ u0_a96   u0_a96">
 <meta name="keywords" content="Android、fd">
 <meta property="og:type" content="article">
 <meta property="og:title" content="fd泄露查询">
 <meta property="og:url" content="http://whiskeyfei.github.io/2018/03/13/android/2017-5-15-fd/index.html">
 <meta property="og:site_name" content="無名小子的杂货铺">
-<meta property="og:description" content="前几天遇到 fd 泄露问题，这里记录下 fd 查询方法 fd 其实是系统中的文件目录，存在 /proc/[pid]/fd，包含进程打开文件的情况。 打印 fd： root@android:/ # adb shell ls -l /proc/9580/fd                                 lrwx------ u0_a96   u0_a96            20">
+<meta property="og:description" content="记录前几天遇到 fd 泄露问题，这里记录下 fd 查询方法 fd 其实是系统中的文件目录，存在 /proc/[pid]/fd，包含进程打开文件的情况。 打印 fd： root@android:/ # adb shell ls -l /proc/9580/fd                                 lrwx------ u0_a96   u0_a96">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-03-14T15:01:46.000Z">
+<meta property="og:updated_time" content="2018-03-15T12:54:35.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="fd泄露查询">
-<meta name="twitter:description" content="前几天遇到 fd 泄露问题，这里记录下 fd 查询方法 fd 其实是系统中的文件目录，存在 /proc/[pid]/fd，包含进程打开文件的情况。 打印 fd： root@android:/ # adb shell ls -l /proc/9580/fd                                 lrwx------ u0_a96   u0_a96            20">
+<meta name="twitter:description" content="记录前几天遇到 fd 泄露问题，这里记录下 fd 查询方法 fd 其实是系统中的文件目录，存在 /proc/[pid]/fd，包含进程打开文件的情况。 打印 fd： root@android:/ # adb shell ls -l /proc/9580/fd                                 lrwx------ u0_a96   u0_a96">
 
 
 
@@ -388,7 +388,7 @@
       
 
       
-        <p>前几天遇到 fd 泄露问题，这里记录下 fd 查询方法</p>
+        <h4 id="记录"><a href="#记录" class="headerlink" title="记录"></a>记录</h4><p>前几天遇到 fd 泄露问题，这里记录下 fd 查询方法</p>
 <p>fd 其实是系统中的文件目录，存在 /proc/[pid]/fd，包含进程打开文件的情况。</p>
 <p>打印 fd：</p>
 <pre><code>root@android:/ # adb shell ls -l /proc/9580/fd                                
@@ -405,7 +405,8 @@ lrwx------ u0_a96   u0_a96            2017-05-15 16:41 133 -&gt; socket:[23937]
 <p>计算个数：</p>
 <pre><code>root@android:/ # adb shell ls -l /proc/9580/fd | wc -l                         
 175
-</code></pre><h5 id="写了一个小脚本来打印pid的-fd个数"><a href="#写了一个小脚本来打印pid的-fd个数" class="headerlink" title="写了一个小脚本来打印pid的 fd个数"></a>写了一个小脚本来打印pid的 fd个数</h5><pre><code>#!/usr/bin/env python
+</code></pre><h4 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h4><p>写了一个小脚本来打印pid的 fd个数</p>
+<pre><code>#!/usr/bin/env python
 #!/bin/bash
 #!/bin/sh
 #coding:utf-8
@@ -748,7 +749,7 @@ p = os.system(command)
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#写了一个小脚本来打印pid的-fd个数"><span class="nav-number">1.</span> <span class="nav-text">写了一个小脚本来打印pid的 fd个数</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#记录"><span class="nav-number">1.</span> <span class="nav-text">记录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#脚本"><span class="nav-number">2.</span> <span class="nav-text">脚本</span></a></li></ol></div>
             
 
           </div>
