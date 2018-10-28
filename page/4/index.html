@@ -303,7 +303,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-11-06-rxjava-demo/">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-4-12-androidstudio/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="無名">
@@ -322,7 +322,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/03/25/android/2016-11-06-rxjava-demo/" itemprop="url">RxJava语法练习</a></h1>
+                <a class="post-title-link" href="/2016/03/25/android/2016-4-12-androidstudio/" itemprop="url">Android Studio 一些实用配置</a></h1>
         
 
         <div class="post-meta">
@@ -391,335 +391,93 @@
       
         
           
-            <p>很早之前就听Rxjava 多么神奇，各种评论都有，说学习坡度高，难等等，于是亲自上手试试，说实话刚开始看到这些用法立马就蒙比了，和我们之前的方式不太一样，理解起来还是挺别扭的，之后找了一篇<a href="http://gank.io/post/560e15be2dca930e00da1083" target="_blank" rel="noopener">给 Android 开发者的 RxJava 详解</a> 抛物线的，好好研究上几天，认真理解每个例子并自己动手敲出来，也就慢慢能体会到 rxjava 的好用之处了。</p>
-<p>内容包含如下：<br> 如何获取，观察者模式，基本语法，操作符使用，线程控制使用</p>
-<blockquote>
-<p>注意：以下部分内容部分段落部分引用自<a href="http://gank.io/post/560e15be2dca930e00da1083" target="_blank" rel="noopener">给 Android 开发者的 RxJava 详解</a>，如有冒犯之处，我会及时删除。</p>
-</blockquote>
-<h2 id="一、如何获取"><a href="#一、如何获取" class="headerlink" title="一、如何获取"></a>一、如何获取</h2><p><strong><a href="https://github.com/ReactiveX/RxJava" target="_blank" rel="noopener">RxJava</a></strong><br><strong><a href="https://github.com/ReactiveX/RxAndroid" target="_blank" rel="noopener">RxAndroid</a></strong><br>在项目中引入依赖就好了，我这里用的不是最新版本</p>
-<pre><code>compile &apos;io.reactivex:rxandroid:1.1.0&apos;
-compile &apos;io.reactivex:rxjava:1.1.0&apos;
-</code></pre><h2 id="二、观察者模式"><a href="#二、观察者模式" class="headerlink" title="二、观察者模式"></a>二、观察者模式</h2><p>这个模式基本上都听过，使用过的就可以直接略过了。</p>
-<p>先说下设计模式中的观察者模式：</p>
-<p>当对象间存在一对多关系时，则使用观察者模式（Observer Pattern） 比如，当一个对象被修改时，则会自动通知它的依赖对象，观察者模式属于行为型模式。</p>
-<p>使用在java中实现观察者模式需要用到java.util包中提供的Observable类和Observer接口，java已经给我们提供好类使用。</p>
-<p>Observable可以查看java源码，下面是Observer接口：</p>
-<pre><code>public interface Observer {
-    void update(Observable observable, Object data);
-}
-</code></pre><p>举个简单例子：</p>
-<p>古董被观察，观察者为people用来观察古董价钱波动<br>被观察者：</p>
-<pre><code>public class Antique extends Observable {
-    private float mPrice;// 价钱
-
-    public Antique(float price) {
-        this.mPrice = price;
-    }
-
-    public float getPrice() {
-        return this.mPrice;
-    }
-
-    public void setPrice(float price) {
-        super.setChanged();
-        super.notifyObservers(price);// 价格被改变
-        this.mPrice = price;
-    }
-
-    public String toString() {
-        return &quot;古董价格为：&quot; + this.mPrice;
-    }
-}
-</code></pre><p> 观察者实现Observer接口，重写update方法即可</p>
-<pre><code>public class People implements Observer{
-
-    private String name;
-
-    public People(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        Log.e(&quot;&quot;,&quot;People update() -&gt; update name:&quot;+ this.name + &quot;,price:&quot;+ ((Float)data).floatValue());
-    }
-
-}
-</code></pre><p>   主函数调用</p>
-<pre><code>Antique house = new Antique(1222f);
-People p1 = new People(&quot;p1&quot;);
-People p2 = new People(&quot;p2&quot;);
-People p3 = new People(&quot;p3&quot;);
-house.addObserver(p1);
-house.addObserver(p2);
-house.addObserver(p3);
-Log.e(&quot;&quot;, house+&quot;&quot;); // 输出价格
-house.setPrice(111f);
-Log.e(&quot;&quot;, house+&quot;&quot;); // 输出价格
-</code></pre><p>这样只要价格发生变化，就会通知所有订阅的人，也就实现了简单的观察者模式。</p>
-<h4 id="RxJava-中的观察者模式"><a href="#RxJava-中的观察者模式" class="headerlink" title="RxJava 中的观察者模式"></a>RxJava 中的观察者模式</h4><p>观察者：Observer;<br><br>被观察者：Observable;<br><br>订阅：subscribe();<br></p>
-<h5 id="观察者"><a href="#观察者" class="headerlink" title="观察者"></a>观察者</h5><p>Observer即为观察者，处理事件发生后逻辑，如古董例子，价格改变后，需要updae信息，不过 Rxjava 这里多了几种处理情况，onCompleted(),onError(),onNext(),具体用法看 dmeo 就可以了。</p>
-<h5 id="被观察者"><a href="#被观察者" class="headerlink" title="被观察者"></a>被观察者</h5><p>Observable 即被观察者，它决定什么时候触发事件以及触发怎样的事件。可以使用create()、just(T…)、from(T[])或from(Iterable&lt;? extends T&gt;)来创建一个 Observable ，并为它定义事件触发规则。</p>
-<h5 id="订阅"><a href="#订阅" class="headerlink" title="订阅"></a>订阅</h5><p>创建了Observable和Observer之后，再用subscribe()方法将它们联结起来。</p>
-<h2 id="三、基本语法"><a href="#三、基本语法" class="headerlink" title="三、基本语法"></a>三、基本语法</h2><p>1、打印 Hello World</p>
-<pre><code>Observable.create(new Observable.OnSubscribe&lt;String&gt;() {
-
-     @Override
-     public void call(Subscriber&lt;? super String&gt; subscriber) {
-         subscriber.onNext(&quot;Hello World&quot;);
-         subscriber.onCompleted();
-     }
- }).subscribe(new Observer&lt;String&gt;() {
-     @Override
-     public void onCompleted() {
-         System.out.println(&quot;onCompleted:&quot;);
-     }
-
-     @Override
-     public void onError(Throwable e) {
-         System.out.println(&quot;onError e:&quot;+e);
-     }
-
-     @Override
-     public void onNext(String s) {
-         System.out.println(&quot;onNext s:&quot;+s);
-     }
- });
-
-//还可以这么写
-
- Observable.just(&quot;hello World&quot;).subscribe(new Action1&lt;String&gt;() {
-     @Override
-     public void call(String s) {
-         System.out.println(&quot;call s:&quot;+s);
-     }
- });
-</code></pre><p>2、将字符串数组 names 中的所有字符串依次打印出来</p>
-<pre><code> String[] names = {&quot;111&quot;, &quot;222&quot;, &quot;333&quot;};
- Observable.from(names).subscribe(new Action1&lt;String&gt;() {
-     @Override
-     public void call(String name) {
-         System.out.println(&quot;test1 name:&quot; + name);
-     }
- });
-// 输出
-test1 name:111
-test1 name:222
-test1 name:333
-
-另一种写法
-
- @Test
- public void test4(){
-     //1:被观察者
-     String [] names ={&quot;111&quot;,&quot;222&quot;,&quot;333&quot;};
-     Observable observable = Observable.from(names);
-
-     //2:观察者
-     Action1 onNextAction = new Action1&lt;String&gt;() {
-         @Override
-         public void call(String s) {
-             System.out.println(&quot;test4 call&quot;+s);
-         }
-     };
-
-     Action1&lt;Throwable&gt; onErrorAction = new Action1&lt;Throwable&gt;() {
-         @Override
-         public void call(Throwable e) {
-             System.out.println(&quot;test4 call e:&quot;+e);
-       }
-     };
-
-     Action0 onCompletedAction = new Action0() {
-         @Override
-         public void call() {
-             System.out.println(&quot;test4 call onCompletedAction&quot;);
-         }
-     };
-     //3:订阅:被观察者被观察者订阅
-     observable.subscribe(onNextAction, onErrorAction, onCompletedAction);
- }
-</code></pre><p>3、just 将传入的参数依次打印</p>
-<pre><code>@Test
-public void test2(){
-    Observable.just(&quot;1&quot;,&quot;2&quot;,&quot;3&quot;).subscribe(new Observer&lt;String&gt;() {
-        @Override
-        public void onCompleted() {
-            System.out.println(&quot;test2 onCompleted&quot;);
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            System.out.println(&quot;test2 e:&quot;+e);
-        }
-
-        @Override
-        public void onNext(String s) {
-            System.out.println(&quot;onNext:&quot;+s);
-        }
-    });
-}
-  //    onNext:1
- //    onNext:2
-//    onNext:3
-//    test2 onCompleted
-</code></pre><p>4、 循环输出list</p>
-<pre><code>@Test
-public void test5(){
-    Observable.from(Data.getCats().get(0).getlist()).subscribe(new Action1&lt;String&gt;() {
-        @Override
-        public void call(String s) {
-            System.out.println(&quot;test5 call :&quot;+s);
-        }
-    });
-}
-
-//    test5 call :list:0
-//    test5 call :list:1
-//    test5 call :list:2
-//    test5 call :list:3
-//    test5 call :list:4
-//    test5 call :list:5
-//    test5 call :list:6
-//    test5 call :list:7
-//    test5 call :list:8
-//    test5 call :list:9
-</code></pre><h2 id="四、操作符使用"><a href="#四、操作符使用" class="headerlink" title="四、操作符使用"></a>四、操作符使用</h2><p>1、map：遍历list中的name，使用map操作符来获取list中的单项</p>
-<pre><code>@Test
-public void test7(){
-    Observable.from(Data.getCats(10)).map(new Func1&lt;Cat, String&gt;() {
-
-      @Override
-      public String call(Cat cat) {
-          return cat.toCat();//获取cat name
-      }
-  }).subscribe(new Observer&lt;String&gt;() {
-      @Override
-      public void onCompleted() {
-          System.out.println(&quot;test7 onCompleted:&quot;);
-      }
-
-      @Override
-      public void onError(Throwable e) {
-          System.out.println(&quot;test7 onCompleted e:&quot;+e);
-      }
-
-      @Override
-      public void onNext(String s) {
-          System.out.println(&quot;test7 onNext :&quot;+s);
-      }
-  });
-}
-
-//  test7 onNext :0
-//  test7 onNext :1
-//  test7 onNext :2
-//  test7 onNext :3
-//  test7 onNext :4
-//  test7 onNext :5
-//  test7 onNext :6
-//  test7 onNext :7
-//  test7 onNext :8
-//  test7 onNext :9
-//  test7 onCompleted:
-</code></pre><p>2、flatMap：<br>  循环List<cat> -&gt; cat里面的list -&gt; list 中的 String</cat></p>
-<pre><code> @Test
- public void test8() {
-     //循环List&lt;Cat&gt; -&gt; cat里面的list -&gt; list 中的 String
-     Observable
-             .from(Data.getCats())
-             .flatMap(new Func1&lt;Cat, Observable&lt;String&gt;&gt;() {
-                 @Override
-                 public Observable&lt;String&gt; call(Cat cat) {
-                     System.out.println(&quot;test8 call #########&quot; + cat.toCat());
-                     return Observable.from(cat.getlist());
-                 }
-             })
-             .subscribe(new Action1&lt;String&gt;() {
-                 @Override
-                 public void call(String s) {
-                     System.out.println(&quot;test8 call :&quot; + s);
-                 }
-     });
- }
-//  部分log
-//  test8 call #########Cat0
-//  test8 call :0:list
-//  test8 call :1:list
-//  test8 call :2:list
-//  test8 call :3:list
-//  test8 call :4:list
-//  test8 call #########Cat1
-//  test8 call :0:list
-//  test8 call :1:list
-//  test8 call :2:list
-//  test8 call :3:list
-//  test8 call :4:list
-//  test8 call #########Cat2
-//  test8 call :0:list
-//  test8 call :1:list
-//  test8 call :2:list
-//  test8 call :3:list
-//  test8 call :4:list
-</code></pre><h2 id="五、线程控制使用"><a href="#五、线程控制使用" class="headerlink" title="五、线程控制使用"></a>五、线程控制使用</h2><p>以上的测试例子中，事件的发起和消费都是在同一个线程执行的，等同于 RxJava 是同步执行(学习使用)，但是，观察者模式本身就是等触发后才通知其他订阅者，所以来了解下 RxJava 如何使用线程的。</p>
-<p>在不指定线程的情况下， RxJava 遵循的是线程不变的原则，即：在哪个线程调用 subscribe()<br>，就在哪个线程生产事件；在哪个线程生产事件，就在哪个线程消费事件。如果需要切换线程，就需要用到 Scheduler （调度器）。</p>
-<p>  1) Scheduler 的 API (一)</p>
-<p> 在RxJava 中，Scheduler ——调度器，相当于线程控制器，RxJava 通过它来指定每一段代码应该运行在什么样的线程。RxJava 已经内置了几个 Scheduler ，它们已经适合大多数的使用场景：</p>
-<p>  1、Schedulers.immediate(): 直接在当前线程运行，相当于不指定线程。这是默认的 Scheduler。</p>
-<p>  2、Schedulers.newThread(): 总是启用新线程，并在新线程执行操作。</p>
-<p>  3、Schedulers.io(): I/O 操作（读写文件、读写数据库、网络信息交互等）所使用的 Scheduler。行为模式和 newThread() 差不多，区别在于 io() 的内部实现是是用一个无数量上限的线程池，可以重用空闲的线程，因此多数情况下 io() 比 newThread() 更有效率。不要把计算工作放在 io() 中，可以避免创建不必要的线程。</p>
-<p>  4、 Schedulers.computation(): 计算所使用的 Scheduler。这个计算指的是 CPU 密集型计算，即不会被 I/O 等操作限制性能的操作，例如图形的计算。这个 Scheduler 使用的固定的线程池，大小为 CPU 核数。不要把 I/O 操作放在 computation() 中，否则 I/O 操作的等待时间会浪费 CPU。</p>
-<p>  5、另外， Android 还有一个专用的 AndroidSchedulers.mainThread()，它指定的操作将在 Android 主线程运行。</p>
-<p>  有了这几个 Scheduler ，就可以使用 subscribeOn() 和 observeOn() 两个方法来对线程进行控制了。 <em> subscribeOn(): 指定 subscribe() 所发生的线程，即 Observable.OnSubscribe 被激活时所处的线程。或者叫做事件产生的线程。 </em> observeOn(): 指定 Subscriber 所运行在的线程。或者叫做事件消费的线程。</p>
-<pre><code>ImageView显示图片：
-
-
-       Observable.just(R.drawable.ic_launcher).map(new Func1&lt;Integer, Drawable&gt;() {
-
-        @Override
-        public Drawable call(Integer integer) {
-            return getResources().getDrawable(integer);
-        }
-        }).subscribeOn(Schedulers.io()) // 指定 subscribe() 发生在 IO 线程
-            .observeOn(AndroidSchedulers.mainThread()) // 指定 Subscriber 的回调发生在主线程
-        .subscribe(new Observer&lt;Drawable&gt;() {
-        @Override
-        public void onCompleted() {
-
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            Toast.makeText(MainActivity.this, &quot;Error!&quot;, Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onNext(Drawable drawable) {
-            mImageView.setImageDrawable(drawable);
-        }
-        });
-</code></pre><h5 id="多次切换线程"><a href="#多次切换线程" class="headerlink" title="多次切换线程"></a>多次切换线程</h5><pre><code>Observable.just(1, 2, 3, 4)
-.subscribeOn(Schedulers.newThread()) // 指定 subscribe() 发生在 IO 线程
-.observeOn(Schedulers.io()) // 指定在IO线程处理
-.map(new Func1&lt;Integer, Integer&gt;() {
-
-    @Override
-    public Integer call(Integer integer) {
-        return integer+1;
-    }
-})
-.observeOn(AndroidSchedulers.mainThread())// 指定 Subscriber 的回调发生在主线程
-.subscribe(new Action1&lt;Integer&gt;() {
-    @Override
-    public void call(Integer number) {
-        Log.d(TAG, &quot;number:&quot; + number);
-    }
-});
-</code></pre><h2 id="六、参考"><a href="#六、参考" class="headerlink" title="六、参考"></a>六、参考</h2><ul>
-<li><a href="https://github.com/whiskeyfei/Node-for-Android/blob/master/Design/%E8%A7%82%E5%AF%9F%E8%80%85.md" target="_blank" rel="noopener">观察者</a></li>
-<li><a href="http://gank.io/post/560e15be2dca930e00da1083" target="_blank" rel="noopener">给 Android 开发者的 RxJava 详解</a></li>
+            <p>Android Studio 目前已经更新到 2.0 稳定版，我目前使用的是 2.3.2 版本。记得在1.0开始的时候，使用 AS 时还不太习惯，虽然使用快捷键是 MAC eclipse，但是还是有些地方不一样，所以纪录在此，以备它用，当你从 eclipse 切换成 Android Studio 时，还想使用以前习惯的快捷键，这就需要自己来配置属于自己的 Android Studio了，好了废话不多说，看配置</p>
+<p><em>可以先查看目录有没有你找的配置问题，可以节省查找时间</em></p>
+<hr>
+<h3 id="主要内容"><a href="#主要内容" class="headerlink" title="主要内容"></a>主要内容</h3><ul>
+<li>代码折叠</li>
+<li>修改编码</li>
+<li>代码提示</li>
+<li>查看源码</li>
+<li>查看类使用</li>
+<li>自动导包</li>
+<li>显示行数</li>
+<li>匹配选中代码</li>
+<li>自定义配色</li>
+<li>配置Log 颜色</li>
+<li>驼峰自动命名</li>
+<li>导出配置</li>
+<li>自动提示错误</li>
+<li>关闭当前活动页面</li>
+<li>显示意图</li>
+<li>格式化代码</li>
+<li>手动匹配代码</li>
+<li>选择列</li>
+<li>自定义 File Heder</li>
+<li>模版相关</li>
 </ul>
-<h2 id="七、小结"><a href="#七、小结" class="headerlink" title="七、小结"></a>七、小结</h2><p>代码已上传 <a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFRxJavaDemo" target="_blank" rel="noopener">WFRxJavaDemo</a>，欢迎指正。</p>
+<hr>
+<h3 id="1、代码折叠"><a href="#1、代码折叠" class="headerlink" title="1、代码折叠"></a>1、代码折叠</h3><p>很多人不喜欢代码折叠，比如我。。折叠起来很不习惯，设置修改如下：</p>
+<p>Editor -&gt; General -&gt; Code Folding</p>
+<p>也可以直接搜索 “code folding”</p>
+<p><img src="!--￼0--&gt;/as_code_floding.png" alt=""></p>
+<h3 id="2、修改编码"><a href="#2、修改编码" class="headerlink" title="2、修改编码"></a>2、修改编码</h3><p>Editor -&gt; General -&gt; File Encodings</p>
+<p><img src="!--￼1--&gt;/as_file_encodings.png" alt=""></p>
+<h3 id="3、代码提示忽略大小写"><a href="#3、代码提示忽略大小写" class="headerlink" title="3、代码提示忽略大小写"></a>3、代码提示忽略大小写</h3><p>Editor -&gt; General -&gt; Code Completion</p>
+<p>这个配置完以后，在写代码时，不管大写或者小写开头都会有代码提示</p>
+<p><img src="!--￼2--&gt;/as_code_completion.png" alt=""></p>
+<h3 id="4、查看源码"><a href="#4、查看源码" class="headerlink" title="4、查看源码"></a>4、查看源码</h3><p>在 eclipse 中习惯按住 Command 或者 Control 键＋鼠标，查看某个类源代码，但在 AS 没作用，这就需要更改 AS 默认设置，如下：</p>
+<p>keymap -&gt; 搜索 “Declaration”</p>
+<p><img src="!--￼3--&gt;/as_declaration.png" alt=""></p>
+<h3 id="5、查看被使用的类方法等"><a href="#5、查看被使用的类方法等" class="headerlink" title="5、查看被使用的类方法等"></a>5、查看被使用的类方法等</h3><p>常用场景，接口方法被多少类实现等，我这里习惯配置成 Command ＋ G</p>
+<p>keymap -&gt; 搜索 “Show Usages”</p>
+<p><img src="!--￼4--&gt;/as_show_usages.png" alt=""></p>
+<h3 id="6、自动导入依赖的包"><a href="#6、自动导入依赖的包" class="headerlink" title="6、自动导入依赖的包"></a>6、自动导入依赖的包</h3><p>Editor -&gt; General -&gt; Auto Import</p>
+<p><img src="!--￼5--&gt;/as_auto_import.png" alt=""></p>
+<h3 id="7、显示行数"><a href="#7、显示行数" class="headerlink" title="7、显示行数"></a>7、显示行数</h3><p>Editor -&gt; General -&gt; Appearance</p>
+<p><img src="!--￼6--&gt;/as_show_line.png" alt=""></p>
+<h3 id="8、快捷键匹配代码"><a href="#8、快捷键匹配代码" class="headerlink" title="8、快捷键匹配代码"></a>8、快捷键匹配代码</h3><p>keymap -&gt; 搜索 “Class Name Completion”</p>
+<p><img src="!--￼7--&gt;/as_class_name_completion.png" alt=""></p>
+<h3 id="9、自定义配色"><a href="#9、自定义配色" class="headerlink" title="9、自定义配色"></a>9、自定义配色</h3><p>我们可以根据自己的喜好，配置代码的颜色</p>
+<p>Editor -&gt; Colors &amp; Fonts -&gt; java</p>
+<p><img src="!--￼8--&gt;/as_custom_color.png" alt=""></p>
+<h3 id="10、Log-颜色"><a href="#10、Log-颜色" class="headerlink" title="10、Log 颜色"></a>10、Log 颜色</h3><p>将五种 log 颜色区分，有助于提高分析 log 效率</p>
+<p>Editor -&gt; Colors &amp; Fonts -&gt; Android Logcat</p>
+<p><img src="!--￼9--&gt;/as_log_color.png" alt=""></p>
+<h3 id="11、驼峰自动命名"><a href="#11、驼峰自动命名" class="headerlink" title="11、驼峰自动命名"></a>11、驼峰自动命名</h3><p>Editor -&gt; Code Style -&gt; java</p>
+<p><img src="!--￼10--&gt;/as_ hump_name.png" alt=""></p>
+<h3 id="12、导出配置"><a href="#12、导出配置" class="headerlink" title="12、导出配置"></a>12、导出配置</h3><p>当我们费劲把自己的 AS 调成自己想要的配置时，记得保存自己的配置，以防出问题后从配置文件恢复</p>
+<p>File -&gt; Export Settings <a href="https://www.jetbrains.com/help/idea/2016.1/exporting-and-importing-settings.html?origin=old_help" target="_blank" rel="noopener">详细查看导出步骤</a></p>
+<p><img src="!--￼11--&gt;/as_export_jar.png" alt=""></p>
+<h3 id="13、自动提示错误"><a href="#13、自动提示错误" class="headerlink" title="13、自动提示错误"></a>13、自动提示错误</h3><p>有一次遇到整个工程不自动提示错误信息，查了下，很简单，改个配置就可以了</p>
+<p>File -&gt; Power Save Mode 把前面的对勾取消就可以了</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-eef3f6033c14d315.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="自动提示错误配置"></p>
+<h3 id="14、自定义模版"><a href="#14、自定义模版" class="headerlink" title="14、自定义模版"></a>14、自定义模版</h3><p>Editor -&gt; Live Templates<br>新建一个自己的tab，在这里tab下添加代码模版</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-ae233bf07c9f5248.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="自定义模版"></p>
+<h3 id="15、关闭当前活动页面"><a href="#15、关闭当前活动页面" class="headerlink" title="15、关闭当前活动页面"></a>15、关闭当前活动页面</h3><p><img src="http://upload-images.jianshu.io/upload_images/877678-6da7eb747966675e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Close"></p>
+<h3 id="16、显示意图"><a href="#16、显示意图" class="headerlink" title="16、显示意图"></a>16、显示意图</h3><p>多用于实现接口或抽象类方法等操作</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-717c8df29bdedace.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Show Intention Actions"></p>
+<h3 id="17、格式化代码"><a href="#17、格式化代码" class="headerlink" title="17、格式化代码"></a>17、格式化代码</h3><p><img src="http://upload-images.jianshu.io/upload_images/877678-75217200b323264d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Reformat Code"></p>
+<h3 id="18、手动匹配代码"><a href="#18、手动匹配代码" class="headerlink" title="18、手动匹配代码"></a>18、手动匹配代码</h3><p><img src="http://upload-images.jianshu.io/upload_images/877678-60d622255d696a1b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Class Name Completion"></p>
+<h3 id="19、选择列"><a href="#19、选择列" class="headerlink" title="19、选择列"></a>19、选择列</h3><p>正常选择时，都是由左向右右上到下的选择方式，列选择模式下，是根据鼠标选中的矩形区域来选择。<br>使用方式：按住Alt，然后拖动鼠标选择(mac 环境下)</p>
+<h3 id="20、自定义-File-Heder"><a href="#20、自定义-File-Heder" class="headerlink" title="20、自定义 File Heder"></a>20、自定义 File Heder</h3><p>希望创建的文件统一描述</p>
+<p>Editor -&gt; File and Code Templates</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-36f96503c4aa6b5f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="File and Code Templates.png"></p>
+<h3 id="21、模版相关"><a href="#21、模版相关" class="headerlink" title="21、模版相关"></a>21、模版相关</h3><p>AS 系统给我们提供了很多好用的快捷模版，可以高效的编写代码，来节省一些无用耗时。</p>
+<h5 id="定义常量"><a href="#定义常量" class="headerlink" title="定义常量"></a>定义常量</h5><p>int：</p>
+<p>输入：  const 输出以下</p>
+<pre><code>private static final int  = 665;
+</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/877678-03f0e4ea86fa3f9c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>String：<br>输入：key 输出</p>
+<pre><code>private static final String KEY_ = &quot;&quot;;
+</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/877678-c28fb8a48da25d0d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>其他类型常量：</p>
+<p>输入：psf 输出以下</p>
+<pre><code>public static final
+</code></pre><h5 id="自动补全-TAG"><a href="#自动补全-TAG" class="headerlink" title="自动补全 TAG"></a>自动补全 TAG</h5><p>输入：logt 会有提示</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-9b14365b7b0f3dae.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<h5 id="自动补全-log-打印"><a href="#自动补全-log-打印" class="headerlink" title="自动补全 log 打印"></a>自动补全 log 打印</h5><p>输入：logi(其他类型都可以，例如：loge、logd)<br><img src="http://upload-images.jianshu.io/upload_images/877678-09d9579fea9e13d1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>收集平时遇到的配置问题等汇聚在此，还有一些关于升级主题等配置，以后慢慢汇总在此，目前只纪录平时遇到的配置。</p>
 
           
         
@@ -1592,324 +1350,6 @@ String S1 = S2 +S3 + S4;
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-12-17-android-use-mvp2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/10/android/2015-12-17-android-use-mvp2/" itemprop="url">Android MVP 项目使用</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T18:28:39+08:00">2015-11-10</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>前段时间学习 MVP 思想，在原来 <a href="https://github.com/liuling07/SimpleNews" target="_blank" rel="noopener">SimpleNews</a> 的基础上，修改了数据层和 UI 层的逻辑，使用 RxJava + MVP 组合方式，重构完成 <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a>，目前还存在很多需要优化的地方，今天说说 SimpleNews.io 中用到的 MVP 部分。</p>
-<p>参考 <a href="https://github.com/ribot/android-boilerplate" target="_blank" rel="noopener">android-boilerplate</a>, 添加 base Presenter 和 base View,以后所有的 Presenter 和 View 都需要继承 base ,这样在Presenter这一层才能使用统一方法回调接口，Model 暂时没有改变</p>
-<h3 id="好处"><a href="#好处" class="headerlink" title="好处"></a>好处</h3><p>1、BasePresenter 将不同的view接口统一，不返回具体的view接口，通过方法操作，易于扩展;<br><br>2、view 接口的绑定统一化;</p>
-<h3 id="基础使用"><a href="#基础使用" class="headerlink" title="基础使用"></a>基础使用</h3><p>定义View接口，暂时为空，子类可以扩展添加</p>
-<pre><code>public interface IMVPBaseView {
-
-}
-</code></pre><p>定义Presenter接口</p>
-<pre><code>public interface IMVPPresenter&lt;V extends IMVPBaseView&gt; {
-    /**
-     * 附加view回调接口
-     *
-     * @param mvpBaseView
-     */
-    void attachView(V mvpBaseView);
-
-     /**
-     * 释放view接口
-     */
-    void detachView();
-
-}
-</code></pre><p>BasePresenter实现</p>
-<pre><code>public class BasePresenter&lt;T extends IMVPBaseView&gt; implements IMVPPresenter&lt;T&gt; {
-    private T mMvpBaseView;
-
-    @Override
-    public void attachView(T mvpBaseView) {
-        mMvpBaseView = mvpBaseView;
-    }
-
-    @Override
-    public void detachView() {
-        mMvpBaseView = null;
-    }
-
-    public T getMvpBaseView() {
-        return mMvpBaseView;
-    }
-
-    /**
-     * 是否附加view接口
-     *
-     * @return true mvpBaseView != null
-     */
-    public boolean isViewAttached() {
-        return mMvpBaseView != null;
-    }
-
-    /**
-     * 检查是否绑定view接口
-     */
-    public void checkViewAttached() {
-        if (!isViewAttached())
-            throw new RuntimeException(
-                    &quot;Please call BasePresenter.attachView(IMVPBaseView) before&quot;
-                            + &quot; requesting data to the Presenter&quot;);
-    }
-}
-</code></pre><h3 id="项目使用"><a href="#项目使用" class="headerlink" title="项目使用"></a>项目使用</h3><p>首先看下我的项目结构:</p>
-<p><img src="!--￼0--&gt;/assets/image/mvp.png" alt="mvp"></p>
-<p>拿获取图片列表来举例，逻辑是这样：获取数据并解析结果给 view 展示。首先在 Fragment 中即 View 接口的实现类中<br>初始化我们的 Presenter 同时会初始化一个 Model，Fragment 调用 Presenter 中的方法，例如：loadImageList() 方法，接着去调用 Model中<br>的getImageList()方法,最后 Model 讲结果回调给 Presenter 层，Presenter 再回调给 View层，这样就完成了一个 MVP逻辑，以下是部分代码。</p>
-<pre><code>//View
-private IImagePresenter mImagePresenter;
-
-@Override
-public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    mImagePresenter = new ImagePresenter(this);
-}
-
-//Presenter
-public class ImagePresenter extends BasePresenter&lt;IImageView&gt; implements IImagePresenter {
-private static final String TAG = &quot;ImagePresenter&quot;;
-private IImageModel mImageModel;
-private Subscription mSubscription;
-
-public ImagePresenter(IImageView imageView) {
-    attachView(imageView);
-    mImageModel = new ImageModel();
-}
-
-@Override
-public void detachView() {
-    super.detachView();
-    if (mSubscription != null) {
-        mSubscription.unsubscribe();
-    }
-}
-
-@Override
-public void loadImageList() {
-    checkViewAttached();
-    mSubscription = mImageModel.getImageList()
-            .subscribeOn(Schedulers.io())
-            .doOnSubscribe(new Action0() {
-                @Override
-                public void call() {
-                    getMvpBaseView().showProgress();
-                }
-            })
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Observer&lt;List&lt;ImageBean&gt;&gt;() {
-                @Override
-                public void onCompleted() {
-                    getMvpBaseView().hideProgress();
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    getMvpBaseView().hideProgress();
-                    getMvpBaseView().showLoadFailMsg();
-                }
-
-                @Override
-                public void onNext(List&lt;ImageBean&gt; list) {
-                    getMvpBaseView().onSuccess(list);
-                }
-            });
-    }
-}
-
-//Model
-public class ImageModel implements IImageModel {
-
-    private static final String TAG = &quot;ImageModel&quot;;
-
-    public Observable&lt;List&lt;ImageBean&gt;&gt; getImageList() {
-        return Observable.just(Urls.IMAGES_URL).flatMap(new Func1&lt;String, Observable&lt;List&lt;ImageBean&gt;&gt;&gt;() {
-            @Override
-            public Observable&lt;List&lt;ImageBean&gt;&gt; call(final String url) {
-                //可以拼接url
-                return Observable.create(new Observable.OnSubscribe&lt;List&lt;ImageBean&gt;&gt;() {
-
-                    @Override
-                    public void call(final Subscriber&lt;? super List&lt;ImageBean&gt;&gt; subscriber) {
-                        OkHttpUtils.ResultCallback&lt;String&gt; loadNewsCallback = new OkHttpUtils.ResultCallback&lt;String&gt;() {
-                            @Override
-                            public void onSuccess(String response) {
-                                Log.d(TAG, &quot;onSuccess response:&quot; + response);
-                                if(StringUtils.isEmpty(response)){
-                                    subscriber.onError(null);
-                                    return;
-                                }
-                                Gson gson = new Gson();
-                                List&lt;ImageBean&gt; iamgeBeanList = gson.fromJson(response, new TypeToken&lt;List&lt;ImageBean&gt;&gt;() {}.getType());
-                                if(ListUtils.isEmpty(iamgeBeanList)){
-                                    subscriber.onError(null);
-                                    return;
-                                }
-                                subscriber.onNext(iamgeBeanList);
-                                subscriber.onCompleted();
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                subscriber.onError(e);
-                            }
-                        };
-                        OkHttpUtils.get(url, loadNewsCallback);
-                    }
-                });
-            }
-        });
-    }
-}
-</code></pre><p>一个完整的MVP思想的使用就结束了，有没有觉得很简单，最初听名字以为是一个框架，学了才知道 MVP 是一种思想，开发多多使用，有问题欢迎留言，<br>也可以frok我的项目 <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a> 一起学习。</p>
-<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
-<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
-<li><a href="http://rocko.xyz/2015/02/06/Android%E4%B8%AD%E7%9A%84MVP/" target="_blank" rel="noopener">Android中的MVP</a></li>
-<li><a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>文章中有些话，摘自<a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>一文</li>
-<li><a href="https://github.com/ribot/android-boilerplate" target="_blank" rel="noopener">android-boilerplate</a></li>
-</ul>
-<h3 id="推荐"><a href="#推荐" class="headerlink" title="推荐"></a>推荐</h3><ul>
-<li><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFAndroid_MVP" target="_blank" rel="noopener">WFAndroid_MVP</a> MVP Demo</li>
-<li><a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a> 我的项目</li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-demo/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2359,6 +1799,324 @@ Uptime: 16199425 Realtime: 16199425
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-12-17-android-use-mvp2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/11/10/android/2015-12-17-android-use-mvp2/" itemprop="url">Android MVP 项目使用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T18:28:39+08:00">2015-11-10</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>前段时间学习 MVP 思想，在原来 <a href="https://github.com/liuling07/SimpleNews" target="_blank" rel="noopener">SimpleNews</a> 的基础上，修改了数据层和 UI 层的逻辑，使用 RxJava + MVP 组合方式，重构完成 <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a>，目前还存在很多需要优化的地方，今天说说 SimpleNews.io 中用到的 MVP 部分。</p>
+<p>参考 <a href="https://github.com/ribot/android-boilerplate" target="_blank" rel="noopener">android-boilerplate</a>, 添加 base Presenter 和 base View,以后所有的 Presenter 和 View 都需要继承 base ,这样在Presenter这一层才能使用统一方法回调接口，Model 暂时没有改变</p>
+<h3 id="好处"><a href="#好处" class="headerlink" title="好处"></a>好处</h3><p>1、BasePresenter 将不同的view接口统一，不返回具体的view接口，通过方法操作，易于扩展;<br><br>2、view 接口的绑定统一化;</p>
+<h3 id="基础使用"><a href="#基础使用" class="headerlink" title="基础使用"></a>基础使用</h3><p>定义View接口，暂时为空，子类可以扩展添加</p>
+<pre><code>public interface IMVPBaseView {
+
+}
+</code></pre><p>定义Presenter接口</p>
+<pre><code>public interface IMVPPresenter&lt;V extends IMVPBaseView&gt; {
+    /**
+     * 附加view回调接口
+     *
+     * @param mvpBaseView
+     */
+    void attachView(V mvpBaseView);
+
+     /**
+     * 释放view接口
+     */
+    void detachView();
+
+}
+</code></pre><p>BasePresenter实现</p>
+<pre><code>public class BasePresenter&lt;T extends IMVPBaseView&gt; implements IMVPPresenter&lt;T&gt; {
+    private T mMvpBaseView;
+
+    @Override
+    public void attachView(T mvpBaseView) {
+        mMvpBaseView = mvpBaseView;
+    }
+
+    @Override
+    public void detachView() {
+        mMvpBaseView = null;
+    }
+
+    public T getMvpBaseView() {
+        return mMvpBaseView;
+    }
+
+    /**
+     * 是否附加view接口
+     *
+     * @return true mvpBaseView != null
+     */
+    public boolean isViewAttached() {
+        return mMvpBaseView != null;
+    }
+
+    /**
+     * 检查是否绑定view接口
+     */
+    public void checkViewAttached() {
+        if (!isViewAttached())
+            throw new RuntimeException(
+                    &quot;Please call BasePresenter.attachView(IMVPBaseView) before&quot;
+                            + &quot; requesting data to the Presenter&quot;);
+    }
+}
+</code></pre><h3 id="项目使用"><a href="#项目使用" class="headerlink" title="项目使用"></a>项目使用</h3><p>首先看下我的项目结构:</p>
+<p><img src="!--￼0--&gt;/assets/image/mvp.png" alt="mvp"></p>
+<p>拿获取图片列表来举例，逻辑是这样：获取数据并解析结果给 view 展示。首先在 Fragment 中即 View 接口的实现类中<br>初始化我们的 Presenter 同时会初始化一个 Model，Fragment 调用 Presenter 中的方法，例如：loadImageList() 方法，接着去调用 Model中<br>的getImageList()方法,最后 Model 讲结果回调给 Presenter 层，Presenter 再回调给 View层，这样就完成了一个 MVP逻辑，以下是部分代码。</p>
+<pre><code>//View
+private IImagePresenter mImagePresenter;
+
+@Override
+public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    mImagePresenter = new ImagePresenter(this);
+}
+
+//Presenter
+public class ImagePresenter extends BasePresenter&lt;IImageView&gt; implements IImagePresenter {
+private static final String TAG = &quot;ImagePresenter&quot;;
+private IImageModel mImageModel;
+private Subscription mSubscription;
+
+public ImagePresenter(IImageView imageView) {
+    attachView(imageView);
+    mImageModel = new ImageModel();
+}
+
+@Override
+public void detachView() {
+    super.detachView();
+    if (mSubscription != null) {
+        mSubscription.unsubscribe();
+    }
+}
+
+@Override
+public void loadImageList() {
+    checkViewAttached();
+    mSubscription = mImageModel.getImageList()
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe(new Action0() {
+                @Override
+                public void call() {
+                    getMvpBaseView().showProgress();
+                }
+            })
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Observer&lt;List&lt;ImageBean&gt;&gt;() {
+                @Override
+                public void onCompleted() {
+                    getMvpBaseView().hideProgress();
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    getMvpBaseView().hideProgress();
+                    getMvpBaseView().showLoadFailMsg();
+                }
+
+                @Override
+                public void onNext(List&lt;ImageBean&gt; list) {
+                    getMvpBaseView().onSuccess(list);
+                }
+            });
+    }
+}
+
+//Model
+public class ImageModel implements IImageModel {
+
+    private static final String TAG = &quot;ImageModel&quot;;
+
+    public Observable&lt;List&lt;ImageBean&gt;&gt; getImageList() {
+        return Observable.just(Urls.IMAGES_URL).flatMap(new Func1&lt;String, Observable&lt;List&lt;ImageBean&gt;&gt;&gt;() {
+            @Override
+            public Observable&lt;List&lt;ImageBean&gt;&gt; call(final String url) {
+                //可以拼接url
+                return Observable.create(new Observable.OnSubscribe&lt;List&lt;ImageBean&gt;&gt;() {
+
+                    @Override
+                    public void call(final Subscriber&lt;? super List&lt;ImageBean&gt;&gt; subscriber) {
+                        OkHttpUtils.ResultCallback&lt;String&gt; loadNewsCallback = new OkHttpUtils.ResultCallback&lt;String&gt;() {
+                            @Override
+                            public void onSuccess(String response) {
+                                Log.d(TAG, &quot;onSuccess response:&quot; + response);
+                                if(StringUtils.isEmpty(response)){
+                                    subscriber.onError(null);
+                                    return;
+                                }
+                                Gson gson = new Gson();
+                                List&lt;ImageBean&gt; iamgeBeanList = gson.fromJson(response, new TypeToken&lt;List&lt;ImageBean&gt;&gt;() {}.getType());
+                                if(ListUtils.isEmpty(iamgeBeanList)){
+                                    subscriber.onError(null);
+                                    return;
+                                }
+                                subscriber.onNext(iamgeBeanList);
+                                subscriber.onCompleted();
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                subscriber.onError(e);
+                            }
+                        };
+                        OkHttpUtils.get(url, loadNewsCallback);
+                    }
+                });
+            }
+        });
+    }
+}
+</code></pre><p>一个完整的MVP思想的使用就结束了，有没有觉得很简单，最初听名字以为是一个框架，学了才知道 MVP 是一种思想，开发多多使用，有问题欢迎留言，<br>也可以frok我的项目 <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a> 一起学习。</p>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
+<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
+<li><a href="http://rocko.xyz/2015/02/06/Android%E4%B8%AD%E7%9A%84MVP/" target="_blank" rel="noopener">Android中的MVP</a></li>
+<li><a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>文章中有些话，摘自<a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>一文</li>
+<li><a href="https://github.com/ribot/android-boilerplate" target="_blank" rel="noopener">android-boilerplate</a></li>
+</ul>
+<h3 id="推荐"><a href="#推荐" class="headerlink" title="推荐"></a>推荐</h3><ul>
+<li><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFAndroid_MVP" target="_blank" rel="noopener">WFAndroid_MVP</a> MVP Demo</li>
+<li><a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a> 我的项目</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-11-17-android-use-mvp/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2703,12 +2461,6 @@ Uptime: 16199425 Realtime: 16199425
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
                     
-                    
-                      
-                    
-                      
-                    
-                      
                     
                       
                     

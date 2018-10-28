@@ -303,7 +303,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/tech/2015-11-26-android-technology-website/">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-8-23-android-use-mvp3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="無名">
@@ -322,7 +322,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2015/11/10/tech/2015-11-26-android-technology-website/" itemprop="url">日常技术博客收集</a></h1>
+                <a class="post-title-link" href="/2015/11/10/android/2016-8-23-android-use-mvp3/" itemprop="url">Android-architecure MVP 学习</a></h1>
         
 
         <div class="post-meta">
@@ -355,7 +355,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常/" itemprop="url" rel="index"><span itemprop="name">日常</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
 
                 
                 
@@ -391,8 +391,54 @@
       
         
           
-            <p>收集开发中经常看的博客或者技术帖</p>
-<p>1、<a href="http://gank.io/" target="_blank" rel="noopener">干货集中营</a> 每日推荐Android、ios、app等开源库<br><br>2、<a href="http://www.liaoxuefeng.com/" target="_blank" rel="noopener">廖雪峰的官方网站</a> Python、git、js等教程，值得一看<br><br>3、<a href="http://codekk.com/open-source-project-analysis" target="_blank" rel="noopener">Codekk源码</a> 开源项目解析<br><br>4、<a href="http://hukai.me/" target="_blank" rel="noopener">胡凯个人网站</a> google课程翻译、性能优化等<br><br>5、<a href="http://www.stormzhang.com/" target="_blank" rel="noopener">stormzhang博客精华</a> AS教程、android开发等<br><br>6、<a href="http://rocko.xyz/" target="_blank" rel="noopener">Rocko</a> Android Developer技术文章等<br><br>7、<a href="http://blog.coderzh.com/" target="_blank" rel="noopener">coderzh CoderZh Blog</a> coderzh CoderZh Blog读书笔记个人文章等<br><br>8、<a href="http://droidyue.com/" target="_blank" rel="noopener">技术小黑屋</a><br><br>9、<a href="https://drakeet.me/" target="_blank" rel="noopener">Drakeet的个人博客</a><br><br>10、<a href="http://www.jcodecraeer.com/" target="_blank" rel="noopener">泡在网上的日子</a><br><br>–未完待续，如果有丢失链接得请告知，谢谢！</p>
+            <p>MVP 思想已经盛行有一段时间了，之前写过几个简单的 MVP Demo，来分离 UI 和逻辑，前段时间研究了 <a href="https://github.com/googlesamples/android-architecture" target="_blank" rel="noopener">googlesamples/android-architecture</a>,这个库包含了好几种 MVP 例子，我针对 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp </a> 和 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-clean/" target="_blank" rel="noopener">todo-mvp-clean</a><br>这两个例子进行了研究，其他几个例子有不同的侧重，但最基本的还是 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp </a>，其他只是在这个基础之上做扩充而已，还有一些用到了 Rxjava 的东西，由于项目中没有使用，也就没有详细研究，下面来说说这两个库最基本的用法。</p>
+<h3 id="概况"><a href="#概况" class="headerlink" title="概况"></a>概况</h3><p>首先要认识到 MVP 是一个思想不是一个框架，不是任何东西都要用它来实现，针对特别简单或者特别复杂的需求或者页面，应根据实际情况来选择，而且要选择使用哪个 MVP 模式作为基本思想。</p>
+<h4 id="todo-mvp"><a href="#todo-mvp" class="headerlink" title="todo-mvp"></a>todo-mvp</h4><p>Basic Model-View-Presenter architecture,这个是最基本的 MVP，规定了最基本的 View 和 Presenter，使用者需要继承这两个类，来根据实际情况，增加自己的接口关系，这里的 View 和 Presenter 都在一个类中维护 Contract，在官方 Demo 中，Model<br>数据层的 Repository 在创建 Presenter 的时候就传进来的，而且还是使用的接口，这样也增加了可扩展性，缺点是在调用 M 是一层一层的传递，略显麻烦，不过从代码结构上是清晰的。</p>
+<h4 id="todo-mvp-clean"><a href="#todo-mvp-clean" class="headerlink" title="todo-mvp-clean"></a>todo-mvp-clean</h4><p>Based on todo-mvp, uses concepts from Clean Architecture，依靠的还是还是基本的 MVP todo-mvp，只不过在 Model 层做了优化，引入了 Domain Layer 层, Presenter 将不直接调用数据层，而是使用 usecase 方式。</p>
+<p>Presenter 要和 Model 打交道，必须通过 Domain 这一层，UseCase 中提供了最基本的请求和回调参数，以及如何调用的抽象方法，每一个子类继承 UseCase 来实现自己的 UseCase，同时<br>又有一个 UseCaseHandler 工具类来管理这些 UseCase 的执行和回调，UseCase 和 UseCaseHandler 都是提供的基类，可以重复利用，对于 case 比较多的案例还是比较适用的。还有这里面<br>有一些线程池的使用，实现类 UseCaseThreadPoolScheduler，来自定义我们的线程调度，包括使用什么队列，线程池大小等。经实际操作验证，一般的页面无需使用这么复杂的结构，如果针对请求情况<br>比较多的 case，可以使用这个。</p>
+<p>Model 这一层在 UseCase 中实现，并且和 todo-mvp 一致，数据层的 Repository 在创建 Presenter 时候也要传入到 UseCase 中。</p>
+<h4 id="新增-Usecase-方式"><a href="#新增-Usecase-方式" class="headerlink" title="新增 Usecase 方式"></a>新增 Usecase 方式</h4><p>利:<br></p>
+<ul>
+<li>代码结构清晰，将每个 case 分离互不干扰，而且请求、回调等进行统一化管理，不在过多的依靠外部提供的接口，增加了灵活性；<br></li>
+<li>将 view 和逻辑分离，在整合基线明星页过程中，并没有对view层关注，完全屏蔽掉，直进行 Presenter 分发处理，大大增加了效率；<br></li>
+<li>Usecase 中有关于线程池的控制以及主线程回调操作；<br></li>
+</ul>
+<p>弊:<br></p>
+<ul>
+<li>新增 Usecase 导致代码增多，因为分离的非常细，首先回增加 Usecase 部分的核心代码（这部分可以共用），其次增加了每个具体的 Usecase 类，使得代码整体结构会增加；<br></li>
+<li>简单页面不太适合使用 Usecase，建议使用 Base MVP 即可；<br></li>
+</ul>
+<p>关于参数的封装：</p>
+<p>先看代码：</p>
+<pre><code>public static class RequestValues implements UseCase.RequestValues {
+}
+
+public static class ResponseValue implements UseCase.ResponseValue {
+
+    private final Statistics mStatistics;
+
+    public ResponseValue(@NonNull Statistics statistics) {
+        mStatistics = checkNotNull(statistics, &quot;statistics cannot be null!&quot;);
+    }
+
+    public Statistics getStatistics() {
+        return mStatistics;
+    }
+}
+</code></pre><p>这种方式提供了一种规范，可扩展、统一封装，这样就可以彻底将数据请求相关的屏蔽掉，如果以后更换请求接口，也不会影响到 UseCase 的使用，更不会影响 View 层了。所以比较推荐这种方式。</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><pre><code>public GetStatistics(@NonNull TasksRepository tasksRepository) {
+    mTasksRepository = checkNotNull(tasksRepository, &quot;tasksRepository cannot be null!&quot;);
+}
+</code></pre><p>强烈建议使用 google 的 checkNotNull 这种方式，必须保证不会 null，这个是 Google 的另一库 guava，建议学习下。</p>
+<h3 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h3><p><a href="https://github.com/whiskeyfei/android-architecture-todo-mvp" target="_blank" rel="noopener">https://github.com/whiskeyfei/android-architecture-todo-mvp</a></p>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
+<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
+<li><a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-clean/" target="_blank" rel="noopener">Google android-architecure</a></li>
+<li><a href="https://github.com/android10/Android-CleanArchitecture" target="_blank" rel="noopener">android10/Android-CleanArchitecture</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/20001838" target="_blank" rel="noopener">android10/Android-CleanArchitecture 中文详解</a></li>
+<li><a href="https://github.com/stuartgunter/guava-demo" target="_blank" rel="noopener">guava-demo</a></li>
+<li><a href="https://github.com/Syhids/android-architecture/tree/todo-mvp-fragmentless" target="_blank" rel="noopener">todo-mvp-fragmentless</a></li>
+</ul>
 
           
         
@@ -972,7 +1018,7 @@ public void test4() {
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-8-23-android-use-mvp3/">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/tech/2015-11-26-android-technology-website/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="無名">
@@ -991,7 +1037,7 @@ public void test4() {
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2015/11/10/android/2016-8-23-android-use-mvp3/" itemprop="url">Android-architecure MVP 学习</a></h1>
+                <a class="post-title-link" href="/2015/11/10/tech/2015-11-26-android-technology-website/" itemprop="url">日常技术博客收集</a></h1>
         
 
         <div class="post-meta">
@@ -1024,7 +1070,7 @@ public void test4() {
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常/" itemprop="url" rel="index"><span itemprop="name">日常</span></a></span>
 
                 
                 
@@ -1060,54 +1106,8 @@ public void test4() {
       
         
           
-            <p>MVP 思想已经盛行有一段时间了，之前写过几个简单的 MVP Demo，来分离 UI 和逻辑，前段时间研究了 <a href="https://github.com/googlesamples/android-architecture" target="_blank" rel="noopener">googlesamples/android-architecture</a>,这个库包含了好几种 MVP 例子，我针对 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp </a> 和 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-clean/" target="_blank" rel="noopener">todo-mvp-clean</a><br>这两个例子进行了研究，其他几个例子有不同的侧重，但最基本的还是 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp </a>，其他只是在这个基础之上做扩充而已，还有一些用到了 Rxjava 的东西，由于项目中没有使用，也就没有详细研究，下面来说说这两个库最基本的用法。</p>
-<h3 id="概况"><a href="#概况" class="headerlink" title="概况"></a>概况</h3><p>首先要认识到 MVP 是一个思想不是一个框架，不是任何东西都要用它来实现，针对特别简单或者特别复杂的需求或者页面，应根据实际情况来选择，而且要选择使用哪个 MVP 模式作为基本思想。</p>
-<h4 id="todo-mvp"><a href="#todo-mvp" class="headerlink" title="todo-mvp"></a>todo-mvp</h4><p>Basic Model-View-Presenter architecture,这个是最基本的 MVP，规定了最基本的 View 和 Presenter，使用者需要继承这两个类，来根据实际情况，增加自己的接口关系，这里的 View 和 Presenter 都在一个类中维护 Contract，在官方 Demo 中，Model<br>数据层的 Repository 在创建 Presenter 的时候就传进来的，而且还是使用的接口，这样也增加了可扩展性，缺点是在调用 M 是一层一层的传递，略显麻烦，不过从代码结构上是清晰的。</p>
-<h4 id="todo-mvp-clean"><a href="#todo-mvp-clean" class="headerlink" title="todo-mvp-clean"></a>todo-mvp-clean</h4><p>Based on todo-mvp, uses concepts from Clean Architecture，依靠的还是还是基本的 MVP todo-mvp，只不过在 Model 层做了优化，引入了 Domain Layer 层, Presenter 将不直接调用数据层，而是使用 usecase 方式。</p>
-<p>Presenter 要和 Model 打交道，必须通过 Domain 这一层，UseCase 中提供了最基本的请求和回调参数，以及如何调用的抽象方法，每一个子类继承 UseCase 来实现自己的 UseCase，同时<br>又有一个 UseCaseHandler 工具类来管理这些 UseCase 的执行和回调，UseCase 和 UseCaseHandler 都是提供的基类，可以重复利用，对于 case 比较多的案例还是比较适用的。还有这里面<br>有一些线程池的使用，实现类 UseCaseThreadPoolScheduler，来自定义我们的线程调度，包括使用什么队列，线程池大小等。经实际操作验证，一般的页面无需使用这么复杂的结构，如果针对请求情况<br>比较多的 case，可以使用这个。</p>
-<p>Model 这一层在 UseCase 中实现，并且和 todo-mvp 一致，数据层的 Repository 在创建 Presenter 时候也要传入到 UseCase 中。</p>
-<h4 id="新增-Usecase-方式"><a href="#新增-Usecase-方式" class="headerlink" title="新增 Usecase 方式"></a>新增 Usecase 方式</h4><p>利:<br></p>
-<ul>
-<li>代码结构清晰，将每个 case 分离互不干扰，而且请求、回调等进行统一化管理，不在过多的依靠外部提供的接口，增加了灵活性；<br></li>
-<li>将 view 和逻辑分离，在整合基线明星页过程中，并没有对view层关注，完全屏蔽掉，直进行 Presenter 分发处理，大大增加了效率；<br></li>
-<li>Usecase 中有关于线程池的控制以及主线程回调操作；<br></li>
-</ul>
-<p>弊:<br></p>
-<ul>
-<li>新增 Usecase 导致代码增多，因为分离的非常细，首先回增加 Usecase 部分的核心代码（这部分可以共用），其次增加了每个具体的 Usecase 类，使得代码整体结构会增加；<br></li>
-<li>简单页面不太适合使用 Usecase，建议使用 Base MVP 即可；<br></li>
-</ul>
-<p>关于参数的封装：</p>
-<p>先看代码：</p>
-<pre><code>public static class RequestValues implements UseCase.RequestValues {
-}
-
-public static class ResponseValue implements UseCase.ResponseValue {
-
-    private final Statistics mStatistics;
-
-    public ResponseValue(@NonNull Statistics statistics) {
-        mStatistics = checkNotNull(statistics, &quot;statistics cannot be null!&quot;);
-    }
-
-    public Statistics getStatistics() {
-        return mStatistics;
-    }
-}
-</code></pre><p>这种方式提供了一种规范，可扩展、统一封装，这样就可以彻底将数据请求相关的屏蔽掉，如果以后更换请求接口，也不会影响到 UseCase 的使用，更不会影响 View 层了。所以比较推荐这种方式。</p>
-<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><pre><code>public GetStatistics(@NonNull TasksRepository tasksRepository) {
-    mTasksRepository = checkNotNull(tasksRepository, &quot;tasksRepository cannot be null!&quot;);
-}
-</code></pre><p>强烈建议使用 google 的 checkNotNull 这种方式，必须保证不会 null，这个是 Google 的另一库 guava，建议学习下。</p>
-<h3 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h3><p><a href="https://github.com/whiskeyfei/android-architecture-todo-mvp" target="_blank" rel="noopener">https://github.com/whiskeyfei/android-architecture-todo-mvp</a></p>
-<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
-<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
-<li><a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-clean/" target="_blank" rel="noopener">Google android-architecure</a></li>
-<li><a href="https://github.com/android10/Android-CleanArchitecture" target="_blank" rel="noopener">android10/Android-CleanArchitecture</a></li>
-<li><a href="https://zhuanlan.zhihu.com/p/20001838" target="_blank" rel="noopener">android10/Android-CleanArchitecture 中文详解</a></li>
-<li><a href="https://github.com/stuartgunter/guava-demo" target="_blank" rel="noopener">guava-demo</a></li>
-<li><a href="https://github.com/Syhids/android-architecture/tree/todo-mvp-fragmentless" target="_blank" rel="noopener">todo-mvp-fragmentless</a></li>
-</ul>
+            <p>收集开发中经常看的博客或者技术帖</p>
+<p>1、<a href="http://gank.io/" target="_blank" rel="noopener">干货集中营</a> 每日推荐Android、ios、app等开源库<br><br>2、<a href="http://www.liaoxuefeng.com/" target="_blank" rel="noopener">廖雪峰的官方网站</a> Python、git、js等教程，值得一看<br><br>3、<a href="http://codekk.com/open-source-project-analysis" target="_blank" rel="noopener">Codekk源码</a> 开源项目解析<br><br>4、<a href="http://hukai.me/" target="_blank" rel="noopener">胡凯个人网站</a> google课程翻译、性能优化等<br><br>5、<a href="http://www.stormzhang.com/" target="_blank" rel="noopener">stormzhang博客精华</a> AS教程、android开发等<br><br>6、<a href="http://rocko.xyz/" target="_blank" rel="noopener">Rocko</a> Android Developer技术文章等<br><br>7、<a href="http://blog.coderzh.com/" target="_blank" rel="noopener">coderzh CoderZh Blog</a> coderzh CoderZh Blog读书笔记个人文章等<br><br>8、<a href="http://droidyue.com/" target="_blank" rel="noopener">技术小黑屋</a><br><br>9、<a href="https://drakeet.me/" target="_blank" rel="noopener">Drakeet的个人博客</a><br><br>10、<a href="http://www.jcodecraeer.com/" target="_blank" rel="noopener">泡在网上的日子</a><br><br>–未完待续，如果有丢失链接得请告知，谢谢！</p>
 
           
         
@@ -2032,12 +2032,6 @@ Environment.MEDIA_MOUNTED_READ_ONLY
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
                     
-                    
-                      
-                    
-                      
-                    
-                      
                     
                       
                     
