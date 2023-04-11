@@ -303,6 +303,221 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2017/06/13/android/2017-6-12-simpleNews-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/06/13/android/2017-6-12-simpleNews-5/" itemprop="url">SimpleNews 项目的重构之旅(5) － Android Gradle 打包&混淆应用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-13T23:38:44+09:00">2017-06-13</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/SimpleNews-系列/" itemprop="url" rel="index"><span itemprop="name">SimpleNews 系列</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><p>之前一直没有做 Android  APK 发包管理，所以这次重构把这打包这部分考虑进去，之后可能会发布到一些应用市场。</p>
+<h3 id="要实现的功能"><a href="#要实现的功能" class="headerlink" title="要实现的功能"></a>要实现的功能</h3><p>混淆代码<br><br>实现签名<br><br>过滤无用资源<br><br>生成 release 版本 APK<br><br>自定义 APK 名称<br><br>生成多渠道包<br></p>
+<p>带着这几个问题，一步一步在 Simplenews 项目中实现</p>
+<h4 id="混淆代码"><a href="#混淆代码" class="headerlink" title="混淆代码"></a>混淆代码</h4><p>说到混淆代码，还真看过一些上线的 app 没有做混淆，这种可以用反编译工具给反编译出来，安全性太差，虽说这个小项目没有商业价值可言，但是还是要掌握app的安全性的，了解如何混淆代码，很简单看实例 app proguard-rules.pro</p>
+<p>本项目中一些不能混淆的类或者方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">    -keep <span class="class"><span class="keyword">class</span> <span class="title">com</span>.<span class="title">library</span>.<span class="title">event</span>.<span class="title">AppExitEvent</span></span></span><br><span class="line"><span class="class">    -<span class="title">keepattributes</span> *<span class="title">Annotation</span>*</span></span><br><span class="line"><span class="class">    -<span class="title">keepclassmembers</span> <span class="title">class</span> ** </span>&#123;</span><br><span class="line">        <span class="meta">@org</span>.greenrobot.eventbus.Subscribe &lt;methods&gt;;</span><br><span class="line">    &#125;</span><br><span class="line">    -keep <span class="keyword">enum</span> org.greenrobot.eventbus.ThreadMode &#123; *; &#125;</span><br><span class="line">    -keep <span class="class"><span class="keyword">class</span> <span class="title">com</span>.<span class="title">kong</span>.<span class="title">app</span>.<span class="title">news</span>.<span class="title">beans</span>.** </span>&#123; *; &#125;</span><br><span class="line">    -keep <span class="class"><span class="keyword">class</span> <span class="title">com</span>.<span class="title">actionbarsherlock</span>.** </span>&#123; *; &#125;</span><br><span class="line">    -keep <span class="class"><span class="keyword">class</span> <span class="title">com</span>.<span class="title">google</span>.<span class="title">gson</span>.** </span>&#123;*;&#125;</span><br><span class="line"></span><br><span class="line">    -dontobfuscate</span><br><span class="line">    -dontwarn okio.**</span><br><span class="line">    -dontwarn okhttp3.**</span><br><span class="line">    -dontwarn rx.**</span><br><span class="line">    -dontnote sun.misc.Unsafe</span><br><span class="line">    -dontnote android.net.http.*</span><br><span class="line">    -dontnote org.apache.commons.codec.**</span><br><span class="line">    -dontnote org.apache.http.**</span><br><span class="line">    -dontnote com.android.org.conscrypt.**</span><br><span class="line">    -dontnote org.apache.harmony.xnet.provider.jsse.**</span><br><span class="line">    -dontnote com.android.internal.**</span><br><span class="line">    -dontwarn android.support.v4.**</span><br><span class="line">    -dontwarn com.dsi.ant.**</span><br><span class="line">    -dontwarn com.samsung.**</span><br><span class="line">    -dontwarn com.vividsolutions.jts.awt.**</span><br><span class="line">    -dontwarn android.support.**</span><br><span class="line">    -dontwarn com.squareup.okhttp.**</span><br><span class="line">    -dontnote android.net.http.*</span><br><span class="line">    -dontnote org.apache.http.**</span><br><span class="line">    -dontwarn javax.annotation.**</span><br><span class="line">    -dontwarn java.lang.invoke.**</span><br><span class="line">    -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement</span><br><span class="line"></span><br><span class="line">主要是集中在一些注解，第三方库以及 Android 源码部分类和方法。</span><br></pre></td></tr></table></figure>
+<p>例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-keep <span class="class"><span class="keyword">class</span> <span class="title">com</span>.<span class="title">kong</span>.<span class="title">app</span>.<span class="title">news</span>.<span class="title">beans</span>.** </span>&#123; *; &#125;</span><br></pre></td></tr></table></figure>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-4b0421404bb0e722.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="bean 目录"></p>
+<p>这个目录下的 model 类用来解析 Json ，所以不能被混淆，不然会找不到对应的类。</p>
+<h4 id="实现签名"><a href="#实现签名" class="headerlink" title="实现签名"></a>实现签名</h4><p>给 App 签名，就相当于给 APP 上了一个牌照，保证了 APP 在线上市场的唯一性，这样才能安装到用户手机上话不多说，看操作</p>
+<p>选择 Build -&gt; Generate Signed APK</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-0b89ec933b2dfb7c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="1"></p>
+<p>Next</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-c075e4f58d90a5e5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="2"></p>
+<p>Create New</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-378ddfa6550c2e4e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="3"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-181cb49c1477b3f6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="4"></p>
+<p>生成签名文件还是挺简单的，不过真正有上线项目的时候，签名文件要注意保密，同时也不要上传到 github 上。</p>
+<h4 id="过滤无用资源"><a href="#过滤无用资源" class="headerlink" title="过滤无用资源"></a>过滤无用资源</h4><pre><code>release {
+           minifyEnabled true //是否启动混淆
+           shrinkResources true //是否移除无用资源文件，shrinkResources依赖于minifyEnabled
+          proguardFiles getDefaultProguardFile(&apos;proguard-android.txt&apos;), &apos;proguard-rules.pro&apos;
+}
+</code></pre><p>通过过滤能够减少apk包大小，增加安装率</p>
+<h3 id="生成-release-版本包"><a href="#生成-release-版本包" class="headerlink" title="生成 release 版本包"></a>生成 release 版本包</h3><p>我们发到线上的 apk 都是 release 版本，是经过混淆，签名，打包的 apk，是可以在各大市场进行下载安装合法 app。</p>
+<h4 id="根据时间更改打包-APK-名称"><a href="#根据时间更改打包-APK-名称" class="headerlink" title="根据时间更改打包 APK 名称"></a>根据时间更改打包 APK 名称</h4><pre><code>android.applicationVariants.all { variant -&gt;
+                   variant.outputs.each { output -&gt;
+                       def outputFile = output.outputFile
+                       if (outputFile != null &amp;&amp; outputFile.name.endsWith(&apos;.apk&apos;)) {
+                           def fileName = &quot;SimpleNews_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk&quot;
+                           output.outputFile = new File(outputFile.parent, fileName)
+                       }
+                   }
+           }
+</code></pre><p>最终生成的：SimpleNews_v1.0_2017-06-12_product1.apk</p>
+<h4 id="生成多渠道包"><a href="#生成多渠道包" class="headerlink" title="生成多渠道包"></a>生成多渠道包</h4><p>顺带着提提多渠道打包，我这个项目目前没涉及到多渠道打包，但真正项目中有很多这样的需求，比如，产品要统计每一个市场的安装下载和用户使用情况，针对不同的市场就要有不同版本的apk，也很好配置：</p>
+<p>1、在AndroidManifest.xml里配置PlaceHolder</p>
+<pre><code>&lt;meta-data
+            android:name=&quot;PRODUCT_CHANNEL&quot;
+            android:value=&quot;${PRODUCT_CHANNEL_VALUE}&quot; /&gt;
+</code></pre><p>2、在 build.gradle 设置productFlavors</p>
+<pre><code>productFlavors {
+      product1 {
+          manifestPlaceholders.put(&quot;PRODUCT_CHANNEL_VALUE&quot;, &apos;product1&apos;)
+      }
+      product2 {
+          manifestPlaceholders.put(&quot;PRODUCT_CHANNEL_VALUE&quot;, &apos;product2&apos;)
+      }
+  }
+</code></pre><p>批量处理</p>
+<pre><code>release {
+        //多渠道
+            productFlavors.all { flavor -&gt;
+            manifestPlaceholders.put(&quot;UMENG_CHANNEL_VALUE&quot;, name)
+        }
+ ｝
+</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/877678-054864e48907d7cf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/440" alt="最终结果"></p>
+<p>我这里有两个例子，product1 product2 两个渠道，同步代码，输入打包命令打包即可，就会在build目录下看到生成的 apk</p>
+<p>这里正好使用上一条更改 apk 名称功能，根据配置生成不同渠道对应的名称。</p>
+<h3 id="完整的-Gradle-文件"><a href="#完整的-Gradle-文件" class="headerlink" title="完整的 Gradle 文件"></a>完整的 Gradle 文件</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line">apply plugin: <span class="string">'com.android.application'</span></span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line">    compileSdkVersion rootProject.ext.android.compileSdkVersion <span class="comment">//编译的 SDK API 版本</span></span><br><span class="line">    buildToolsVersion rootProject.ext.android.buildToolsVersion <span class="comment">//构建工具版本</span></span><br><span class="line"></span><br><span class="line">    defaultConfig &#123;</span><br><span class="line">        applicationId rootProject.ext.android.applicationId<span class="comment">//配置包名的</span></span><br><span class="line">        minSdkVersion rootProject.ext.android.minSdkVersion <span class="comment">//支持最小的 SDK 版本</span></span><br><span class="line">        targetSdkVersion rootProject.ext.android.targetSdkVersion</span><br><span class="line">        versionCode rootProject.ext.android.versionCode<span class="comment">//版本号</span></span><br><span class="line">        versionName rootProject.ext.android.versionName<span class="comment">//版本名称</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//        manifestPlaceholders = [PRODUCT_CHANNEL_VALUE: "github"]// 默认</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    signingConfigs &#123;</span><br><span class="line">        releaseConfig &#123;</span><br><span class="line">            keyAlias rootProject.ext.releaseConfig.keyAlias</span><br><span class="line">            keyPassword rootProject.ext.releaseConfig.keyPassword</span><br><span class="line">            <span class="function">storeFile <span class="title">file</span><span class="params">(rootProject.ext.releaseConfig.storeFile)</span></span></span><br><span class="line"><span class="function">            storePassword rootProject.ext.releaseConfig.storePassword</span></span><br><span class="line"><span class="function">        &#125;</span></span><br><span class="line"><span class="function">    &#125;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    buildTypes </span>&#123;</span><br><span class="line">        debug &#123;</span><br><span class="line">            applicationIdSuffix <span class="string">".debug"</span></span><br><span class="line">            minifyEnabled <span class="keyword">false</span></span><br><span class="line">            zipAlignEnabled <span class="keyword">false</span></span><br><span class="line">            shrinkResources <span class="keyword">false</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        release &#123;</span><br><span class="line">            zipAlignEnabled <span class="keyword">true</span></span><br><span class="line">            minifyEnabled <span class="keyword">true</span> <span class="comment">//是否启动混淆</span></span><br><span class="line">            shrinkResources <span class="keyword">true</span> <span class="comment">//是否移除无用资源文件，shrinkResources依赖于minifyEnabled</span></span><br><span class="line">            <span class="function">proguardFiles <span class="title">getDefaultProguardFile</span><span class="params">(<span class="string">'proguard-android.txt'</span>)</span>, 'proguard-rules.pro'</span></span><br><span class="line"><span class="function">            signingConfig signingConfigs.releaseConfig</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">            android.applicationVariants.all </span>&#123; variant -&gt;</span><br><span class="line">                    variant.outputs.each &#123; output -&gt;</span><br><span class="line">                        def outputFile = output.outputFile</span><br><span class="line">                        <span class="keyword">if</span> (outputFile != <span class="keyword">null</span> &amp;&amp; outputFile.name.endsWith(<span class="string">'.apk'</span>)) &#123;</span><br><span class="line">                            def fileName = <span class="string">"SimpleNews_v$&#123;defaultConfig.versionName&#125;_$&#123;releaseTime()&#125;_$&#123;variant.productFlavors[0].name&#125;.apk"</span></span><br><span class="line">                            output.outputFile = <span class="keyword">new</span> File(outputFile.parent, fileName)</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//多渠道</span></span><br><span class="line">            productFlavors.all &#123; flavor -&gt;</span><br><span class="line">                manifestPlaceholders.put(<span class="string">"UMENG_CHANNEL_VALUE"</span>, name)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    productFlavors &#123;</span><br><span class="line">        product1 &#123;</span><br><span class="line">            manifestPlaceholders.put(<span class="string">"PRODUCT_CHANNEL_VALUE"</span>, <span class="string">'product1'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        product2 &#123;</span><br><span class="line">            manifestPlaceholders.put(<span class="string">"PRODUCT_CHANNEL_VALUE"</span>, <span class="string">'product2'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">repositories &#123;</span><br><span class="line">    jcenter()</span><br><span class="line">    maven &#123; url <span class="string">"https://jitpack.io"</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">//将libs文件夹中所有的jar文件视为依赖包。</span></span><br><span class="line">    <span class="function">compile <span class="title">fileTree</span><span class="params">(include: [<span class="string">'*.jar'</span>], dir: <span class="string">'libs'</span>)</span></span></span><br><span class="line"><span class="function">    testCompile 'junit:junit:4.12'</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    <span class="comment">//依赖远程仓库</span></span></span><br><span class="line"><span class="function">    compile rootProject.ext.dependencies.design</span></span><br><span class="line"><span class="function">    compile rootProject.ext.dependencies.cardview</span></span><br><span class="line"><span class="function">    compile rootProject.ext.dependencies.circleimageview</span></span><br><span class="line"><span class="function">    compile rootProject.ext.dependencies.sufficientlysecure</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    compile <span class="title">project</span><span class="params">(<span class="string">':lib.utils'</span>)</span></span></span><br><span class="line"><span class="function">    compile <span class="title">project</span><span class="params">(<span class="string">':lib.style'</span>)</span></span></span><br><span class="line"><span class="function">&#125;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">def <span class="title">releaseTime</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Date().format(<span class="string">"yyyy-MM-dd"</span>, TimeZone.getTimeZone(<span class="string">"UTC"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>完整 App <a href="https://github.com/whiskeyfei/SimpleNews.io/blob/master/app/build.gradle" target="_blank" rel="noopener">build.gradle</a></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>了解了以上知识，已经能满足简单的打包功能了，小项目中可能也就够了，先掌握最基本的内容，之后在再这之上做扩展，后续可能还需要在优化一些内容，比如 使用微信的混淆工具来大幅度压缩apk大小。</p>
+<h3 id="SimpleNews-介绍"><a href="#SimpleNews-介绍" class="headerlink" title="SimpleNews 介绍"></a><a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews</a> 介绍</h3><p>A news Android App,based on the Material Design and RxJava 、MVP.Due to changes in the data request logic larger.so,I searate pull out the demo to update, in the original basis to modify the use of RxJava and MVP to rewirete the code starcture.Github <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a></p>
+<hr>
+<h4 id="SimpleNews-项目的重构之旅其他文章"><a href="#SimpleNews-项目的重构之旅其他文章" class="headerlink" title="SimpleNews 项目的重构之旅其他文章"></a><a href="">SimpleNews 项目的重构之旅其他文章</a></h4><ul>
+<li><a href="http://www.jianshu.com/p/d2101119e7b7" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(1) －项目架构定位 &amp; Gradle 全局配置</a></li>
+<li><a href="http://www.jianshu.com/p/a658021edea8" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(2) － 整理项目 .gitignore 文件</a></li>
+<li><a href="http://www.jianshu.com/p/de207458f12e" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(3) －EventBus 接入</a></li>
+<li><a href="http://www.jianshu.com/p/ff777bb4e1d9" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(4) －Gradle for Android 基础知识汇总</a></li>
+<li><a href="http://www.jianshu.com/p/3c8c69346acf" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(5) － Android Gradle 打包&amp;混淆应用</a></li>
+<li><a href="http://www.jianshu.com/p/37112006f7ed" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(6) － 命名规范 &amp; Android Toolbar</a></li>
+<li><a href="http://www.jianshu.com/p/9cc735021b6a" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(7) － 改头换面&amp;深度清理</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2017/06/05/android/2017-6-5-simpleNews-4/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -334,7 +549,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-05T10:12:30+08:00">2017-06-05</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-05T11:12:30+09:00">2017-06-05</time>
             
 
             
@@ -535,7 +750,7 @@ allprojects {
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-02T09:50:00+08:00">2017-06-02</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-02T10:50:00+09:00">2017-06-02</time>
             
 
             
@@ -731,7 +946,7 @@ EventBus.getDefault().unregister(this);//取消订阅
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-01T11:36:30+08:00">2017-06-01</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-01T12:36:30+09:00">2017-06-01</time>
             
 
             
@@ -900,7 +1115,7 @@ git commit -m “xxx&quot;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-01T11:27:37+08:00">2017-06-01</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-01T12:27:37+09:00">2017-06-01</time>
             
 
             
@@ -1091,7 +1306,7 @@ git commit -m “xxx&quot;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T14:15:31+08:00">2017-05-22</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T15:15:31+09:00">2017-05-22</time>
             
 
             
@@ -1239,7 +1454,7 @@ git commit -m “xxx&quot;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T13:49:50+08:00">2017-05-22</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T14:49:50+09:00">2017-05-22</time>
             
 
             
@@ -1434,7 +1649,7 @@ git commit -m “xxx&quot;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T13:37:16+08:00">2017-05-22</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T14:37:16+09:00">2017-05-22</time>
             
 
             
@@ -1589,7 +1804,7 @@ git commit -m “xxx&quot;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T13:37:16+08:00">2017-05-22</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T14:37:16+09:00">2017-05-22</time>
             
 
             
@@ -1763,7 +1978,7 @@ git commit -m “xxx&quot;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-17T20:53:59+08:00">2017-01-17</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-17T21:53:59+09:00">2017-01-17</time>
             
 
             
@@ -1863,165 +2078,6 @@ git commit -m “xxx&quot;
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/04/12/life/2016-11-08-cooperate/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/04/12/life/2016-11-08-cooperate/" itemprop="url">对接那点事</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-12T11:14:39+08:00">2016-04-12</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/生活/" itemprop="url" rel="index"><span itemprop="name">生活</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="谈对接"><a href="#谈对接" class="headerlink" title="谈对接"></a>谈对接</h3><p>说起对接，开发起来哪哪都是对接，自己逻辑对接，别人模块对接，后台接口对接等等，凡事出现功能交集，或者需要别的提供的接口时都会产生对接情况。</p>
-<p>我们都事故期望对接完美，什么都不缺，可往往是以愿违，或多或少的问题总是阻碍开发的进度，不仅如此还有可能陷入纠结和无语当中，今天来说说对接那点事，也是自己在工作中的一些体会，做个记录，希望有所帮助。</p>
-<h3 id="故事"><a href="#故事" class="headerlink" title="故事"></a>故事</h3><p>之前接手一个模块，数据部分设计到好几个模块，其实就是好几个人，操作数据的人多，所以出问题的地方就很多，不出问题还好，一出问题就各种推……总之很无语，所以就思考，如何在出问题的情况下，迅速排查出问题原因，用事实说话，这样于人于己都方便。</p>
-<h3 id="明确细节"><a href="#明确细节" class="headerlink" title="明确细节"></a>明确细节</h3><p>1、明确功能<br>    在开始做需求功能的时，一定要确定自己开发所需的数据、UI资源是否能按时提供或者给出的格式，方便预留。</p>
-<p>2、明确出错<br>    考虑各种出错的情况，明确哪些出错是自己的，哪些是其他模块的。</p>
-<p>3、明确定位<br>    在关键的位置添加log，根据响应的出错等情况，区分类型，定位到具体模块。</p>
-<h3 id="如何避免"><a href="#如何避免" class="headerlink" title="如何避免"></a>如何避免</h3><ul>
-<li>自己的模块尽量提供最简单的用法，谁用都方便；</li>
-<li>和测试提前沟通，不同人理解产品文档可能存在偏差，注意就好；</li>
-<li>确保测试环境配置没有问题，一些需要各种条件才能正常测试；</li>
-<li>给自己的模块做各种case测试；</li>
-</ul>
-<h3 id="如何排查"><a href="#如何排查" class="headerlink" title="如何排查"></a>如何排查</h3><ul>
-<li>根据页面显示来判断；</li>
-<li>查看是不是自己模块的问题；</li>
-<li>然后根据关键log标识排查接口问题；</li>
-</ul>
-<h3 id="说到最后"><a href="#说到最后" class="headerlink" title="说到最后"></a>说到最后</h3><p>我所说的都是一些小的对接，不过还是想开开心心高效的工作，另外说点大的，跨组、跨部门、乃至跨公司合作都类似，只是复杂程度不同，针对双方列出来的功能一定要逐一核对，明确功能。</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2073,7 +2129,7 @@ git commit -m “xxx&quot;
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">46</span>
+                    <span class="site-state-item-count">47</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2235,7 +2291,7 @@ git commit -m “xxx&quot;
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

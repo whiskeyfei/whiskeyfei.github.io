@@ -303,7 +303,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-4-12-androidstudio/">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-8-23-typeface/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="無名">
@@ -322,7 +322,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/03/25/android/2016-4-12-androidstudio/" itemprop="url">Android Studio 一些实用配置</a></h1>
+                <a class="post-title-link" href="/2016/03/25/android/2016-8-23-typeface/" itemprop="url">Android 换字体总结</a></h1>
         
 
         <div class="post-meta">
@@ -334,7 +334,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-25T10:59:01+08:00">2016-03-25</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-25T11:59:01+09:00">2016-03-25</time>
             
 
             
@@ -391,93 +391,252 @@
       
         
           
-            <p>Android Studio 目前已经更新到 2.0 稳定版，我目前使用的是 2.3.2 版本。记得在1.0开始的时候，使用 AS 时还不太习惯，虽然使用快捷键是 MAC eclipse，但是还是有些地方不一样，所以纪录在此，以备它用，当你从 eclipse 切换成 Android Studio 时，还想使用以前习惯的快捷键，这就需要自己来配置属于自己的 Android Studio了，好了废话不多说，看配置</p>
-<p><em>可以先查看目录有没有你找的配置问题，可以节省查找时间</em></p>
-<hr>
-<h3 id="主要内容"><a href="#主要内容" class="headerlink" title="主要内容"></a>主要内容</h3><ul>
-<li>代码折叠</li>
-<li>修改编码</li>
-<li>代码提示</li>
-<li>查看源码</li>
-<li>查看类使用</li>
-<li>自动导包</li>
-<li>显示行数</li>
-<li>匹配选中代码</li>
-<li>自定义配色</li>
-<li>配置Log 颜色</li>
-<li>驼峰自动命名</li>
-<li>导出配置</li>
-<li>自动提示错误</li>
-<li>关闭当前活动页面</li>
-<li>显示意图</li>
-<li>格式化代码</li>
-<li>手动匹配代码</li>
-<li>选择列</li>
-<li>自定义 File Heder</li>
-<li>模版相关</li>
+            <p>之前调研客户端动态换字体，尝试过很多方案，也走过很多弯路，总结下心路历程</p>
+<p>1、和 Rom 无关，限 App 内<br><br>2、支持动态切换<br><br>3、方式（自定义 、遍历、替换）<br></p>
+<h4 id="一、归根结底"><a href="#一、归根结底" class="headerlink" title="一、归根结底"></a>一、归根结底</h4><p>归根结底都是改变 Typeface 然后通过 setTypeface() 设置字体，包括系统的控件和 cavas 的 paint。</p>
+<h4 id="二、基础"><a href="#二、基础" class="headerlink" title="二、基础"></a>二、基础</h4><p>系统提供从 asset 目录和普通目录获取Typeface方法，如下：</p>
+<pre><code>Typeface.createFromAsset(mContext.getAssets(), name);
+Typeface.createFromFile(path);
+</code></pre><p>有了Typeface 就能更好的为换字体提供支持</p>
+<h4 id="三、方式"><a href="#三、方式" class="headerlink" title="三、方式"></a>三、方式</h4><h5 id="1、自定义"><a href="#1、自定义" class="headerlink" title="1、自定义"></a>1、自定义</h5><p>先来说说比较笨的方式，自定义所有能显示文字的控件，重写 setTypeface 方法，设置自己的 typeface 即可</p>
+<p>优点：直观一劳永逸，后期如果有其他需求，可以跟进开发，例如：不仅是字体样式，还有 Style 样式动态改变的情况；</p>
+<p>代码示例：</p>
+<pre><code>@Override
+public void setTypeface(Typeface tf) {
+    Typeface currentTypeface = TypefaceHelper.getInstance().getCurrentTypeface();
+        if (currentTypeface != null) {
+            super.setTypeface(currentTypeface);
+            return;
+        }
+    super.setTypeface(tf);
+}
+</code></pre><h5 id="2、遍历："><a href="#2、遍历：" class="headerlink" title="2、遍历："></a>2、遍历：</h5><p>查过很多资料也翻过 github 上的代码，有很多采用对当前页面 view 进行遍历的方式，遇到 继承自 TextView 的 View 就动态设置 typeface；</p>
+<p>优点：不用更改 xml、只在使用时候更改字体；</p>
+<p>缺点：<br></p>
+<ul>
+<li>循环遍历消耗性能，对大量 view 的界面不太适合，容易造成页面卡顿现象；</li>
+<li>对采用 cavas 的自定义画布的方式需要单独处理里面的文字显示；</li>
 </ul>
-<hr>
-<h3 id="1、代码折叠"><a href="#1、代码折叠" class="headerlink" title="1、代码折叠"></a>1、代码折叠</h3><p>很多人不喜欢代码折叠，比如我。。折叠起来很不习惯，设置修改如下：</p>
-<p>Editor -&gt; General -&gt; Code Folding</p>
-<p>也可以直接搜索 “code folding”</p>
-<p><img src="!--￼0--&gt;/as_code_floding.png" alt=""></p>
-<h3 id="2、修改编码"><a href="#2、修改编码" class="headerlink" title="2、修改编码"></a>2、修改编码</h3><p>Editor -&gt; General -&gt; File Encodings</p>
-<p><img src="!--￼1--&gt;/as_file_encodings.png" alt=""></p>
-<h3 id="3、代码提示忽略大小写"><a href="#3、代码提示忽略大小写" class="headerlink" title="3、代码提示忽略大小写"></a>3、代码提示忽略大小写</h3><p>Editor -&gt; General -&gt; Code Completion</p>
-<p>这个配置完以后，在写代码时，不管大写或者小写开头都会有代码提示</p>
-<p><img src="!--￼2--&gt;/as_code_completion.png" alt=""></p>
-<h3 id="4、查看源码"><a href="#4、查看源码" class="headerlink" title="4、查看源码"></a>4、查看源码</h3><p>在 eclipse 中习惯按住 Command 或者 Control 键＋鼠标，查看某个类源代码，但在 AS 没作用，这就需要更改 AS 默认设置，如下：</p>
-<p>keymap -&gt; 搜索 “Declaration”</p>
-<p><img src="!--￼3--&gt;/as_declaration.png" alt=""></p>
-<h3 id="5、查看被使用的类方法等"><a href="#5、查看被使用的类方法等" class="headerlink" title="5、查看被使用的类方法等"></a>5、查看被使用的类方法等</h3><p>常用场景，接口方法被多少类实现等，我这里习惯配置成 Command ＋ G</p>
-<p>keymap -&gt; 搜索 “Show Usages”</p>
-<p><img src="!--￼4--&gt;/as_show_usages.png" alt=""></p>
-<h3 id="6、自动导入依赖的包"><a href="#6、自动导入依赖的包" class="headerlink" title="6、自动导入依赖的包"></a>6、自动导入依赖的包</h3><p>Editor -&gt; General -&gt; Auto Import</p>
-<p><img src="!--￼5--&gt;/as_auto_import.png" alt=""></p>
-<h3 id="7、显示行数"><a href="#7、显示行数" class="headerlink" title="7、显示行数"></a>7、显示行数</h3><p>Editor -&gt; General -&gt; Appearance</p>
-<p><img src="!--￼6--&gt;/as_show_line.png" alt=""></p>
-<h3 id="8、快捷键匹配代码"><a href="#8、快捷键匹配代码" class="headerlink" title="8、快捷键匹配代码"></a>8、快捷键匹配代码</h3><p>keymap -&gt; 搜索 “Class Name Completion”</p>
-<p><img src="!--￼7--&gt;/as_class_name_completion.png" alt=""></p>
-<h3 id="9、自定义配色"><a href="#9、自定义配色" class="headerlink" title="9、自定义配色"></a>9、自定义配色</h3><p>我们可以根据自己的喜好，配置代码的颜色</p>
-<p>Editor -&gt; Colors &amp; Fonts -&gt; java</p>
-<p><img src="!--￼8--&gt;/as_custom_color.png" alt=""></p>
-<h3 id="10、Log-颜色"><a href="#10、Log-颜色" class="headerlink" title="10、Log 颜色"></a>10、Log 颜色</h3><p>将五种 log 颜色区分，有助于提高分析 log 效率</p>
-<p>Editor -&gt; Colors &amp; Fonts -&gt; Android Logcat</p>
-<p><img src="!--￼9--&gt;/as_log_color.png" alt=""></p>
-<h3 id="11、驼峰自动命名"><a href="#11、驼峰自动命名" class="headerlink" title="11、驼峰自动命名"></a>11、驼峰自动命名</h3><p>Editor -&gt; Code Style -&gt; java</p>
-<p><img src="!--￼10--&gt;/as_ hump_name.png" alt=""></p>
-<h3 id="12、导出配置"><a href="#12、导出配置" class="headerlink" title="12、导出配置"></a>12、导出配置</h3><p>当我们费劲把自己的 AS 调成自己想要的配置时，记得保存自己的配置，以防出问题后从配置文件恢复</p>
-<p>File -&gt; Export Settings <a href="https://www.jetbrains.com/help/idea/2016.1/exporting-and-importing-settings.html?origin=old_help" target="_blank" rel="noopener">详细查看导出步骤</a></p>
-<p><img src="!--￼11--&gt;/as_export_jar.png" alt=""></p>
-<h3 id="13、自动提示错误"><a href="#13、自动提示错误" class="headerlink" title="13、自动提示错误"></a>13、自动提示错误</h3><p>有一次遇到整个工程不自动提示错误信息，查了下，很简单，改个配置就可以了</p>
-<p>File -&gt; Power Save Mode 把前面的对勾取消就可以了</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-eef3f6033c14d315.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="自动提示错误配置"></p>
-<h3 id="14、自定义模版"><a href="#14、自定义模版" class="headerlink" title="14、自定义模版"></a>14、自定义模版</h3><p>Editor -&gt; Live Templates<br>新建一个自己的tab，在这里tab下添加代码模版</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-ae233bf07c9f5248.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="自定义模版"></p>
-<h3 id="15、关闭当前活动页面"><a href="#15、关闭当前活动页面" class="headerlink" title="15、关闭当前活动页面"></a>15、关闭当前活动页面</h3><p><img src="http://upload-images.jianshu.io/upload_images/877678-6da7eb747966675e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Close"></p>
-<h3 id="16、显示意图"><a href="#16、显示意图" class="headerlink" title="16、显示意图"></a>16、显示意图</h3><p>多用于实现接口或抽象类方法等操作</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-717c8df29bdedace.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Show Intention Actions"></p>
-<h3 id="17、格式化代码"><a href="#17、格式化代码" class="headerlink" title="17、格式化代码"></a>17、格式化代码</h3><p><img src="http://upload-images.jianshu.io/upload_images/877678-75217200b323264d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Reformat Code"></p>
-<h3 id="18、手动匹配代码"><a href="#18、手动匹配代码" class="headerlink" title="18、手动匹配代码"></a>18、手动匹配代码</h3><p><img src="http://upload-images.jianshu.io/upload_images/877678-60d622255d696a1b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Class Name Completion"></p>
-<h3 id="19、选择列"><a href="#19、选择列" class="headerlink" title="19、选择列"></a>19、选择列</h3><p>正常选择时，都是由左向右右上到下的选择方式，列选择模式下，是根据鼠标选中的矩形区域来选择。<br>使用方式：按住Alt，然后拖动鼠标选择(mac 环境下)</p>
-<h3 id="20、自定义-File-Heder"><a href="#20、自定义-File-Heder" class="headerlink" title="20、自定义 File Heder"></a>20、自定义 File Heder</h3><p>希望创建的文件统一描述</p>
-<p>Editor -&gt; File and Code Templates</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-36f96503c4aa6b5f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="File and Code Templates.png"></p>
-<h3 id="21、模版相关"><a href="#21、模版相关" class="headerlink" title="21、模版相关"></a>21、模版相关</h3><p>AS 系统给我们提供了很多好用的快捷模版，可以高效的编写代码，来节省一些无用耗时。</p>
-<h5 id="定义常量"><a href="#定义常量" class="headerlink" title="定义常量"></a>定义常量</h5><p>int：</p>
-<p>输入：  const 输出以下</p>
-<pre><code>private static final int  = 665;
-</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/877678-03f0e4ea86fa3f9c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<p>String：<br>输入：key 输出</p>
-<pre><code>private static final String KEY_ = &quot;&quot;;
-</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/877678-c28fb8a48da25d0d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<p>其他类型常量：</p>
-<p>输入：psf 输出以下</p>
-<pre><code>public static final
-</code></pre><h5 id="自动补全-TAG"><a href="#自动补全-TAG" class="headerlink" title="自动补全 TAG"></a>自动补全 TAG</h5><p>输入：logt 会有提示</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-9b14365b7b0f3dae.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
-<h5 id="自动补全-log-打印"><a href="#自动补全-log-打印" class="headerlink" title="自动补全 log 打印"></a>自动补全 log 打印</h5><p>输入：logi(其他类型都可以，例如：loge、logd)<br><img src="http://upload-images.jianshu.io/upload_images/877678-09d9579fea9e13d1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>收集平时遇到的配置问题等汇聚在此，还有一些关于升级主题等配置，以后慢慢汇总在此，目前只纪录平时遇到的配置。</p>
+<p>代码示例：</p>
+<pre><code>private void applyForView(View view, Typeface typeface) {
+    if (view instanceof TextView) {
+        TextView textView = (TextView) view;
+        TextPaint paint = textView.getPaint();
+        paint.setTypeface(typeface);
+        textView.invalidate();
+    }
+}
+</code></pre><h5 id="3、替换掉系统字体"><a href="#3、替换掉系统字体" class="headerlink" title="3、替换掉系统字体"></a>3、替换掉系统字体</h5><p>在程序启动初始化的时候，将系统的字体通过反射的方式替换掉我们的字体包，这个是目前改动最小的地方</p>
+<p>优点：<br></p>
+<ul>
+<li>不用更改 xml、和动态更改 typeface；<br></li>
+</ul>
+<p>缺点：<br></p>
+<ul>
+<li>干涉了系统字体，可能会造成影响;<br></li>
+</ul>
+<p>参考：<a href="https://github.com/whiskeyfei/FontOverrideExample" target="_blank" rel="noopener">https://github.com/whiskeyfei/FontOverrideExample</a><br></p>
+<p>代码示例：</p>
+<pre><code>final Typeface normal_monospace = Typeface.createFromAsset(getAssets(), DEFAULT_MONOSPACE_NORMAL_FONT_FILENAME);
+Field monospaceDefaultField = Typeface.class.getDeclaredField(&quot;MONOSPACE&quot;);
+monospaceDefaultField.setAccessible(true);
+monospaceDefaultField.set(null, normal_monospace);
+</code></pre><h3 id="四、动态改变："><a href="#四、动态改变：" class="headerlink" title="四、动态改变："></a>四、动态改变：</h3><p>1、采用观察者模式，字体改变通知所以订阅着改变自己的字体；<br><br>2、ViewGroup做监听，遍历所有子 view，还需要注意的动态新添加的 view 也要绑定监听，不然新 view 不能动态改变;<br></p>
+<p>这两种方式都试过，由于 view 较多，影响效率，也就放弃了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上简单总结了 Android 换字体使用的方案，可以翻看参考的 github 库来实践。</p>
+<p>注意：如果是中文字体，一定要注意字体包的完整性，有一些是个人做的，可能会有一些问题，我遇到的就是中英文字体 padding 不一样，造成显示效果不一样。<br></p>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p>一些关于字体的开源库：<br></p>
+<ul>
+<li><a href="https://github.com/chrisjenx/Calligraphy" target="_blank" rel="noopener">https://github.com/chrisjenx/Calligraphy</a></li>
+<li><a href="https://github.com/johnkil/Android-Icon-Fonts" target="_blank" rel="noopener">https://github.com/johnkil/Android-Icon-Fonts</a></li>
+<li><a href="https://github.com/GcsSloop/FontsManager" target="_blank" rel="noopener">https://github.com/GcsSloop/FontsManager</a></li>
+<li><a href="https://github.com/vsvankhede/EasyFonts" target="_blank" rel="noopener">https://github.com/vsvankhede/EasyFonts</a></li>
+<li><a href="https://github.com/Pixplicity/letterpress" target="_blank" rel="noopener">https://github.com/Pixplicity/letterpress</a></li>
+<li><a href="https://github.com/svendvd/Fontinator" target="_blank" rel="noopener">https://github.com/svendvd/Fontinator</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-4-8-android-overdraw-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/03/25/android/2016-4-8-android-overdraw-note/" itemprop="url">Android Overdraw 初识及如何优化</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-25T11:59:01+09:00">2016-03-25</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最近在分析项目中的内存泄露和过渡绘制问题，关于如何避免简单内存泄露问题，已经在其他博客中记录了，今天来记录下关于 Android OverDraw 的知识点。</p>
+<h2 id="Overdraw-概况"><a href="#Overdraw-概况" class="headerlink" title="Overdraw 概况"></a>Overdraw 概况</h2><p>Overdraw(过度绘制)描述的是屏幕上的某个像素在同一帧的时间内被绘制了多次。在多层次的UI结构里面，如果不可见的UI也在做绘制的操作，这就会导致某些像素区域被绘制了多次，这就浪费大量的CPU以及GPU资源，从而降低了程序的性能。</p>
+<p>例如：在白色的顶部栏绘制一个按钮，按钮绘制在背景上面，就是overdraw，当然这里只是说明。</p>
+<h3 id="如何开启？"><a href="#如何开启？" class="headerlink" title="如何开启？"></a>如何开启？</h3><p>开发者选项 - 开启GPU过度绘制</p>
+<p><img src="!--￼1--&gt;/Overdraw1.png" alt=""></p>
+<h3 id="基本效果"><a href="#基本效果" class="headerlink" title="基本效果"></a>基本效果</h3><p><img src="!--￼2--&gt;/Overdraw3.png" alt=""></p>
+<h3 id="颜色含义解释"><a href="#颜色含义解释" class="headerlink" title="颜色含义解释"></a>颜色含义解释</h3><ul>
+<li>没有颜色:  表示没有重绘</li>
+<li>蓝色：表示重绘了一次,每个像素只画了两次,大块的蓝色是可以接受的</li>
+<li>绿色：表示重绘了两次,每个像素画了三次,中等尺寸的绿色方块是可以接受的，最好尝试优化</li>
+<li>红色：表示重绘了三次，这个像素被画了四次,很小尺寸的红色方块是可以接受的</li>
+<li>黑色：表示重绘了四次及以上,这个像素被画了五次及以上。这个是要必须解决的</li>
+</ul>
+<h3 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h3><p>打开调试的应用，观察颜色过渡绘制情况，根据显示颜色分析哪些需要优化！</p>
+<p>系统页面</p>
+<p><img src="!--￼3--&gt;/Overdraw2.png" alt=""></p>
+<p>VST 应用</p>
+<p><img src="!--￼4--&gt;/Overdraw5.png" alt=""></p>
+<p><img src="!--￼5--&gt;/Overdraw6.png" alt=""></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>以上只是简单介绍了如何调适使用 Overdraw 调适工具，还可以使用 android 自带工具 Hierarchy Viewer，<br>来查看 view 的层级关系，4.2以下没有 Overdraw 调适选项，如果真机没有的话可以使用<br>第三方的 genymotion 模拟器，很好用。</p>
+<h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><p>主要是为了说明问题，在 demo 中演示，以下是效果对比：</p>
+<p>之前：</p>
+<p><img src="!--￼6--&gt;/Overdraw7.png" alt=""></p>
+<p>之后：白色区域为没有重复绘制</p>
+<p><img src="!--￼7--&gt;/Overdraw8.png" alt=""></p>
+<p>优化点：</p>
+<p>1、去掉window的默认背景</p>
+<p>首先如果子 view 上设置背景的话，就要把根布局上背景去掉，同时去掉这个那个 activity 的背景。</p>
+<pre><code>getWindow().setBackgroundDrawable(null);
+</code></pre><p>在setContentView之后设置才能起作用        </p>
+<p>2、去除多余的层级</p>
+<p>首先是采用最简单的布局来搭建页面，不要过多的嵌套 LinearLayout 和 RelativeLayout，<br>然后使用 include、merge、viewstub 标签进行优化 view 层级。</p>
+<p>具体可以查看以前的笔记 <a href="!--￼0--">Android ViewStub、include、merge 标签使用</a></p>
+<p>这里三个标签主要是减少 view 层级，去除多余重复的 view 布局，以及 include 能复用一些相同的布局，ViewStub 是惰性控件占位作用，只有需要<br>的时候才去初始化 view。</p>
+<p>3、使用透明图片或者 .9 格式图片</p>
+<p>有时候图片是有边框的，这时候就可以用.9格式的图片设置背景。</p>
+<p>4、和设计同学多沟通</p>
+<p>这里就是实际开发中，要在效果和性能上达到一个合理比例，不能一味的为了效果导致性能下降。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
+<li><a href="http://developer.android.com/intl/zh-cn/tools/performance/debug-gpu-overdraw/index.html#VisualizingOverdraw" target="_blank" rel="noopener">Debug GPU Overdraw Walkthrough</a></li>
+<li><a href="http://hukai.me/android-performance-patterns/" target="_blank" rel="noopener">Android性能优化典范 - 第1季</a></li>
+</ul>
 
           
         
@@ -562,7 +721,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-24T11:26:35+08:00">2016-03-24</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-24T12:26:35+09:00">2016-03-24</time>
             
 
             
@@ -776,7 +935,7 @@ String S1 = S2 +S3 + S4;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-09T14:11:17+08:00">2016-03-09</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-03-09T15:11:17+09:00">2016-03-09</time>
             
 
             
@@ -922,7 +1081,7 @@ String S1 = S2 +S3 + S4;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-26T09:21:51+08:00">2016-02-26</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-26T10:21:51+09:00">2016-02-26</time>
             
 
             
@@ -1034,162 +1193,6 @@ String S1 = S2 +S3 + S4;
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/12/28/life/2015-12-28-bye2015hi2016/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/12/28/life/2015-12-28-bye2015hi2016/" itemprop="url">无名-我为自己代言</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-28T20:55:26+08:00">2015-12-28</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/生活/" itemprop="url" rel="index"><span itemprop="name">生活</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>今天看到，秋百万发起的 <a href="https://github.com/winter-fall/Bye2015Hi2016" target="_blank" rel="noopener">Bye2015Hi2016</a> ，也来尝试写一篇来记录过去的2015，起个什么名字呢，无名是微信昵称，就《无名-我为自己代言》吧，咱也来说说这一年，早在半年前6月份时候，也写过一篇类似这样的文章，好在列的目标基本上都实现了；</p>
-<p>记得当时心情及其糟糕，自身的情况和小伙伴的离职等等吧，自己也很希望赶紧找回工作状态，不知怎么的就看到了 codekk 的 <a href="https://github.com/aosp-exchange-group/fuck-2014-flirt-2015" target="_blank" rel="noopener">fuck-2014-flirt-2015</a> ,看了其他人写的文章，让我触动很大，还有很多的人在奋斗在codeing，不断的受虐同时也在不断的进步，这时候正能量满满的，所以写了下面三个方面：</p>
-<h2 id="收获"><a href="#收获" class="headerlink" title="收获"></a>收获</h2><p>说起来还是比较幸运的，毕业就签了某公司的offer，没有犹豫，从实习到正式入职,从旱鸭子到深水区,买了mac，<br>给妈妈买了手机，姐姐妹妹买了衣服鞋子，外甥买了玩具,没给父母丢脸，在北京好好混,从一个没有项目经验的，到第一个、第二个项目，确确实实学到了不少东西。</p>
-<h2 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h2><p>心还是太浮躁，没有沉下心，技术点有些半知半解，浅尝辄止的现象，心情容易受工作影响，很放纵的做一些不想做的事情。</p>
-<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>身体最重要，一定要坚持锻炼，打球游泳不断，阅读书籍（技术非技术都要学习），充实自己，也许在未来就用到了，多回家看看陪陪父母，争取和父母出去玩一次（自己花钱）<br>给妹妹攒钱上大学，稳扎稳打，把技术点一一再过一遍，不会的不清楚的一定要吃透，只有这样才能进步，阅读一些开源框架，不在于多少，在于能够熟练使用,<br>抽空和朋友聚聚，记住出门在外靠朋友，扩展人脉</p>
-<p>稀稀拉拉列了不少，现在看着都有些可笑，但是达到上面这样的目标自己也是付出了很多，包括精力时间也包括身体，我一直相信那句话“有付出总会有收获”，自己学的东西没准那一天就用上了，来公司的第一个年基本上都在在加班中度过的，一周6天，偶尔也7天，平常下班到家都11，12点，基本上没有运动，身板不太好的我那会体重只有55KG，然而在14年年末由于阑尾炎直接降到了50KG以下，庆幸慢性阑尾炎没有切掉，也没有和家里说，默默的打点滴一个星期，喝粥吃咸菜，就这样过了年，也完成了版本迭代。</p>
-<p>就这样迎来了15年，现在回想起那会的状态，当时自己确实很难受，在租的房间里，一躺就是一天，该坚持该放弃，很明显，我选择了坚持，记住在最无助或者想不开想不懂的时候，别去钻牛角尖，和好兄弟去喝几杯就好了，期间特别爱喝酒，自己回家也会和几罐啤酒，可能自己想麻痹来放松自己，就当减压了吧，这个状态没有持续多久，慢慢也就正常了。</p>
-<p>就这样开始去运动，去思考。。学这去改变自己，改变工作状态，改变生活态度。</p>
-<h2 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h2><p>按部就班的版本迭代，开发新功能，工作之余，开始使用github，git，开始浏览一些大牛的技术博客，比如：代码家，秋百万，干活集中营，技术小黑屋，胡凯技术博客，codekk等等，开始学习一些框架思想，例如：MVP，MVVP等等，收藏技术贴，学习android性能优化，并能应用到实际项目当中，自己写小demo，使用git提交管理等等，记得第一次给别人PR还有一点的紧张，现在不会了，也fork参与了一些项目，最后说一点这段时间最大的收获吧，技术文章不在于收藏的多少，而在于你自己用心读了多少，不要以为收藏了就学会了，很多时候自己其实在欺骗自己，所以看到一篇想学的技术一定要吃透，应用到自己的实际开发中，这样才能提高。</p>
-<h2 id="生活"><a href="#生活" class="headerlink" title="生活"></a>生活</h2><p>开始每周打羽毛球游泳，周末不再有那么多的加班，提高工作效率，平时读了一些小说，google work,重新读了左耳。。青春系列小说，也是够了。。十一时候和小伙伴去青海玩了一趟，感觉很爽，给人一种不一样的感觉，心灵仿佛也得到了洗礼，为那些骑行的人竖起大拇指。下半年刚开始回家看爸妈比较多，给爸妈换上了苹果，当然自己也换了，三件套就差pad了，啧啧，小妹16年高考，作为哥哥也要为妹妹准备点东西，真真切切觉的，温暖的家是你在外工作的后盾，家人身体健康是最大的财富。</p>
-<h2 id="展望2016"><a href="#展望2016" class="headerlink" title="展望2016"></a>展望2016</h2><p>1、16年是重要的一年，技术当然要更上一层楼，毕竟靠技术吃饭嘛，还是要稳扎稳打，做好平时的技术积累，知其然知其所以然，多写博客，通过写东西来训练逻辑思维，找几本Android进阶的书，学习RxJava，做读书笔记，避免浅尝辄止，学习框架知识，编写自己的app，应用所学的知识。</p>
-<p>2、身体很重要，没了身体＝都没了，所以还是要加强锻炼,健身打球游泳一定要坚持！！</p>
-<p>3、找一个城市旅行旅行，这没的说，必须去！！(这个需求再16年开始就完成了，和她一起去的西安，以后还要去更多的地方！)</p>
-<p>还是那句话，最重要一点：要好好做人，这个从大学我就一直坚信，做人，要从生活的点点滴滴做起，对家人对朋友一定要真心相待，问心无愧足已。</p>
-<p><em>配图为10月份的青海湖，美极了，有机会还要去一次！<em></em></em></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/12/28/book/2016-3-22-book1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1221,7 +1224,7 @@ String S1 = S2 +S3 + S4;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-28T20:55:26+08:00">2015-12-28</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-28T21:55:26+09:00">2015-12-28</time>
             
 
             
@@ -1350,6 +1353,162 @@ String S1 = S2 +S3 + S4;
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/12/28/life/2015-12-28-bye2015hi2016/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/28/life/2015-12-28-bye2015hi2016/" itemprop="url">无名-我为自己代言</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-28T21:55:26+09:00">2015-12-28</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/生活/" itemprop="url" rel="index"><span itemprop="name">生活</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>今天看到，秋百万发起的 <a href="https://github.com/winter-fall/Bye2015Hi2016" target="_blank" rel="noopener">Bye2015Hi2016</a> ，也来尝试写一篇来记录过去的2015，起个什么名字呢，无名是微信昵称，就《无名-我为自己代言》吧，咱也来说说这一年，早在半年前6月份时候，也写过一篇类似这样的文章，好在列的目标基本上都实现了；</p>
+<p>记得当时心情及其糟糕，自身的情况和小伙伴的离职等等吧，自己也很希望赶紧找回工作状态，不知怎么的就看到了 codekk 的 <a href="https://github.com/aosp-exchange-group/fuck-2014-flirt-2015" target="_blank" rel="noopener">fuck-2014-flirt-2015</a> ,看了其他人写的文章，让我触动很大，还有很多的人在奋斗在codeing，不断的受虐同时也在不断的进步，这时候正能量满满的，所以写了下面三个方面：</p>
+<h2 id="收获"><a href="#收获" class="headerlink" title="收获"></a>收获</h2><p>说起来还是比较幸运的，毕业就签了某公司的offer，没有犹豫，从实习到正式入职,从旱鸭子到深水区,买了mac，<br>给妈妈买了手机，姐姐妹妹买了衣服鞋子，外甥买了玩具,没给父母丢脸，在北京好好混,从一个没有项目经验的，到第一个、第二个项目，确确实实学到了不少东西。</p>
+<h2 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h2><p>心还是太浮躁，没有沉下心，技术点有些半知半解，浅尝辄止的现象，心情容易受工作影响，很放纵的做一些不想做的事情。</p>
+<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>身体最重要，一定要坚持锻炼，打球游泳不断，阅读书籍（技术非技术都要学习），充实自己，也许在未来就用到了，多回家看看陪陪父母，争取和父母出去玩一次（自己花钱）<br>给妹妹攒钱上大学，稳扎稳打，把技术点一一再过一遍，不会的不清楚的一定要吃透，只有这样才能进步，阅读一些开源框架，不在于多少，在于能够熟练使用,<br>抽空和朋友聚聚，记住出门在外靠朋友，扩展人脉</p>
+<p>稀稀拉拉列了不少，现在看着都有些可笑，但是达到上面这样的目标自己也是付出了很多，包括精力时间也包括身体，我一直相信那句话“有付出总会有收获”，自己学的东西没准那一天就用上了，来公司的第一个年基本上都在在加班中度过的，一周6天，偶尔也7天，平常下班到家都11，12点，基本上没有运动，身板不太好的我那会体重只有55KG，然而在14年年末由于阑尾炎直接降到了50KG以下，庆幸慢性阑尾炎没有切掉，也没有和家里说，默默的打点滴一个星期，喝粥吃咸菜，就这样过了年，也完成了版本迭代。</p>
+<p>就这样迎来了15年，现在回想起那会的状态，当时自己确实很难受，在租的房间里，一躺就是一天，该坚持该放弃，很明显，我选择了坚持，记住在最无助或者想不开想不懂的时候，别去钻牛角尖，和好兄弟去喝几杯就好了，期间特别爱喝酒，自己回家也会和几罐啤酒，可能自己想麻痹来放松自己，就当减压了吧，这个状态没有持续多久，慢慢也就正常了。</p>
+<p>就这样开始去运动，去思考。。学这去改变自己，改变工作状态，改变生活态度。</p>
+<h2 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h2><p>按部就班的版本迭代，开发新功能，工作之余，开始使用github，git，开始浏览一些大牛的技术博客，比如：代码家，秋百万，干活集中营，技术小黑屋，胡凯技术博客，codekk等等，开始学习一些框架思想，例如：MVP，MVVP等等，收藏技术贴，学习android性能优化，并能应用到实际项目当中，自己写小demo，使用git提交管理等等，记得第一次给别人PR还有一点的紧张，现在不会了，也fork参与了一些项目，最后说一点这段时间最大的收获吧，技术文章不在于收藏的多少，而在于你自己用心读了多少，不要以为收藏了就学会了，很多时候自己其实在欺骗自己，所以看到一篇想学的技术一定要吃透，应用到自己的实际开发中，这样才能提高。</p>
+<h2 id="生活"><a href="#生活" class="headerlink" title="生活"></a>生活</h2><p>开始每周打羽毛球游泳，周末不再有那么多的加班，提高工作效率，平时读了一些小说，google work,重新读了左耳。。青春系列小说，也是够了。。十一时候和小伙伴去青海玩了一趟，感觉很爽，给人一种不一样的感觉，心灵仿佛也得到了洗礼，为那些骑行的人竖起大拇指。下半年刚开始回家看爸妈比较多，给爸妈换上了苹果，当然自己也换了，三件套就差pad了，啧啧，小妹16年高考，作为哥哥也要为妹妹准备点东西，真真切切觉的，温暖的家是你在外工作的后盾，家人身体健康是最大的财富。</p>
+<h2 id="展望2016"><a href="#展望2016" class="headerlink" title="展望2016"></a>展望2016</h2><p>1、16年是重要的一年，技术当然要更上一层楼，毕竟靠技术吃饭嘛，还是要稳扎稳打，做好平时的技术积累，知其然知其所以然，多写博客，通过写东西来训练逻辑思维，找几本Android进阶的书，学习RxJava，做读书笔记，避免浅尝辄止，学习框架知识，编写自己的app，应用所学的知识。</p>
+<p>2、身体很重要，没了身体＝都没了，所以还是要加强锻炼,健身打球游泳一定要坚持！！</p>
+<p>3、找一个城市旅行旅行，这没的说，必须去！！(这个需求再16年开始就完成了，和她一起去的西安，以后还要去更多的地方！)</p>
+<p>还是那句话，最重要一点：要好好做人，这个从大学我就一直坚信，做人，要从生活的点点滴滴做起，对家人对朋友一定要真心相待，问心无愧足已。</p>
+<p><em>配图为10月份的青海湖，美极了，有机会还要去一次！<em></em></em></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-demo/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1381,7 +1540,7 @@ String S1 = S2 +S3 + S4;
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T18:28:39+08:00">2015-11-10</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
             
 
             
@@ -1602,7 +1761,7 @@ mHandler.post(new ItemRunnble(mItem))
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T18:28:39+08:00">2015-11-10</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
             
 
             
@@ -1830,7 +1989,7 @@ Uptime: 16199425 Realtime: 16199425
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T18:28:39+08:00">2015-11-10</time>
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
             
 
             
@@ -2102,279 +2261,6 @@ public class ImageModel implements IImageModel {
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-11-17-android-use-mvp/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/10/android/2015-11-17-android-use-mvp/" itemprop="url">Android MVP 简单使用</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T18:28:39+08:00">2015-11-10</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>前段时间接了一个模块，使用 MVP 思想来优化，考虑到不能太多的影响现有模块功能和其他调用方式，没有做太大的改动，只是将流程进行了梳理和优化，直接上案例。</p>
-<p><em>MVP</em> 是一套理论概念，而不是一种具体实现,需要注意 MVP 仅用于应用中的 GUI 部分，它并不是整个应用的架构方式，一个应用的主要的架构应该包括基础组件，业务逻辑层和 GUI 展示层，而 MVP仅是用于展示层的设计模式。另外，它是一个方法论的东西，没有固定的实现方式，只要能体现出它的方法就可以算是 MVP。</p>
-<h2 id="MVC"><a href="#MVC" class="headerlink" title="MVC"></a>MVC</h2><p>简单说下 MVC(Model-View-Controller), MVC 在网站开发中用的多，以前用 Thinkphp 时就是 MVC，MVC 机构分为三部分，实体层的 Model，视图层的 View，控制层的 Controller。<br>View 就是我们看到的程序界面，接受用户的操作，Model 就是数据，Controller 用于更新 View 和 Model。<br>这样三部分都将自己的业务分开，不必干扰其他模块部分，和设计模式当中类功能的单一职责相似。</p>
-<h2 id="MVP"><a href="#MVP" class="headerlink" title="MVP"></a>MVP</h2><p>MVP 模式（Model-View-Presenter）应该是 MVC 在 Android开发上的一种变化模式，其思想是一样的，都是将三层业务分离。<br>View 对应 Activity，业务逻辑 Presenter，Model 还是数据。<br>这样划分以后，三层工作逻辑很清晰，view 只管相应用户等系统事件，具体操作全都丢到 Persenter 中，而 view 不能直接操作 model，需要通过 Presenter 中转。</p>
-<h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><ul>
-<li>分离了 Activity 中的 UI 和业务逻辑，降低了耦合程度，以后如果更换view层会很方便，因为UI层和业务层互不影响，只存在一个调用关系;</li>
-<li>业务逻辑层代码可以复用，降低了维护成本;</li>
-<li>增强了代码的可读性，一层一层调用会很清晰;</li>
-<li>可以进行单元测试，通过后和 UI 层在进行合并，提高效率;</li>
-</ul>
-<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><ul>
-<li>不能为了接口而抽象,适当的抽象;</li>
-<li>考虑业务是否符合 MVP;</li>
-<li>view 过多时,不建议使用 MVP ,view 增多导致 Presenter 增多,从而不以维护，不过一般 view 也不会太多;</li>
-</ul>
-<h2 id="约束条件"><a href="#约束条件" class="headerlink" title="约束条件"></a>约束条件</h2><ul>
-<li>Model 与 View 不能直接通信，只能通过 Presenter;</li>
-<li>Model 和 View 是接口，Presenter 持有的是一个 Model 接口和一个 View 接口;</li>
-<li>Model 和 View 都应该是被动的，一切都由 Presenter 来主导;</li>
-<li>Model 应该把与业务逻辑层的交互封装掉，换句话说 Presenter 和 View 不应该知道业务逻辑层；</li>
-<li>View 的逻辑应该尽可能的简单，不应该有状态。当事件发生时，调用 Presenter 来处理，并且不传参数，Presenter 处理时再调用 View 的方法来获取;</li>
-</ul>
-<h2 id="具体使用"><a href="#具体使用" class="headerlink" title="具体使用"></a>具体使用</h2><p>定义View接口</p>
-<pre><code>public interface IMainView {
-  /**
-   * view 显示文字
-   * @param text
-   */
-  void showTextView(String text);
-  }
-</code></pre><p>定义Presenter接口</p>
-<pre><code>  public interface IMainPresenter {
-    /**
-     * 显示文字事件分发
-     */
-    void show();
-}
-</code></pre><p>定义Model接口</p>
-<pre><code>  public interface IMainModel {
-    /**
-     * 显示文字逻辑实现
-     */
-    void show();
-}
-</code></pre><p>定义结果回调接口，再Presenter中使用，给Model回调，然后再回调view，修改UI</p>
-<pre><code>public interface IMainCallback {
-    /**
-     * 显示结果文字
-     * @param string
-     */
-    void show(String string);
-}
-</code></pre><p>View实现</p>
-<pre><code>public class MainActivity extends Activity implements IMainView {
-
-    private TextView mTextView;
-    private Button mButton;
-    private IMainPresenter mMainPresenter;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        initView();
-        mMainPresenter = new MainPresenter(this);
-        mButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                mMainPresenter.show();
-            }
-        });
-    }
-
-    void initView() {
-        mTextView = (TextView) findViewById(R.id.text);
-        mButton = (Button) findViewById(R.id.loadButton);
-    }
-
-    @Override
-    public void showTextView(final String text) {
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-                mTextView.setText(text);
-            }
-        });
-    }
-
-}
-</code></pre><p>Presenter实现</p>
-<pre><code>public class MainPresenter implements IMainPresenter,IMainCallback{
-    private IMainView mMainView;
-    private IMainModel mUserModel;
-
-    public MainPresenter(IMainView view) {
-        mMainView = view;
-        mUserModel = new MainModel(this);
-    }
-
-    @Override
-    public void show() {
-        mUserModel.show();
-    }
-
-    @Override
-    public void show(String string) {
-        mMainView.showTextView(string);
-    }
-}
-</code></pre><p>Model实现</p>
-<pre><code>public class MainModel implements IMainModel {
-    IMainCallback call;
-
-    public MainModel(IMainCallback call) {
-        this.call = call;
-    }
-
-    @Override
-    public void show() {
-        call.show(&quot;123&quot;);
-    }
-
-}    
-</code></pre><h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
-<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
-<li><a href="http://rocko.xyz/2015/02/06/Android%E4%B8%AD%E7%9A%84MVP/" target="_blank" rel="noopener">Android中的MVP</a></li>
-<li><a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>文章中有些话，摘自<a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>一文</li>
-</ul>
-<h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><p>代码是最好的老师，自行下载:<a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFAndroid_MVP" target="_blank" rel="noopener">WFAndroid_MVP</a></p>
-<h2 id="推荐"><a href="#推荐" class="headerlink" title="推荐"></a>推荐</h2><p><a href="http://doraemonyu.me/android/2015/12/17/android-use-mvp2.html" target="_blank" rel="noopener">Android MVP简单使用2</a></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2426,7 +2312,7 @@ public class ImageModel implements IImageModel {
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">46</span>
+                    <span class="site-state-item-count">47</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2588,7 +2474,7 @@ public class ImageModel implements IImageModel {
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; 2014 &mdash; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
