@@ -303,6 +303,324 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-12-17-android-use-mvp2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/11/10/android/2015-12-17-android-use-mvp2/" itemprop="url">Android MVP 项目使用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>前段时间学习 MVP 思想，在原来 <a href="https://github.com/liuling07/SimpleNews" target="_blank" rel="noopener">SimpleNews</a> 的基础上，修改了数据层和 UI 层的逻辑，使用 RxJava + MVP 组合方式，重构完成 <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a>，目前还存在很多需要优化的地方，今天说说 SimpleNews.io 中用到的 MVP 部分。</p>
+<p>参考 <a href="https://github.com/ribot/android-boilerplate" target="_blank" rel="noopener">android-boilerplate</a>, 添加 base Presenter 和 base View,以后所有的 Presenter 和 View 都需要继承 base ,这样在Presenter这一层才能使用统一方法回调接口，Model 暂时没有改变</p>
+<h3 id="好处"><a href="#好处" class="headerlink" title="好处"></a>好处</h3><p>1、BasePresenter 将不同的view接口统一，不返回具体的view接口，通过方法操作，易于扩展;<br><br>2、view 接口的绑定统一化;</p>
+<h3 id="基础使用"><a href="#基础使用" class="headerlink" title="基础使用"></a>基础使用</h3><p>定义View接口，暂时为空，子类可以扩展添加</p>
+<pre><code>public interface IMVPBaseView {
+
+}
+</code></pre><p>定义Presenter接口</p>
+<pre><code>public interface IMVPPresenter&lt;V extends IMVPBaseView&gt; {
+    /**
+     * 附加view回调接口
+     *
+     * @param mvpBaseView
+     */
+    void attachView(V mvpBaseView);
+
+     /**
+     * 释放view接口
+     */
+    void detachView();
+
+}
+</code></pre><p>BasePresenter实现</p>
+<pre><code>public class BasePresenter&lt;T extends IMVPBaseView&gt; implements IMVPPresenter&lt;T&gt; {
+    private T mMvpBaseView;
+
+    @Override
+    public void attachView(T mvpBaseView) {
+        mMvpBaseView = mvpBaseView;
+    }
+
+    @Override
+    public void detachView() {
+        mMvpBaseView = null;
+    }
+
+    public T getMvpBaseView() {
+        return mMvpBaseView;
+    }
+
+    /**
+     * 是否附加view接口
+     *
+     * @return true mvpBaseView != null
+     */
+    public boolean isViewAttached() {
+        return mMvpBaseView != null;
+    }
+
+    /**
+     * 检查是否绑定view接口
+     */
+    public void checkViewAttached() {
+        if (!isViewAttached())
+            throw new RuntimeException(
+                    &quot;Please call BasePresenter.attachView(IMVPBaseView) before&quot;
+                            + &quot; requesting data to the Presenter&quot;);
+    }
+}
+</code></pre><h3 id="项目使用"><a href="#项目使用" class="headerlink" title="项目使用"></a>项目使用</h3><p>首先看下我的项目结构:</p>
+<p><img src="!--￼0--&gt;/assets/image/mvp.png" alt="mvp"></p>
+<p>拿获取图片列表来举例，逻辑是这样：获取数据并解析结果给 view 展示。首先在 Fragment 中即 View 接口的实现类中<br>初始化我们的 Presenter 同时会初始化一个 Model，Fragment 调用 Presenter 中的方法，例如：loadImageList() 方法，接着去调用 Model中<br>的getImageList()方法,最后 Model 讲结果回调给 Presenter 层，Presenter 再回调给 View层，这样就完成了一个 MVP逻辑，以下是部分代码。</p>
+<pre><code>//View
+private IImagePresenter mImagePresenter;
+
+@Override
+public void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    mImagePresenter = new ImagePresenter(this);
+}
+
+//Presenter
+public class ImagePresenter extends BasePresenter&lt;IImageView&gt; implements IImagePresenter {
+private static final String TAG = &quot;ImagePresenter&quot;;
+private IImageModel mImageModel;
+private Subscription mSubscription;
+
+public ImagePresenter(IImageView imageView) {
+    attachView(imageView);
+    mImageModel = new ImageModel();
+}
+
+@Override
+public void detachView() {
+    super.detachView();
+    if (mSubscription != null) {
+        mSubscription.unsubscribe();
+    }
+}
+
+@Override
+public void loadImageList() {
+    checkViewAttached();
+    mSubscription = mImageModel.getImageList()
+            .subscribeOn(Schedulers.io())
+            .doOnSubscribe(new Action0() {
+                @Override
+                public void call() {
+                    getMvpBaseView().showProgress();
+                }
+            })
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Observer&lt;List&lt;ImageBean&gt;&gt;() {
+                @Override
+                public void onCompleted() {
+                    getMvpBaseView().hideProgress();
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    getMvpBaseView().hideProgress();
+                    getMvpBaseView().showLoadFailMsg();
+                }
+
+                @Override
+                public void onNext(List&lt;ImageBean&gt; list) {
+                    getMvpBaseView().onSuccess(list);
+                }
+            });
+    }
+}
+
+//Model
+public class ImageModel implements IImageModel {
+
+    private static final String TAG = &quot;ImageModel&quot;;
+
+    public Observable&lt;List&lt;ImageBean&gt;&gt; getImageList() {
+        return Observable.just(Urls.IMAGES_URL).flatMap(new Func1&lt;String, Observable&lt;List&lt;ImageBean&gt;&gt;&gt;() {
+            @Override
+            public Observable&lt;List&lt;ImageBean&gt;&gt; call(final String url) {
+                //可以拼接url
+                return Observable.create(new Observable.OnSubscribe&lt;List&lt;ImageBean&gt;&gt;() {
+
+                    @Override
+                    public void call(final Subscriber&lt;? super List&lt;ImageBean&gt;&gt; subscriber) {
+                        OkHttpUtils.ResultCallback&lt;String&gt; loadNewsCallback = new OkHttpUtils.ResultCallback&lt;String&gt;() {
+                            @Override
+                            public void onSuccess(String response) {
+                                Log.d(TAG, &quot;onSuccess response:&quot; + response);
+                                if(StringUtils.isEmpty(response)){
+                                    subscriber.onError(null);
+                                    return;
+                                }
+                                Gson gson = new Gson();
+                                List&lt;ImageBean&gt; iamgeBeanList = gson.fromJson(response, new TypeToken&lt;List&lt;ImageBean&gt;&gt;() {}.getType());
+                                if(ListUtils.isEmpty(iamgeBeanList)){
+                                    subscriber.onError(null);
+                                    return;
+                                }
+                                subscriber.onNext(iamgeBeanList);
+                                subscriber.onCompleted();
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                subscriber.onError(e);
+                            }
+                        };
+                        OkHttpUtils.get(url, loadNewsCallback);
+                    }
+                });
+            }
+        });
+    }
+}
+</code></pre><p>一个完整的MVP思想的使用就结束了，有没有觉得很简单，最初听名字以为是一个框架，学了才知道 MVP 是一种思想，开发多多使用，有问题欢迎留言，<br>也可以frok我的项目 <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a> 一起学习。</p>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
+<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
+<li><a href="http://rocko.xyz/2015/02/06/Android%E4%B8%AD%E7%9A%84MVP/" target="_blank" rel="noopener">Android中的MVP</a></li>
+<li><a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>文章中有些话，摘自<a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>一文</li>
+<li><a href="https://github.com/ribot/android-boilerplate" target="_blank" rel="noopener">android-boilerplate</a></li>
+</ul>
+<h3 id="推荐"><a href="#推荐" class="headerlink" title="推荐"></a>推荐</h3><ul>
+<li><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFAndroid_MVP" target="_blank" rel="noopener">WFAndroid_MVP</a> MVP Demo</li>
+<li><a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a> 我的项目</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-11-17-android-use-mvp/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -523,6 +841,423 @@
 </ul>
 <h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><p>代码是最好的老师，自行下载:<a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFAndroid_MVP" target="_blank" rel="noopener">WFAndroid_MVP</a></p>
 <h2 id="推荐"><a href="#推荐" class="headerlink" title="推荐"></a>推荐</h2><p><a href="http://doraemonyu.me/android/2015/12/17/android-use-mvp2.html" target="_blank" rel="noopener">Android MVP简单使用2</a></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/tech/2015-11-26-android-technology-website/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/11/10/tech/2015-11-26-android-technology-website/" itemprop="url">日常技术博客收集</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常/" itemprop="url" rel="index"><span itemprop="name">日常</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>收集开发中经常看的博客或者技术帖</p>
+<p>1、<a href="http://gank.io/" target="_blank" rel="noopener">干货集中营</a> 每日推荐Android、ios、app等开源库<br><br>2、<a href="http://www.liaoxuefeng.com/" target="_blank" rel="noopener">廖雪峰的官方网站</a> Python、git、js等教程，值得一看<br><br>3、<a href="http://codekk.com/open-source-project-analysis" target="_blank" rel="noopener">Codekk源码</a> 开源项目解析<br><br>4、<a href="http://hukai.me/" target="_blank" rel="noopener">胡凯个人网站</a> google课程翻译、性能优化等<br><br>5、<a href="http://www.stormzhang.com/" target="_blank" rel="noopener">stormzhang博客精华</a> AS教程、android开发等<br><br>6、<a href="http://rocko.xyz/" target="_blank" rel="noopener">Rocko</a> Android Developer技术文章等<br><br>7、<a href="http://blog.coderzh.com/" target="_blank" rel="noopener">coderzh CoderZh Blog</a> coderzh CoderZh Blog读书笔记个人文章等<br><br>8、<a href="http://droidyue.com/" target="_blank" rel="noopener">技术小黑屋</a><br><br>9、<a href="https://drakeet.me/" target="_blank" rel="noopener">Drakeet的个人博客</a><br><br>10、<a href="http://www.jcodecraeer.com/" target="_blank" rel="noopener">泡在网上的日子</a><br><br>–未完待续，如果有丢失链接得请告知，谢谢！</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-11-11-android-viewstub/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/11/10/android/2015-11-11-android-viewstub/" itemprop="url">Android ViewStub、include、merge 标签使用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>总结两个在 Android 局优化中用到的标签，ViewStub 和 include，通过使用这些标签来使布局文件的到重用，嵌到别的布局中，include标签用途：引入重复布局，使布局得到复用。<br>ViewStub：默认不可见，使用时才真正加载，避免创建无用的 view 来消耗系统资源。</p>
+<h2 id="1、include-使用"><a href="#1、include-使用" class="headerlink" title="1、include 使用"></a>1、include 使用</h2><pre><code>&lt;include
+      android:id=&quot;@+id/top_layout_id&quot;
+      android:layout_width=&quot;match_parent&quot;
+      android:layout_height=&quot;wrap_content&quot;
+      layout=&quot;@layout/title_top_layout&quot; /&gt;
+
+  /**
+   * 直接通过this查找，因为include已经转换成layout中的布局
+   */
+  private void methodTwo() {
+      TextView textView = (TextView)findViewById(R.id.textview);
+      textView.setText(&quot;Top Title Two&quot;);
+  }
+
+  /**
+   *  通过mView查找子view控件,mView为layout布局
+   */
+  private void methodOne() {
+      ImageView imageView = (ImageView) mView.findViewById(R.id.imageview);
+      TextView textView = (TextView) mView.findViewById(R.id.textview);
+      textView.setText(&quot;Top Title One&quot;);
+  }
+</code></pre><h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>注意标签是是 layout,和 viewStub 区分;</li>
+<li>如果 include 设置了 Id 则需要通过 Id 来查找目标布局的根元素;</li>
+</ul>
+<hr>
+<h2 id="二、ViewStub"><a href="#二、ViewStub" class="headerlink" title="二、ViewStub"></a>二、ViewStub</h2><p>ViewStub用途:布局优化，开发中经常听说view优化，但是真正用到得ViewStub可能不多，做下记录，今天优化代码将ViewStub加入,include标签就不用说了,开发经常用的标签，简单的包含父布局；</p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><pre><code>&lt;ViewStub android:id=&quot;@+id/stub&quot;
+   android:inflatedId=&quot;@+id/subTree&quot;
+   android:layout=&quot;@layout/mySubTree&quot;
+   android:layout_width=&quot;120dip&quot;
+   android:layout_height=&quot;40dip&quot; /&gt;
+
+ViewStub stub = (ViewStub) findViewById(R.id.stub);
+View view = stub.inflate();//这里的view就是include进来的view
+
+//这里的设置了inflatedId则通过inflatedId来获取子view
+</code></pre><h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
+<li>延迟加载或者很少几率才用到得view布局，比如:错误信息显示、占位等;</li>
+<li>遇到重复的view布局，通过android:layout引入;</li>
+<li>存在两者取其一等类似情况，没必要都初始化好;</li>
+</ul>
+<h3 id="注意事项-1"><a href="#注意事项-1" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<li>inflate()被调用之后，返回的是父布局控件对象,不能再次调用inflate();</li>
+<li>注意标签是android:layout不是layout,和include区分;</li>
+<li>可以使用inflatedId重写ViewStub的父布局控件的Id,也就是说,如果ViewStup设置了inflatedId则需要通过inflatedId来查找目标布局的根元素;</li>
+</ul>
+<p>ViewStub源码:</p>
+<pre><code>public View inflate() {
+    final ViewParent viewParent = getParent();
+
+    if (viewParent != null &amp;&amp; viewParent instanceof ViewGroup) {
+        if (mLayoutResource != 0) {
+            final ViewGroup parent = (ViewGroup) viewParent;
+            final LayoutInflater factory = LayoutInflater.from(mContext);
+            final View view = factory.inflate(mLayoutResource, parent,
+                    false);
+            //NO_ID＝－1即没有获取到mInflatedId
+            if (mInflatedId != NO_ID) {
+                view.setId(mInflatedId);
+                //如果ViewStub的inflatedId不是NO_ID（－1）则把inflatedId设置为目标布局根元素的id,也就是layout根布局的id
+            }
+
+            final int index = parent.indexOfChild(this);
+            parent.removeViewInLayout(this);
+            final ViewGroup.LayoutParams layoutParams = getLayoutParams();
+            if (layoutParams != null) {
+                parent.addView(view, index, layoutParams);
+            } else {
+                parent.addView(view, index);
+            }
+
+            mInflatedViewRef = new WeakReference&lt;View&gt;(view);
+
+            if (mInflateListener != null) {
+                mInflateListener.onInflate(this, view);
+            }
+
+            return view;
+        } else {
+            throw new IllegalArgumentException(&quot;ViewStub must have a valid layoutResource&quot;);
+        }
+    } else {
+        throw new IllegalStateException(&quot;ViewStub must have a non-null ViewGroup viewParent&quot;);
+    }
+}
+</code></pre><h2 id="三、merge"><a href="#三、merge" class="headerlink" title="三、merge"></a>三、merge</h2><p>主要目的是为了减少在 include 布局文件时的层级，例如：如果您的布局中嵌套了两层 LinearLayout ，这时候就存在布局冗余情况，<br>需要使用 merge 标签来减少布局层级，同时还能优化 UI 性能，因为多一层 view 就会多影响渲染性能。</p>
+<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><p>merge_main.xml</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:orientation=&quot;vertical&quot; &gt;
+
+    &lt;include
+        android:id=&quot;@+id/news_title&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        layout=&quot;@layout/merge_item&quot; /&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre><p>merge_item.xml</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;merge xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; &gt;
+
+    &lt;Button
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;merge1&quot; /&gt;
+
+    &lt;Button
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;merge2&quot; /&gt;
+
+&lt;/merge&gt;
+</code></pre><h3 id="前后对比"><a href="#前后对比" class="headerlink" title="前后对比"></a>前后对比</h3><p>主要是消除 LinearLayout 层级</p>
+<p><img src="!--￼0--&gt;/merge1.png" alt="不使用merge"></p>
+<p><img src="!--￼1--&gt;/merge2.png" alt="使用merge"></p>
+<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>注意标签是layout,如果使用了 android:layout，则会报错</p>
+<pre><code>Exception raised during rendering:
+You must specifiy a layout in the include tag: &lt;include layout=&quot;@layout/layoutID&quot; /&gt;
+</code></pre><h2 id="四、Demo"><a href="#四、Demo" class="headerlink" title="四、Demo"></a>四、Demo</h2><p>代码是最好的老师，<a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WPLayoutImp" target="_blank" rel="noopener">点我点我</a></p>
+<h2 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h2><p>官方说明 ViewStub 本质就是一个高度为0个View，默认不可见，只有通过调用setVisibility函数或者Inflate函数才会将其要装载的目标布局给加载出来,从而达到延迟加载效果，不需要的时候也可以不加载</p>
+<h2 id="推荐文章"><a href="#推荐文章" class="headerlink" title="推荐文章"></a>推荐文章</h2><ul>
+<li><a href="http://developer.android.com/intl/zh-cn/reference/android/view/ViewStub.html" target="_blank" rel="noopener">Google ViewStub reference</a></li>
+<li><a href="http://blog.csdn.net/hitlion2008/article/details/6737537" target="_blank" rel="noopener">ViewStub的应用</a></li>
+<li><a href="http://www.cnblogs.com/menlsh/archive/2013/03/17/2965217.html" target="_blank" rel="noopener">使用惰性控件ViewStub实现布局动态加载</a></li>
+<li><a href="http://blog.csdn.net/bboyfeiyu/article/details/45869393#t2" target="_blank" rel="noopener">Android布局优化之ViewStub、include、merge使用与源码分析</a></li>
+<li><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WPLayoutImp" target="_blank" rel="noopener">本文案例</a></li>
+</ul>
 
           
         
@@ -1048,612 +1783,6 @@ public void test4() {
 <li><a href="http://www.cnblogs.com/ayan/archive/2012/04/16/2451949.html" target="_blank" rel="noopener">Java数据结构内容整理</a></li>
 <li><a href="http://cping1982.blog.51cto.com/601635/130062" target="_blank" rel="noopener">浅谈Java集合中Array(数组)的应用</a></li>
 <li><a href="http://www.cnblogs.com/devinzhang/archive/2012/01/13/2321481.html" target="_blank" rel="noopener">Java的HashMap和HashTable</a></li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/tech/2015-11-26-android-technology-website/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/10/tech/2015-11-26-android-technology-website/" itemprop="url">日常技术博客收集</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/日常/" itemprop="url" rel="index"><span itemprop="name">日常</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>收集开发中经常看的博客或者技术帖</p>
-<p>1、<a href="http://gank.io/" target="_blank" rel="noopener">干货集中营</a> 每日推荐Android、ios、app等开源库<br><br>2、<a href="http://www.liaoxuefeng.com/" target="_blank" rel="noopener">廖雪峰的官方网站</a> Python、git、js等教程，值得一看<br><br>3、<a href="http://codekk.com/open-source-project-analysis" target="_blank" rel="noopener">Codekk源码</a> 开源项目解析<br><br>4、<a href="http://hukai.me/" target="_blank" rel="noopener">胡凯个人网站</a> google课程翻译、性能优化等<br><br>5、<a href="http://www.stormzhang.com/" target="_blank" rel="noopener">stormzhang博客精华</a> AS教程、android开发等<br><br>6、<a href="http://rocko.xyz/" target="_blank" rel="noopener">Rocko</a> Android Developer技术文章等<br><br>7、<a href="http://blog.coderzh.com/" target="_blank" rel="noopener">coderzh CoderZh Blog</a> coderzh CoderZh Blog读书笔记个人文章等<br><br>8、<a href="http://droidyue.com/" target="_blank" rel="noopener">技术小黑屋</a><br><br>9、<a href="https://drakeet.me/" target="_blank" rel="noopener">Drakeet的个人博客</a><br><br>10、<a href="http://www.jcodecraeer.com/" target="_blank" rel="noopener">泡在网上的日子</a><br><br>–未完待续，如果有丢失链接得请告知，谢谢！</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-8-23-android-use-mvp3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/10/android/2016-8-23-android-use-mvp3/" itemprop="url">Android-architecure MVP 学习</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>MVP 思想已经盛行有一段时间了，之前写过几个简单的 MVP Demo，来分离 UI 和逻辑，前段时间研究了 <a href="https://github.com/googlesamples/android-architecture" target="_blank" rel="noopener">googlesamples/android-architecture</a>,这个库包含了好几种 MVP 例子，我针对 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp </a> 和 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-clean/" target="_blank" rel="noopener">todo-mvp-clean</a><br>这两个例子进行了研究，其他几个例子有不同的侧重，但最基本的还是 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp </a>，其他只是在这个基础之上做扩充而已，还有一些用到了 Rxjava 的东西，由于项目中没有使用，也就没有详细研究，下面来说说这两个库最基本的用法。</p>
-<h3 id="概况"><a href="#概况" class="headerlink" title="概况"></a>概况</h3><p>首先要认识到 MVP 是一个思想不是一个框架，不是任何东西都要用它来实现，针对特别简单或者特别复杂的需求或者页面，应根据实际情况来选择，而且要选择使用哪个 MVP 模式作为基本思想。</p>
-<h4 id="todo-mvp"><a href="#todo-mvp" class="headerlink" title="todo-mvp"></a>todo-mvp</h4><p>Basic Model-View-Presenter architecture,这个是最基本的 MVP，规定了最基本的 View 和 Presenter，使用者需要继承这两个类，来根据实际情况，增加自己的接口关系，这里的 View 和 Presenter 都在一个类中维护 Contract，在官方 Demo 中，Model<br>数据层的 Repository 在创建 Presenter 的时候就传进来的，而且还是使用的接口，这样也增加了可扩展性，缺点是在调用 M 是一层一层的传递，略显麻烦，不过从代码结构上是清晰的。</p>
-<h4 id="todo-mvp-clean"><a href="#todo-mvp-clean" class="headerlink" title="todo-mvp-clean"></a>todo-mvp-clean</h4><p>Based on todo-mvp, uses concepts from Clean Architecture，依靠的还是还是基本的 MVP todo-mvp，只不过在 Model 层做了优化，引入了 Domain Layer 层, Presenter 将不直接调用数据层，而是使用 usecase 方式。</p>
-<p>Presenter 要和 Model 打交道，必须通过 Domain 这一层，UseCase 中提供了最基本的请求和回调参数，以及如何调用的抽象方法，每一个子类继承 UseCase 来实现自己的 UseCase，同时<br>又有一个 UseCaseHandler 工具类来管理这些 UseCase 的执行和回调，UseCase 和 UseCaseHandler 都是提供的基类，可以重复利用，对于 case 比较多的案例还是比较适用的。还有这里面<br>有一些线程池的使用，实现类 UseCaseThreadPoolScheduler，来自定义我们的线程调度，包括使用什么队列，线程池大小等。经实际操作验证，一般的页面无需使用这么复杂的结构，如果针对请求情况<br>比较多的 case，可以使用这个。</p>
-<p>Model 这一层在 UseCase 中实现，并且和 todo-mvp 一致，数据层的 Repository 在创建 Presenter 时候也要传入到 UseCase 中。</p>
-<h4 id="新增-Usecase-方式"><a href="#新增-Usecase-方式" class="headerlink" title="新增 Usecase 方式"></a>新增 Usecase 方式</h4><p>利:<br></p>
-<ul>
-<li>代码结构清晰，将每个 case 分离互不干扰，而且请求、回调等进行统一化管理，不在过多的依靠外部提供的接口，增加了灵活性；<br></li>
-<li>将 view 和逻辑分离，在整合基线明星页过程中，并没有对view层关注，完全屏蔽掉，直进行 Presenter 分发处理，大大增加了效率；<br></li>
-<li>Usecase 中有关于线程池的控制以及主线程回调操作；<br></li>
-</ul>
-<p>弊:<br></p>
-<ul>
-<li>新增 Usecase 导致代码增多，因为分离的非常细，首先回增加 Usecase 部分的核心代码（这部分可以共用），其次增加了每个具体的 Usecase 类，使得代码整体结构会增加；<br></li>
-<li>简单页面不太适合使用 Usecase，建议使用 Base MVP 即可；<br></li>
-</ul>
-<p>关于参数的封装：</p>
-<p>先看代码：</p>
-<pre><code>public static class RequestValues implements UseCase.RequestValues {
-}
-
-public static class ResponseValue implements UseCase.ResponseValue {
-
-    private final Statistics mStatistics;
-
-    public ResponseValue(@NonNull Statistics statistics) {
-        mStatistics = checkNotNull(statistics, &quot;statistics cannot be null!&quot;);
-    }
-
-    public Statistics getStatistics() {
-        return mStatistics;
-    }
-}
-</code></pre><p>这种方式提供了一种规范，可扩展、统一封装，这样就可以彻底将数据请求相关的屏蔽掉，如果以后更换请求接口，也不会影响到 UseCase 的使用，更不会影响 View 层了。所以比较推荐这种方式。</p>
-<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><pre><code>public GetStatistics(@NonNull TasksRepository tasksRepository) {
-    mTasksRepository = checkNotNull(tasksRepository, &quot;tasksRepository cannot be null!&quot;);
-}
-</code></pre><p>强烈建议使用 google 的 checkNotNull 这种方式，必须保证不会 null，这个是 Google 的另一库 guava，建议学习下。</p>
-<h3 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h3><p><a href="https://github.com/whiskeyfei/android-architecture-todo-mvp" target="_blank" rel="noopener">https://github.com/whiskeyfei/android-architecture-todo-mvp</a></p>
-<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
-<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
-<li><a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-clean/" target="_blank" rel="noopener">Google android-architecure</a></li>
-<li><a href="https://github.com/android10/Android-CleanArchitecture" target="_blank" rel="noopener">android10/Android-CleanArchitecture</a></li>
-<li><a href="https://zhuanlan.zhihu.com/p/20001838" target="_blank" rel="noopener">android10/Android-CleanArchitecture 中文详解</a></li>
-<li><a href="https://github.com/stuartgunter/guava-demo" target="_blank" rel="noopener">guava-demo</a></li>
-<li><a href="https://github.com/Syhids/android-architecture/tree/todo-mvp-fragmentless" target="_blank" rel="noopener">todo-mvp-fragmentless</a></li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-11-11-android-viewstub/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/10/android/2015-11-11-android-viewstub/" itemprop="url">Android ViewStub、include、merge 标签使用</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-10T19:28:39+09:00">2015-11-10</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>总结两个在 Android 局优化中用到的标签，ViewStub 和 include，通过使用这些标签来使布局文件的到重用，嵌到别的布局中，include标签用途：引入重复布局，使布局得到复用。<br>ViewStub：默认不可见，使用时才真正加载，避免创建无用的 view 来消耗系统资源。</p>
-<h2 id="1、include-使用"><a href="#1、include-使用" class="headerlink" title="1、include 使用"></a>1、include 使用</h2><pre><code>&lt;include
-      android:id=&quot;@+id/top_layout_id&quot;
-      android:layout_width=&quot;match_parent&quot;
-      android:layout_height=&quot;wrap_content&quot;
-      layout=&quot;@layout/title_top_layout&quot; /&gt;
-
-  /**
-   * 直接通过this查找，因为include已经转换成layout中的布局
-   */
-  private void methodTwo() {
-      TextView textView = (TextView)findViewById(R.id.textview);
-      textView.setText(&quot;Top Title Two&quot;);
-  }
-
-  /**
-   *  通过mView查找子view控件,mView为layout布局
-   */
-  private void methodOne() {
-      ImageView imageView = (ImageView) mView.findViewById(R.id.imageview);
-      TextView textView = (TextView) mView.findViewById(R.id.textview);
-      textView.setText(&quot;Top Title One&quot;);
-  }
-</code></pre><h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
-<li>注意标签是是 layout,和 viewStub 区分;</li>
-<li>如果 include 设置了 Id 则需要通过 Id 来查找目标布局的根元素;</li>
-</ul>
-<hr>
-<h2 id="二、ViewStub"><a href="#二、ViewStub" class="headerlink" title="二、ViewStub"></a>二、ViewStub</h2><p>ViewStub用途:布局优化，开发中经常听说view优化，但是真正用到得ViewStub可能不多，做下记录，今天优化代码将ViewStub加入,include标签就不用说了,开发经常用的标签，简单的包含父布局；</p>
-<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><pre><code>&lt;ViewStub android:id=&quot;@+id/stub&quot;
-   android:inflatedId=&quot;@+id/subTree&quot;
-   android:layout=&quot;@layout/mySubTree&quot;
-   android:layout_width=&quot;120dip&quot;
-   android:layout_height=&quot;40dip&quot; /&gt;
-
-ViewStub stub = (ViewStub) findViewById(R.id.stub);
-View view = stub.inflate();//这里的view就是include进来的view
-
-//这里的设置了inflatedId则通过inflatedId来获取子view
-</code></pre><h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><ul>
-<li>延迟加载或者很少几率才用到得view布局，比如:错误信息显示、占位等;</li>
-<li>遇到重复的view布局，通过android:layout引入;</li>
-<li>存在两者取其一等类似情况，没必要都初始化好;</li>
-</ul>
-<h3 id="注意事项-1"><a href="#注意事项-1" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
-<li>inflate()被调用之后，返回的是父布局控件对象,不能再次调用inflate();</li>
-<li>注意标签是android:layout不是layout,和include区分;</li>
-<li>可以使用inflatedId重写ViewStub的父布局控件的Id,也就是说,如果ViewStup设置了inflatedId则需要通过inflatedId来查找目标布局的根元素;</li>
-</ul>
-<p>ViewStub源码:</p>
-<pre><code>public View inflate() {
-    final ViewParent viewParent = getParent();
-
-    if (viewParent != null &amp;&amp; viewParent instanceof ViewGroup) {
-        if (mLayoutResource != 0) {
-            final ViewGroup parent = (ViewGroup) viewParent;
-            final LayoutInflater factory = LayoutInflater.from(mContext);
-            final View view = factory.inflate(mLayoutResource, parent,
-                    false);
-            //NO_ID＝－1即没有获取到mInflatedId
-            if (mInflatedId != NO_ID) {
-                view.setId(mInflatedId);
-                //如果ViewStub的inflatedId不是NO_ID（－1）则把inflatedId设置为目标布局根元素的id,也就是layout根布局的id
-            }
-
-            final int index = parent.indexOfChild(this);
-            parent.removeViewInLayout(this);
-            final ViewGroup.LayoutParams layoutParams = getLayoutParams();
-            if (layoutParams != null) {
-                parent.addView(view, index, layoutParams);
-            } else {
-                parent.addView(view, index);
-            }
-
-            mInflatedViewRef = new WeakReference&lt;View&gt;(view);
-
-            if (mInflateListener != null) {
-                mInflateListener.onInflate(this, view);
-            }
-
-            return view;
-        } else {
-            throw new IllegalArgumentException(&quot;ViewStub must have a valid layoutResource&quot;);
-        }
-    } else {
-        throw new IllegalStateException(&quot;ViewStub must have a non-null ViewGroup viewParent&quot;);
-    }
-}
-</code></pre><h2 id="三、merge"><a href="#三、merge" class="headerlink" title="三、merge"></a>三、merge</h2><p>主要目的是为了减少在 include 布局文件时的层级，例如：如果您的布局中嵌套了两层 LinearLayout ，这时候就存在布局冗余情况，<br>需要使用 merge 标签来减少布局层级，同时还能优化 UI 性能，因为多一层 view 就会多影响渲染性能。</p>
-<h3 id="使用-1"><a href="#使用-1" class="headerlink" title="使用"></a>使用</h3><p>merge_main.xml</p>
-<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;
-    android:orientation=&quot;vertical&quot; &gt;
-
-    &lt;include
-        android:id=&quot;@+id/news_title&quot;
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;match_parent&quot;
-        layout=&quot;@layout/merge_item&quot; /&gt;
-
-&lt;/LinearLayout&gt;
-</code></pre><p>merge_item.xml</p>
-<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;merge xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; &gt;
-
-    &lt;Button
-        android:layout_width=&quot;fill_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:text=&quot;merge1&quot; /&gt;
-
-    &lt;Button
-        android:layout_width=&quot;fill_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:text=&quot;merge2&quot; /&gt;
-
-&lt;/merge&gt;
-</code></pre><h3 id="前后对比"><a href="#前后对比" class="headerlink" title="前后对比"></a>前后对比</h3><p>主要是消除 LinearLayout 层级</p>
-<p><img src="!--￼0--&gt;/merge1.png" alt="不使用merge"></p>
-<p><img src="!--￼1--&gt;/merge2.png" alt="使用merge"></p>
-<h3 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h3><p>注意标签是layout,如果使用了 android:layout，则会报错</p>
-<pre><code>Exception raised during rendering:
-You must specifiy a layout in the include tag: &lt;include layout=&quot;@layout/layoutID&quot; /&gt;
-</code></pre><h2 id="四、Demo"><a href="#四、Demo" class="headerlink" title="四、Demo"></a>四、Demo</h2><p>代码是最好的老师，<a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WPLayoutImp" target="_blank" rel="noopener">点我点我</a></p>
-<h2 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h2><p>官方说明 ViewStub 本质就是一个高度为0个View，默认不可见，只有通过调用setVisibility函数或者Inflate函数才会将其要装载的目标布局给加载出来,从而达到延迟加载效果，不需要的时候也可以不加载</p>
-<h2 id="推荐文章"><a href="#推荐文章" class="headerlink" title="推荐文章"></a>推荐文章</h2><ul>
-<li><a href="http://developer.android.com/intl/zh-cn/reference/android/view/ViewStub.html" target="_blank" rel="noopener">Google ViewStub reference</a></li>
-<li><a href="http://blog.csdn.net/hitlion2008/article/details/6737537" target="_blank" rel="noopener">ViewStub的应用</a></li>
-<li><a href="http://www.cnblogs.com/menlsh/archive/2013/03/17/2965217.html" target="_blank" rel="noopener">使用惰性控件ViewStub实现布局动态加载</a></li>
-<li><a href="http://blog.csdn.net/bboyfeiyu/article/details/45869393#t2" target="_blank" rel="noopener">Android布局优化之ViewStub、include、merge使用与源码分析</a></li>
-<li><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WPLayoutImp" target="_blank" rel="noopener">本文案例</a></li>
 </ul>
 
           

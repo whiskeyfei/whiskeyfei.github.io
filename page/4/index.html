@@ -507,7 +507,7 @@ monospaceDefaultField.set(null, normal_monospace);
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-4-8-android-overdraw-note/">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2016/03/25/android/2016-11-06-mvp-rxjava/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="無名">
@@ -526,7 +526,7 @@ monospaceDefaultField.set(null, normal_monospace);
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/03/25/android/2016-4-8-android-overdraw-note/" itemprop="url">Android Overdraw 初识及如何优化</a></h1>
+                <a class="post-title-link" href="/2016/03/25/android/2016-11-06-mvp-rxjava/" itemprop="url">Google Samples MVP + RxJava 官方精简Demo</a></h1>
         
 
         <div class="post-meta">
@@ -595,47 +595,88 @@ monospaceDefaultField.set(null, normal_monospace);
       
         
           
-            <p>最近在分析项目中的内存泄露和过渡绘制问题，关于如何避免简单内存泄露问题，已经在其他博客中记录了，今天来记录下关于 Android OverDraw 的知识点。</p>
-<h2 id="Overdraw-概况"><a href="#Overdraw-概况" class="headerlink" title="Overdraw 概况"></a>Overdraw 概况</h2><p>Overdraw(过度绘制)描述的是屏幕上的某个像素在同一帧的时间内被绘制了多次。在多层次的UI结构里面，如果不可见的UI也在做绘制的操作，这就会导致某些像素区域被绘制了多次，这就浪费大量的CPU以及GPU资源，从而降低了程序的性能。</p>
-<p>例如：在白色的顶部栏绘制一个按钮，按钮绘制在背景上面，就是overdraw，当然这里只是说明。</p>
-<h3 id="如何开启？"><a href="#如何开启？" class="headerlink" title="如何开启？"></a>如何开启？</h3><p>开发者选项 - 开启GPU过度绘制</p>
-<p><img src="!--￼1--&gt;/Overdraw1.png" alt=""></p>
-<h3 id="基本效果"><a href="#基本效果" class="headerlink" title="基本效果"></a>基本效果</h3><p><img src="!--￼2--&gt;/Overdraw3.png" alt=""></p>
-<h3 id="颜色含义解释"><a href="#颜色含义解释" class="headerlink" title="颜色含义解释"></a>颜色含义解释</h3><ul>
-<li>没有颜色:  表示没有重绘</li>
-<li>蓝色：表示重绘了一次,每个像素只画了两次,大块的蓝色是可以接受的</li>
-<li>绿色：表示重绘了两次,每个像素画了三次,中等尺寸的绿色方块是可以接受的，最好尝试优化</li>
-<li>红色：表示重绘了三次，这个像素被画了四次,很小尺寸的红色方块是可以接受的</li>
-<li>黑色：表示重绘了四次及以上,这个像素被画了五次及以上。这个是要必须解决的</li>
-</ul>
-<h3 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h3><p>打开调试的应用，观察颜色过渡绘制情况，根据显示颜色分析哪些需要优化！</p>
-<p>系统页面</p>
-<p><img src="!--￼3--&gt;/Overdraw2.png" alt=""></p>
-<p>VST 应用</p>
-<p><img src="!--￼4--&gt;/Overdraw5.png" alt=""></p>
-<p><img src="!--￼5--&gt;/Overdraw6.png" alt=""></p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>以上只是简单介绍了如何调适使用 Overdraw 调适工具，还可以使用 android 自带工具 Hierarchy Viewer，<br>来查看 view 的层级关系，4.2以下没有 Overdraw 调适选项，如果真机没有的话可以使用<br>第三方的 genymotion 模拟器，很好用。</p>
-<h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><p>主要是为了说明问题，在 demo 中演示，以下是效果对比：</p>
-<p>之前：</p>
-<p><img src="!--￼6--&gt;/Overdraw7.png" alt=""></p>
-<p>之后：白色区域为没有重复绘制</p>
-<p><img src="!--￼7--&gt;/Overdraw8.png" alt=""></p>
-<p>优化点：</p>
-<p>1、去掉window的默认背景</p>
-<p>首先如果子 view 上设置背景的话，就要把根布局上背景去掉，同时去掉这个那个 activity 的背景。</p>
-<pre><code>getWindow().setBackgroundDrawable(null);
-</code></pre><p>在setContentView之后设置才能起作用        </p>
-<p>2、去除多余的层级</p>
-<p>首先是采用最简单的布局来搭建页面，不要过多的嵌套 LinearLayout 和 RelativeLayout，<br>然后使用 include、merge、viewstub 标签进行优化 view 层级。</p>
-<p>具体可以查看以前的笔记 <a href="!--￼0--">Android ViewStub、include、merge 标签使用</a></p>
-<p>这里三个标签主要是减少 view 层级，去除多余重复的 view 布局，以及 include 能复用一些相同的布局，ViewStub 是惰性控件占位作用，只有需要<br>的时候才去初始化 view。</p>
-<p>3、使用透明图片或者 .9 格式图片</p>
-<p>有时候图片是有边框的，这时候就可以用.9格式的图片设置背景。</p>
-<p>4、和设计同学多沟通</p>
-<p>这里就是实际开发中，要在效果和性能上达到一个合理比例，不能一味的为了效果导致性能下降。</p>
-<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ul>
-<li><a href="http://developer.android.com/intl/zh-cn/tools/performance/debug-gpu-overdraw/index.html#VisualizingOverdraw" target="_blank" rel="noopener">Debug GPU Overdraw Walkthrough</a></li>
-<li><a href="http://hukai.me/android-performance-patterns/" target="_blank" rel="noopener">Android性能优化典范 - 第1季</a></li>
+            <p>前段时间学习了 Google Samples  MVP <strong><a href="https://github.com/googlesamples/android-architecture" target="_blank" rel="noopener">android-architecture</a></strong> <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp/</a> 了解了 MVP 基本使用方法，以及 UseCase 的使用，之后也用在项目当中，确实带来了一些好处，比如：数据和 UI 拆分，UseCase 执行重用，使用线程池等等，之后了解了 RxJava，有必要合并 mvp 使用下，参考官方 Google Samples  github <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-rxjava/" target="_blank" rel="noopener">todo-mvp-rxjava/</a> 例子学习并记录在此。</p>
+<h4 id="一、MVP"><a href="#一、MVP" class="headerlink" title="一、MVP"></a>一、MVP</h4><p>这部分是最最初的知识，在我的另一篇 <a href="http://www.jianshu.com/p/a6d5a78198d0" target="_blank" rel="noopener">Google MVP 你也可以运用自如</a> 总结中可以看到对官方MVP demo <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp/</a> 的精简代码，没有了解过的可以先看看这个，然后跟着代码自己操练一下就可以了。</p>
+<h4 id="二、RxJava"><a href="#二、RxJava" class="headerlink" title="二、RxJava"></a>二、RxJava</h4><p>RxJava 的基本用法肯定是要学的，我这里就不介绍了，之后会写一篇关于 RxJava 语法的练习，现在就当你已经会使用 RxJava 了。</p>
+<p><a href="http://www.jianshu.com/p/618c4c583160" target="_blank" rel="noopener">RxJava语法练习</a>看这里，后补充。</p>
+<h4 id="三、MVP-RxJava"><a href="#三、MVP-RxJava" class="headerlink" title="三、MVP + RxJava"></a>三、MVP + RxJava</h4><p>修改主要集中在 Presenter 中，由于使用 rxjava 订阅的方式，所以接口更改了，去除了 start() 方法，也不再使用 Handler 来回调主线程，也使用 rxAndroid提供的线程调用相关 Api 。</p>
+<p>注意：我这里是把获取数据的逻辑写在了 Presenter 中，这是 demo 形式，如果是真是项目肯定是用写在 Task 中的，这里就是做一些大概描述。</p>
+<p> 1、BasePresenter 更改：</p>
+<pre><code>public interface BasePresenter {   
+    void subscribe();   
+    void unsubscribe();
+}
+</code></pre><p>2、添加 Observable ：</p>
+<pre><code> private void startTask() {
+     mSubscriptions.clear();
+     Subscription subscription = getObservable().subscribe(getSubscriber());
+     mSubscriptions.add(subscription);
+ }
+
+private Observable&lt;List&lt;String&gt;&gt; getObservable() {
+    return Observable.create(new Observable.OnSubscribe&lt;List&lt;String&gt;&gt;() {
+        @Override
+        public void call(Subscriber&lt;? super List&lt;String&gt;&gt; subscriber) {
+            try {
+                Thread.sleep(3000);//模拟一个3秒的加载
+            } catch (InterruptedException e) {
+                subscriber.onError(e);
+            }
+            List&lt;String&gt; list = new ArrayList&lt;&gt;();
+            for (int i = 0; i &lt; 10; i++) {
+                list.add(i + &quot;--&quot;);
+            }
+            subscriber.onNext(list);
+            subscriber.onCompleted();
+        }
+    })
+            .subscribeOn(mSchedulerProvider.io())//指定 subscribe() 发生在新的线程
+            .observeOn(mSchedulerProvider.ui());// 指定 Subscriber 的回调发生在主线程
+}
+
+//处理数据结果以及UI相关操作
+ private Subscriber&lt;List&lt;String&gt;&gt; getSubscriber() {
+     return new Subscriber&lt;List&lt;String&gt;&gt;() {
+         @Override
+         public void onStart() {
+             super.onStart();
+             mView.setLoading(true);//操作UI
+         }
+
+         @Override
+         public void onCompleted() {
+             mView.setLoading(false);//操作UI
+         }
+
+         @Override
+         public void onError(Throwable e) {
+             mView.setLoading(false);//操作UI
+         }
+
+         @Override
+         public void onNext(List&lt;String&gt; list) {
+             mView.show(list);//view接口回调
+         }
+     };
+ }
+</code></pre><p>3、其他：<br>另外关于 Scheduler 部分，将其中的模式抽象成接口，使用者实现使用即可</p>
+<pre><code>public interface BaseSchedulerProvider {
+
+     Scheduler computation();
+
+     Scheduler io();
+
+     Scheduler ui();
+
+     Scheduler newThread();
+ }
+</code></pre><p>4、代码<br>关于这部分的练习代码，上传到了分支 <strong><a href="https://github.com/whiskeyfei/android-architecture-todo-mvp/tree/android-architecture-todo-mvp-rxjava" target="_blank" rel="noopener">android-architecture-todo-mvp-rxjava</a></strong> 上，有需要的朋友可以下载运行，demo 形式很简单，使用 mvp+rxjava 显示一个 list 文本。</p>
+<h4 id="四、参考"><a href="#四、参考" class="headerlink" title="四、参考"></a>四、参考</h4><p>以下为编写过程中参考的资料</p>
+<ul>
+<li><a href="https://github.com/googlesamples/android-architecture" target="_blank" rel="noopener">android-architecture</a></li>
+<li><a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp</a></li>
+<li><a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-rxjava/" target="_blank" rel="noopener">todo-mvp-rxjava/</a></li>
+<li><a href="https://github.com/googlesamples/android-architecture" target="_blank" rel="noopener">android-architecture</a></li>
 </ul>
 
           
@@ -1193,6 +1234,162 @@ String S1 = S2 +S3 + S4;
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/12/28/life/2015-12-28-bye2015hi2016/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/12/28/life/2015-12-28-bye2015hi2016/" itemprop="url">无名-我为自己代言</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-28T21:55:26+09:00">2015-12-28</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/生活/" itemprop="url" rel="index"><span itemprop="name">生活</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>今天看到，秋百万发起的 <a href="https://github.com/winter-fall/Bye2015Hi2016" target="_blank" rel="noopener">Bye2015Hi2016</a> ，也来尝试写一篇来记录过去的2015，起个什么名字呢，无名是微信昵称，就《无名-我为自己代言》吧，咱也来说说这一年，早在半年前6月份时候，也写过一篇类似这样的文章，好在列的目标基本上都实现了；</p>
+<p>记得当时心情及其糟糕，自身的情况和小伙伴的离职等等吧，自己也很希望赶紧找回工作状态，不知怎么的就看到了 codekk 的 <a href="https://github.com/aosp-exchange-group/fuck-2014-flirt-2015" target="_blank" rel="noopener">fuck-2014-flirt-2015</a> ,看了其他人写的文章，让我触动很大，还有很多的人在奋斗在codeing，不断的受虐同时也在不断的进步，这时候正能量满满的，所以写了下面三个方面：</p>
+<h2 id="收获"><a href="#收获" class="headerlink" title="收获"></a>收获</h2><p>说起来还是比较幸运的，毕业就签了某公司的offer，没有犹豫，从实习到正式入职,从旱鸭子到深水区,买了mac，<br>给妈妈买了手机，姐姐妹妹买了衣服鞋子，外甥买了玩具,没给父母丢脸，在北京好好混,从一个没有项目经验的，到第一个、第二个项目，确确实实学到了不少东西。</p>
+<h2 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h2><p>心还是太浮躁，没有沉下心，技术点有些半知半解，浅尝辄止的现象，心情容易受工作影响，很放纵的做一些不想做的事情。</p>
+<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>身体最重要，一定要坚持锻炼，打球游泳不断，阅读书籍（技术非技术都要学习），充实自己，也许在未来就用到了，多回家看看陪陪父母，争取和父母出去玩一次（自己花钱）<br>给妹妹攒钱上大学，稳扎稳打，把技术点一一再过一遍，不会的不清楚的一定要吃透，只有这样才能进步，阅读一些开源框架，不在于多少，在于能够熟练使用,<br>抽空和朋友聚聚，记住出门在外靠朋友，扩展人脉</p>
+<p>稀稀拉拉列了不少，现在看着都有些可笑，但是达到上面这样的目标自己也是付出了很多，包括精力时间也包括身体，我一直相信那句话“有付出总会有收获”，自己学的东西没准那一天就用上了，来公司的第一个年基本上都在在加班中度过的，一周6天，偶尔也7天，平常下班到家都11，12点，基本上没有运动，身板不太好的我那会体重只有55KG，然而在14年年末由于阑尾炎直接降到了50KG以下，庆幸慢性阑尾炎没有切掉，也没有和家里说，默默的打点滴一个星期，喝粥吃咸菜，就这样过了年，也完成了版本迭代。</p>
+<p>就这样迎来了15年，现在回想起那会的状态，当时自己确实很难受，在租的房间里，一躺就是一天，该坚持该放弃，很明显，我选择了坚持，记住在最无助或者想不开想不懂的时候，别去钻牛角尖，和好兄弟去喝几杯就好了，期间特别爱喝酒，自己回家也会和几罐啤酒，可能自己想麻痹来放松自己，就当减压了吧，这个状态没有持续多久，慢慢也就正常了。</p>
+<p>就这样开始去运动，去思考。。学这去改变自己，改变工作状态，改变生活态度。</p>
+<h2 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h2><p>按部就班的版本迭代，开发新功能，工作之余，开始使用github，git，开始浏览一些大牛的技术博客，比如：代码家，秋百万，干活集中营，技术小黑屋，胡凯技术博客，codekk等等，开始学习一些框架思想，例如：MVP，MVVP等等，收藏技术贴，学习android性能优化，并能应用到实际项目当中，自己写小demo，使用git提交管理等等，记得第一次给别人PR还有一点的紧张，现在不会了，也fork参与了一些项目，最后说一点这段时间最大的收获吧，技术文章不在于收藏的多少，而在于你自己用心读了多少，不要以为收藏了就学会了，很多时候自己其实在欺骗自己，所以看到一篇想学的技术一定要吃透，应用到自己的实际开发中，这样才能提高。</p>
+<h2 id="生活"><a href="#生活" class="headerlink" title="生活"></a>生活</h2><p>开始每周打羽毛球游泳，周末不再有那么多的加班，提高工作效率，平时读了一些小说，google work,重新读了左耳。。青春系列小说，也是够了。。十一时候和小伙伴去青海玩了一趟，感觉很爽，给人一种不一样的感觉，心灵仿佛也得到了洗礼，为那些骑行的人竖起大拇指。下半年刚开始回家看爸妈比较多，给爸妈换上了苹果，当然自己也换了，三件套就差pad了，啧啧，小妹16年高考，作为哥哥也要为妹妹准备点东西，真真切切觉的，温暖的家是你在外工作的后盾，家人身体健康是最大的财富。</p>
+<h2 id="展望2016"><a href="#展望2016" class="headerlink" title="展望2016"></a>展望2016</h2><p>1、16年是重要的一年，技术当然要更上一层楼，毕竟靠技术吃饭嘛，还是要稳扎稳打，做好平时的技术积累，知其然知其所以然，多写博客，通过写东西来训练逻辑思维，找几本Android进阶的书，学习RxJava，做读书笔记，避免浅尝辄止，学习框架知识，编写自己的app，应用所学的知识。</p>
+<p>2、身体很重要，没了身体＝都没了，所以还是要加强锻炼,健身打球游泳一定要坚持！！</p>
+<p>3、找一个城市旅行旅行，这没的说，必须去！！(这个需求再16年开始就完成了，和她一起去的西安，以后还要去更多的地方！)</p>
+<p>还是那句话，最重要一点：要好好做人，这个从大学我就一直坚信，做人，要从生活的点点滴滴做起，对家人对朋友一定要真心相待，问心无愧足已。</p>
+<p><em>配图为10月份的青海湖，美极了，有机会还要去一次！<em></em></em></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/12/28/book/2016-3-22-book1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1353,7 +1550,7 @@ String S1 = S2 +S3 + S4;
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/12/28/life/2015-12-28-bye2015hi2016/">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-8-23-android-use-mvp3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="無名">
@@ -1372,163 +1569,7 @@ String S1 = S2 +S3 + S4;
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2015/12/28/life/2015-12-28-bye2015hi2016/" itemprop="url">无名-我为自己代言</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-12-28T21:55:26+09:00">2015-12-28</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/生活/" itemprop="url" rel="index"><span itemprop="name">生活</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>今天看到，秋百万发起的 <a href="https://github.com/winter-fall/Bye2015Hi2016" target="_blank" rel="noopener">Bye2015Hi2016</a> ，也来尝试写一篇来记录过去的2015，起个什么名字呢，无名是微信昵称，就《无名-我为自己代言》吧，咱也来说说这一年，早在半年前6月份时候，也写过一篇类似这样的文章，好在列的目标基本上都实现了；</p>
-<p>记得当时心情及其糟糕，自身的情况和小伙伴的离职等等吧，自己也很希望赶紧找回工作状态，不知怎么的就看到了 codekk 的 <a href="https://github.com/aosp-exchange-group/fuck-2014-flirt-2015" target="_blank" rel="noopener">fuck-2014-flirt-2015</a> ,看了其他人写的文章，让我触动很大，还有很多的人在奋斗在codeing，不断的受虐同时也在不断的进步，这时候正能量满满的，所以写了下面三个方面：</p>
-<h2 id="收获"><a href="#收获" class="headerlink" title="收获"></a>收获</h2><p>说起来还是比较幸运的，毕业就签了某公司的offer，没有犹豫，从实习到正式入职,从旱鸭子到深水区,买了mac，<br>给妈妈买了手机，姐姐妹妹买了衣服鞋子，外甥买了玩具,没给父母丢脸，在北京好好混,从一个没有项目经验的，到第一个、第二个项目，确确实实学到了不少东西。</p>
-<h2 id="不足"><a href="#不足" class="headerlink" title="不足"></a>不足</h2><p>心还是太浮躁，没有沉下心，技术点有些半知半解，浅尝辄止的现象，心情容易受工作影响，很放纵的做一些不想做的事情。</p>
-<h2 id="展望"><a href="#展望" class="headerlink" title="展望"></a>展望</h2><p>身体最重要，一定要坚持锻炼，打球游泳不断，阅读书籍（技术非技术都要学习），充实自己，也许在未来就用到了，多回家看看陪陪父母，争取和父母出去玩一次（自己花钱）<br>给妹妹攒钱上大学，稳扎稳打，把技术点一一再过一遍，不会的不清楚的一定要吃透，只有这样才能进步，阅读一些开源框架，不在于多少，在于能够熟练使用,<br>抽空和朋友聚聚，记住出门在外靠朋友，扩展人脉</p>
-<p>稀稀拉拉列了不少，现在看着都有些可笑，但是达到上面这样的目标自己也是付出了很多，包括精力时间也包括身体，我一直相信那句话“有付出总会有收获”，自己学的东西没准那一天就用上了，来公司的第一个年基本上都在在加班中度过的，一周6天，偶尔也7天，平常下班到家都11，12点，基本上没有运动，身板不太好的我那会体重只有55KG，然而在14年年末由于阑尾炎直接降到了50KG以下，庆幸慢性阑尾炎没有切掉，也没有和家里说，默默的打点滴一个星期，喝粥吃咸菜，就这样过了年，也完成了版本迭代。</p>
-<p>就这样迎来了15年，现在回想起那会的状态，当时自己确实很难受，在租的房间里，一躺就是一天，该坚持该放弃，很明显，我选择了坚持，记住在最无助或者想不开想不懂的时候，别去钻牛角尖，和好兄弟去喝几杯就好了，期间特别爱喝酒，自己回家也会和几罐啤酒，可能自己想麻痹来放松自己，就当减压了吧，这个状态没有持续多久，慢慢也就正常了。</p>
-<p>就这样开始去运动，去思考。。学这去改变自己，改变工作状态，改变生活态度。</p>
-<h2 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h2><p>按部就班的版本迭代，开发新功能，工作之余，开始使用github，git，开始浏览一些大牛的技术博客，比如：代码家，秋百万，干活集中营，技术小黑屋，胡凯技术博客，codekk等等，开始学习一些框架思想，例如：MVP，MVVP等等，收藏技术贴，学习android性能优化，并能应用到实际项目当中，自己写小demo，使用git提交管理等等，记得第一次给别人PR还有一点的紧张，现在不会了，也fork参与了一些项目，最后说一点这段时间最大的收获吧，技术文章不在于收藏的多少，而在于你自己用心读了多少，不要以为收藏了就学会了，很多时候自己其实在欺骗自己，所以看到一篇想学的技术一定要吃透，应用到自己的实际开发中，这样才能提高。</p>
-<h2 id="生活"><a href="#生活" class="headerlink" title="生活"></a>生活</h2><p>开始每周打羽毛球游泳，周末不再有那么多的加班，提高工作效率，平时读了一些小说，google work,重新读了左耳。。青春系列小说，也是够了。。十一时候和小伙伴去青海玩了一趟，感觉很爽，给人一种不一样的感觉，心灵仿佛也得到了洗礼，为那些骑行的人竖起大拇指。下半年刚开始回家看爸妈比较多，给爸妈换上了苹果，当然自己也换了，三件套就差pad了，啧啧，小妹16年高考，作为哥哥也要为妹妹准备点东西，真真切切觉的，温暖的家是你在外工作的后盾，家人身体健康是最大的财富。</p>
-<h2 id="展望2016"><a href="#展望2016" class="headerlink" title="展望2016"></a>展望2016</h2><p>1、16年是重要的一年，技术当然要更上一层楼，毕竟靠技术吃饭嘛，还是要稳扎稳打，做好平时的技术积累，知其然知其所以然，多写博客，通过写东西来训练逻辑思维，找几本Android进阶的书，学习RxJava，做读书笔记，避免浅尝辄止，学习框架知识，编写自己的app，应用所学的知识。</p>
-<p>2、身体很重要，没了身体＝都没了，所以还是要加强锻炼,健身打球游泳一定要坚持！！</p>
-<p>3、找一个城市旅行旅行，这没的说，必须去！！(这个需求再16年开始就完成了，和她一起去的西安，以后还要去更多的地方！)</p>
-<p>还是那句话，最重要一点：要好好做人，这个从大学我就一直坚信，做人，要从生活的点点滴滴做起，对家人对朋友一定要真心相待，问心无愧足已。</p>
-<p><em>配图为10月份的青海湖，美极了，有机会还要去一次！<em></em></em></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-demo/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/11/10/android/2016-3-16-android-memory-demo/" itemprop="url">Android 内存泄漏案例分析总结(Handler)</a></h1>
+                <a class="post-title-link" href="/2015/11/10/android/2016-8-23-android-use-mvp3/" itemprop="url">Android-architecure MVP 学习</a></h1>
         
 
         <div class="post-meta">
@@ -1597,85 +1638,53 @@ String S1 = S2 +S3 + S4;
       
         
           
-            <p>在Android开发开发中，操作不当很容易引起内存泄漏，这里主要记录下平时遇到问题，包括：静态变量(也包含集合)、非静态的内部类、Handler、监听器，尤其是 Handler<br>在开发中要格外的注意。</p>
-<h2 id="1、静态变量"><a href="#1、静态变量" class="headerlink" title="1、静态变量"></a>1、静态变量</h2><p>public class LeakActivityDemo extends Activity{<br>  private static TextView mTextView;</p>
-<p>  @Override<br>  protected void onCreate(Bundle savedInstanceState) {<br>    super.onCreate(savedInstanceState);<br>    setContentView(R.layout.activity_main);<br>    mTextView = new TextView(this);<br>    mTextView.setText(“demo”);<br>  }<br>}</p>
-<p>我这里这是一个例子，一般开发不会这么写，上面的代码在 Activity 结束的时候，mTextView 一直持有 this 引用，<br>导致整个 Activity 无法回收</p>
-<p>解决:方法在 Activity 生命周期 onDestroy 时将 mTextView 置空，或者尽量少使用到静态变量。<br>注意:在写代码时，要考虑到当前的变量是否持有当前 Activity 的引用，避免出现内存泄漏.</p>
-<h2 id="2、非静态内部类"><a href="#2、非静态内部类" class="headerlink" title="2、非静态内部类"></a>2、非静态内部类</h2><h3 id="关于-Handler"><a href="#关于-Handler" class="headerlink" title="关于 Handler"></a>关于 Handler</h3><p>public class LeakActivity extends Activity{</p>
-<p>  @Override<br>  protected void onCreate(Bundle savedInstanceState) {<br>    super.onCreate(savedInstanceState);<br>    setContentView(R.layout.activity_main);<br>    mHandler.postDelayed(new Runnable() {</p>
-<pre><code>  @Override
-  public void run() {
-
-  }
-}, 1);
-</code></pre><p>  }</p>
-<p>  //提示：This Handler class should be static or leaks might occur (com.mvp.view.LeakActivity.1)<br>  private Handler mHandler = new Handler() {<br>      @Override public void handleMessage(Message msg) {<br>          super.handleMessage(msg);<br>      }<br>  };<br>}</p>
-<p>在 Android 开发中，我们一般使用 Handler 处理异步操作，通常我们的代码会像上面一样实现，但是上面的代码可能存在泄漏，<br>其实编译器已经提示了警告，建议使用 static 静态标示。</p>
-<p>原因：</p>
-<p>1、首先在 java 中，非静态内部类会或者内部类会持有外部对象的引用，而静态内部类不会持有外部类的引用；</p>
-<p>2、和 Handler 机制有关，我们知道 Handler 和 Looper 是一起工作的，在一个 Activity 起来的时候，会帮我们创建一个<br>在主线程中使用的 Looper，用来处理所有的消息，当 Hanlder 初始化好以后，就会有一个消息发送到了 Looper 的消息队列中，<br>而这个消息则包含了当前 Handler 的引用，这就是内存泄露的原因；</p>
-<p>解决:</p>
-<p>1、使用静态内部类，如果在内部类中使用了 Activiy 则要使用 WeakReference(弱引用)，并且需要注意判空。</p>
-<p>2、还有Hanlder要在生命周期 ondestroy 时，取消该 Handler 对象的 Messag 和 Runnable。</p>
-<p>例如：removeCallbacks(Runnable r)、removeMessages(int what)、mHandler.removeCallbacksAndMessages(null);  </p>
-<p>  private final MyHandler mHandler = new MyHandler(this);</p>
-<p>  public static class MyHandler extends Handler {<br>      private final WeakReference<leakactivity> mWeakActivity;</leakactivity></p>
-<pre><code>public MyHandler(LeakActivity context) {
-  mWeakActivity = new WeakReference&lt;LeakActivity&gt;(context);
+            <p>MVP 思想已经盛行有一段时间了，之前写过几个简单的 MVP Demo，来分离 UI 和逻辑，前段时间研究了 <a href="https://github.com/googlesamples/android-architecture" target="_blank" rel="noopener">googlesamples/android-architecture</a>,这个库包含了好几种 MVP 例子，我针对 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp </a> 和 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-clean/" target="_blank" rel="noopener">todo-mvp-clean</a><br>这两个例子进行了研究，其他几个例子有不同的侧重，但最基本的还是 <a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp/" target="_blank" rel="noopener">todo-mvp </a>，其他只是在这个基础之上做扩充而已，还有一些用到了 Rxjava 的东西，由于项目中没有使用，也就没有详细研究，下面来说说这两个库最基本的用法。</p>
+<h3 id="概况"><a href="#概况" class="headerlink" title="概况"></a>概况</h3><p>首先要认识到 MVP 是一个思想不是一个框架，不是任何东西都要用它来实现，针对特别简单或者特别复杂的需求或者页面，应根据实际情况来选择，而且要选择使用哪个 MVP 模式作为基本思想。</p>
+<h4 id="todo-mvp"><a href="#todo-mvp" class="headerlink" title="todo-mvp"></a>todo-mvp</h4><p>Basic Model-View-Presenter architecture,这个是最基本的 MVP，规定了最基本的 View 和 Presenter，使用者需要继承这两个类，来根据实际情况，增加自己的接口关系，这里的 View 和 Presenter 都在一个类中维护 Contract，在官方 Demo 中，Model<br>数据层的 Repository 在创建 Presenter 的时候就传进来的，而且还是使用的接口，这样也增加了可扩展性，缺点是在调用 M 是一层一层的传递，略显麻烦，不过从代码结构上是清晰的。</p>
+<h4 id="todo-mvp-clean"><a href="#todo-mvp-clean" class="headerlink" title="todo-mvp-clean"></a>todo-mvp-clean</h4><p>Based on todo-mvp, uses concepts from Clean Architecture，依靠的还是还是基本的 MVP todo-mvp，只不过在 Model 层做了优化，引入了 Domain Layer 层, Presenter 将不直接调用数据层，而是使用 usecase 方式。</p>
+<p>Presenter 要和 Model 打交道，必须通过 Domain 这一层，UseCase 中提供了最基本的请求和回调参数，以及如何调用的抽象方法，每一个子类继承 UseCase 来实现自己的 UseCase，同时<br>又有一个 UseCaseHandler 工具类来管理这些 UseCase 的执行和回调，UseCase 和 UseCaseHandler 都是提供的基类，可以重复利用，对于 case 比较多的案例还是比较适用的。还有这里面<br>有一些线程池的使用，实现类 UseCaseThreadPoolScheduler，来自定义我们的线程调度，包括使用什么队列，线程池大小等。经实际操作验证，一般的页面无需使用这么复杂的结构，如果针对请求情况<br>比较多的 case，可以使用这个。</p>
+<p>Model 这一层在 UseCase 中实现，并且和 todo-mvp 一致，数据层的 Repository 在创建 Presenter 时候也要传入到 UseCase 中。</p>
+<h4 id="新增-Usecase-方式"><a href="#新增-Usecase-方式" class="headerlink" title="新增 Usecase 方式"></a>新增 Usecase 方式</h4><p>利:<br></p>
+<ul>
+<li>代码结构清晰，将每个 case 分离互不干扰，而且请求、回调等进行统一化管理，不在过多的依靠外部提供的接口，增加了灵活性；<br></li>
+<li>将 view 和逻辑分离，在整合基线明星页过程中，并没有对view层关注，完全屏蔽掉，直进行 Presenter 分发处理，大大增加了效率；<br></li>
+<li>Usecase 中有关于线程池的控制以及主线程回调操作；<br></li>
+</ul>
+<p>弊:<br></p>
+<ul>
+<li>新增 Usecase 导致代码增多，因为分离的非常细，首先回增加 Usecase 部分的核心代码（这部分可以共用），其次增加了每个具体的 Usecase 类，使得代码整体结构会增加；<br></li>
+<li>简单页面不太适合使用 Usecase，建议使用 Base MVP 即可；<br></li>
+</ul>
+<p>关于参数的封装：</p>
+<p>先看代码：</p>
+<pre><code>public static class RequestValues implements UseCase.RequestValues {
 }
 
-@Override public void handleMessage(Message msg) {
-    super.handleMessage(msg);
-    if (mWeakActivity.get() != null) {
-      mWeakActivity.get().todo();
-}
-}
-</code></pre><p>  }</p>
-<p>  public void todo(){<br>    //todo<br>  }</p>
-<h3 id="关于-Runnable"><a href="#关于-Runnable" class="headerlink" title="关于 Runnable"></a>关于 Runnable</h3><p>常常会这么写,会存在很大的内存泄露问题，内部类会持有外部对象的引用，如果我们 run 方法操作了 UI 等，或者 使用了 postDelayed 方法，很容易造成内存泄露问题。</p>
-<pre><code>mHandler.post(new Runnable() {
+public static class ResponseValue implements UseCase.ResponseValue {
 
-    @Override
-    public void run() {
-      ..
+    private final Statistics mStatistics;
+
+    public ResponseValue(@NonNull Statistics statistics) {
+        mStatistics = checkNotNull(statistics, &quot;statistics cannot be null!&quot;);
     }
-});
-</code></pre><p>解决方法：使用静态的Runnable 和 WeakReference 来解决引用问题，使用 WeakReference 要注意判断，因为可能随时会被回收。</p>
-<pre><code>private static final class ItemRunnble implements Runnable {
 
-  private final WeakReference&lt;Item&gt; mWeakReference;
-
-  public ProgressBarRunnble(Item f) {
-    mWeakReference = new WeakReference&lt;Item&gt;(f);
-  }
-
-  @Override
-  public void run() {
-    Item item = mWeakReference.get();
-    if (item != null) {
-      ...
+    public Statistics getStatistics() {
+        return mStatistics;
     }
-  }
 }
-
-mHandler.post(new ItemRunnble(mItem))
-</code></pre><h2 id="3、非静态内部类生成的静态变量"><a href="#3、非静态内部类生成的静态变量" class="headerlink" title="3、非静态内部类生成的静态变量"></a>3、非静态内部类生成的静态变量</h2><p>private static MyClass myClass;<br>  private class MyClass {</p>
-<p>  }</p>
-<p>..</p>
-<p>myClass = new MyClass();   </p>
-<p>这种是两者的综合体，只要是非静态内部类就会持有外部类的引用，如果外部类正好是 Activity ，那么会导致 Activity 无法回收；<br>处理方式和第一种很像，记得释放</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>静态变量最容易出现内存泄露，这些静态变量的生命周期和应用程序一致，所有的对象 Object 也不能被释放，<br>而集合类如果不 remove 添加的 Object，则会永远持有这些 Ojbect，也会导致无法释放。</p>
-<p>监听器是一种使用方式，Android 中比较常见的是 Listener，Observer 等，<br>一般被监听者的生命周期要比监听者的生命周期长,当监听者本身不被使用，但又没有移除被监听者对其的引用时就会造成内存无法释放。</p>
-<p>数据库在不使用时也没有关闭，那么这部分内存也就无法回收。</p>
-<p>以下列举注意情况：</p>
- <ul><br>    <li>遵守生命周期，创建时创建，销毁时记得回收</li><br>    <li>Bitmip 和 Drawable 记得手动回收</li><br>    <li>减少静态变量的使用</li><br>    <li>自定义静态 Handler，和 Handler 回收</li><br>    <li>使用 Application Context,少使用 Activity Context</li><br>    <li>监听器不使用的时候记得释放</li><br>    <li>如果循环中使用较多临时变量，当不使用时及时释放</li><br>  </ul>
-
-<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
-<li><a href="http://blog.csdn.net/zhuanglonghai/article/details/382330698" target="_blank" rel="noopener">Android App 内存泄露之Handler</a></li>
-<li><a href="http://www.cnblogs.com/kissazi2/p/4121852.html" target="_blank" rel="noopener">【译】什么导致了Context泄露：Handler&amp;内部类</a></li>
-<li><a href="http://droidyue.com/blog/2014/10/02/the-private-modifier-in-java/" target="_blank" rel="noopener">细话Java：”失效”的private修饰符</a></li>
-<li><a href="http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html" target="_blank" rel="noopener">How to Leak a Context: Handlers &amp; Inner Classes</a></li>
+</code></pre><p>这种方式提供了一种规范，可扩展、统一封装，这样就可以彻底将数据请求相关的屏蔽掉，如果以后更换请求接口，也不会影响到 UseCase 的使用，更不会影响 View 层了。所以比较推荐这种方式。</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><pre><code>public GetStatistics(@NonNull TasksRepository tasksRepository) {
+    mTasksRepository = checkNotNull(tasksRepository, &quot;tasksRepository cannot be null!&quot;);
+}
+</code></pre><p>强烈建议使用 google 的 checkNotNull 这种方式，必须保证不会 null，这个是 Google 的另一库 guava，建议学习下。</p>
+<h3 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h3><p><a href="https://github.com/whiskeyfei/android-architecture-todo-mvp" target="_blank" rel="noopener">https://github.com/whiskeyfei/android-architecture-todo-mvp</a></p>
+<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
+<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
+<li><a href="https://github.com/googlesamples/android-architecture/tree/todo-mvp-clean/" target="_blank" rel="noopener">Google android-architecure</a></li>
+<li><a href="https://github.com/android10/Android-CleanArchitecture" target="_blank" rel="noopener">android10/Android-CleanArchitecture</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/20001838" target="_blank" rel="noopener">android10/Android-CleanArchitecture 中文详解</a></li>
+<li><a href="https://github.com/stuartgunter/guava-demo" target="_blank" rel="noopener">guava-demo</a></li>
+<li><a href="https://github.com/Syhids/android-architecture/tree/todo-mvp-fragmentless" target="_blank" rel="noopener">todo-mvp-fragmentless</a></li>
 </ul>
 
           
@@ -1958,7 +1967,7 @@ Uptime: 16199425 Realtime: 16199425
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2015-12-17-android-use-mvp2/">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2015/11/10/android/2016-3-16-android-memory-demo/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="無名">
@@ -1977,7 +1986,7 @@ Uptime: 16199425 Realtime: 16199425
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2015/11/10/android/2015-12-17-android-use-mvp2/" itemprop="url">Android MVP 项目使用</a></h1>
+                <a class="post-title-link" href="/2015/11/10/android/2016-3-16-android-memory-demo/" itemprop="url">Android 内存泄漏案例分析总结(Handler)</a></h1>
         
 
         <div class="post-meta">
@@ -2046,182 +2055,85 @@ Uptime: 16199425 Realtime: 16199425
       
         
           
-            <p>前段时间学习 MVP 思想，在原来 <a href="https://github.com/liuling07/SimpleNews" target="_blank" rel="noopener">SimpleNews</a> 的基础上，修改了数据层和 UI 层的逻辑，使用 RxJava + MVP 组合方式，重构完成 <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a>，目前还存在很多需要优化的地方，今天说说 SimpleNews.io 中用到的 MVP 部分。</p>
-<p>参考 <a href="https://github.com/ribot/android-boilerplate" target="_blank" rel="noopener">android-boilerplate</a>, 添加 base Presenter 和 base View,以后所有的 Presenter 和 View 都需要继承 base ,这样在Presenter这一层才能使用统一方法回调接口，Model 暂时没有改变</p>
-<h3 id="好处"><a href="#好处" class="headerlink" title="好处"></a>好处</h3><p>1、BasePresenter 将不同的view接口统一，不返回具体的view接口，通过方法操作，易于扩展;<br><br>2、view 接口的绑定统一化;</p>
-<h3 id="基础使用"><a href="#基础使用" class="headerlink" title="基础使用"></a>基础使用</h3><p>定义View接口，暂时为空，子类可以扩展添加</p>
-<pre><code>public interface IMVPBaseView {
+            <p>在Android开发开发中，操作不当很容易引起内存泄漏，这里主要记录下平时遇到问题，包括：静态变量(也包含集合)、非静态的内部类、Handler、监听器，尤其是 Handler<br>在开发中要格外的注意。</p>
+<h2 id="1、静态变量"><a href="#1、静态变量" class="headerlink" title="1、静态变量"></a>1、静态变量</h2><p>public class LeakActivityDemo extends Activity{<br>  private static TextView mTextView;</p>
+<p>  @Override<br>  protected void onCreate(Bundle savedInstanceState) {<br>    super.onCreate(savedInstanceState);<br>    setContentView(R.layout.activity_main);<br>    mTextView = new TextView(this);<br>    mTextView.setText(“demo”);<br>  }<br>}</p>
+<p>我这里这是一个例子，一般开发不会这么写，上面的代码在 Activity 结束的时候，mTextView 一直持有 this 引用，<br>导致整个 Activity 无法回收</p>
+<p>解决:方法在 Activity 生命周期 onDestroy 时将 mTextView 置空，或者尽量少使用到静态变量。<br>注意:在写代码时，要考虑到当前的变量是否持有当前 Activity 的引用，避免出现内存泄漏.</p>
+<h2 id="2、非静态内部类"><a href="#2、非静态内部类" class="headerlink" title="2、非静态内部类"></a>2、非静态内部类</h2><h3 id="关于-Handler"><a href="#关于-Handler" class="headerlink" title="关于 Handler"></a>关于 Handler</h3><p>public class LeakActivity extends Activity{</p>
+<p>  @Override<br>  protected void onCreate(Bundle savedInstanceState) {<br>    super.onCreate(savedInstanceState);<br>    setContentView(R.layout.activity_main);<br>    mHandler.postDelayed(new Runnable() {</p>
+<pre><code>  @Override
+  public void run() {
 
+  }
+}, 1);
+</code></pre><p>  }</p>
+<p>  //提示：This Handler class should be static or leaks might occur (com.mvp.view.LeakActivity.1)<br>  private Handler mHandler = new Handler() {<br>      @Override public void handleMessage(Message msg) {<br>          super.handleMessage(msg);<br>      }<br>  };<br>}</p>
+<p>在 Android 开发中，我们一般使用 Handler 处理异步操作，通常我们的代码会像上面一样实现，但是上面的代码可能存在泄漏，<br>其实编译器已经提示了警告，建议使用 static 静态标示。</p>
+<p>原因：</p>
+<p>1、首先在 java 中，非静态内部类会或者内部类会持有外部对象的引用，而静态内部类不会持有外部类的引用；</p>
+<p>2、和 Handler 机制有关，我们知道 Handler 和 Looper 是一起工作的，在一个 Activity 起来的时候，会帮我们创建一个<br>在主线程中使用的 Looper，用来处理所有的消息，当 Hanlder 初始化好以后，就会有一个消息发送到了 Looper 的消息队列中，<br>而这个消息则包含了当前 Handler 的引用，这就是内存泄露的原因；</p>
+<p>解决:</p>
+<p>1、使用静态内部类，如果在内部类中使用了 Activiy 则要使用 WeakReference(弱引用)，并且需要注意判空。</p>
+<p>2、还有Hanlder要在生命周期 ondestroy 时，取消该 Handler 对象的 Messag 和 Runnable。</p>
+<p>例如：removeCallbacks(Runnable r)、removeMessages(int what)、mHandler.removeCallbacksAndMessages(null);  </p>
+<p>  private final MyHandler mHandler = new MyHandler(this);</p>
+<p>  public static class MyHandler extends Handler {<br>      private final WeakReference<leakactivity> mWeakActivity;</leakactivity></p>
+<pre><code>public MyHandler(LeakActivity context) {
+  mWeakActivity = new WeakReference&lt;LeakActivity&gt;(context);
 }
-</code></pre><p>定义Presenter接口</p>
-<pre><code>public interface IMVPPresenter&lt;V extends IMVPBaseView&gt; {
-    /**
-     * 附加view回调接口
-     *
-     * @param mvpBaseView
-     */
-    void attachView(V mvpBaseView);
 
-     /**
-     * 释放view接口
-     */
-    void detachView();
-
+@Override public void handleMessage(Message msg) {
+    super.handleMessage(msg);
+    if (mWeakActivity.get() != null) {
+      mWeakActivity.get().todo();
 }
-</code></pre><p>BasePresenter实现</p>
-<pre><code>public class BasePresenter&lt;T extends IMVPBaseView&gt; implements IMVPPresenter&lt;T&gt; {
-    private T mMvpBaseView;
+}
+</code></pre><p>  }</p>
+<p>  public void todo(){<br>    //todo<br>  }</p>
+<h3 id="关于-Runnable"><a href="#关于-Runnable" class="headerlink" title="关于 Runnable"></a>关于 Runnable</h3><p>常常会这么写,会存在很大的内存泄露问题，内部类会持有外部对象的引用，如果我们 run 方法操作了 UI 等，或者 使用了 postDelayed 方法，很容易造成内存泄露问题。</p>
+<pre><code>mHandler.post(new Runnable() {
 
     @Override
-    public void attachView(T mvpBaseView) {
-        mMvpBaseView = mvpBaseView;
+    public void run() {
+      ..
     }
+});
+</code></pre><p>解决方法：使用静态的Runnable 和 WeakReference 来解决引用问题，使用 WeakReference 要注意判断，因为可能随时会被回收。</p>
+<pre><code>private static final class ItemRunnble implements Runnable {
 
-    @Override
-    public void detachView() {
-        mMvpBaseView = null;
+  private final WeakReference&lt;Item&gt; mWeakReference;
+
+  public ProgressBarRunnble(Item f) {
+    mWeakReference = new WeakReference&lt;Item&gt;(f);
+  }
+
+  @Override
+  public void run() {
+    Item item = mWeakReference.get();
+    if (item != null) {
+      ...
     }
-
-    public T getMvpBaseView() {
-        return mMvpBaseView;
-    }
-
-    /**
-     * 是否附加view接口
-     *
-     * @return true mvpBaseView != null
-     */
-    public boolean isViewAttached() {
-        return mMvpBaseView != null;
-    }
-
-    /**
-     * 检查是否绑定view接口
-     */
-    public void checkViewAttached() {
-        if (!isViewAttached())
-            throw new RuntimeException(
-                    &quot;Please call BasePresenter.attachView(IMVPBaseView) before&quot;
-                            + &quot; requesting data to the Presenter&quot;);
-    }
-}
-</code></pre><h3 id="项目使用"><a href="#项目使用" class="headerlink" title="项目使用"></a>项目使用</h3><p>首先看下我的项目结构:</p>
-<p><img src="!--￼0--&gt;/assets/image/mvp.png" alt="mvp"></p>
-<p>拿获取图片列表来举例，逻辑是这样：获取数据并解析结果给 view 展示。首先在 Fragment 中即 View 接口的实现类中<br>初始化我们的 Presenter 同时会初始化一个 Model，Fragment 调用 Presenter 中的方法，例如：loadImageList() 方法，接着去调用 Model中<br>的getImageList()方法,最后 Model 讲结果回调给 Presenter 层，Presenter 再回调给 View层，这样就完成了一个 MVP逻辑，以下是部分代码。</p>
-<pre><code>//View
-private IImagePresenter mImagePresenter;
-
-@Override
-public void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    mImagePresenter = new ImagePresenter(this);
+  }
 }
 
-//Presenter
-public class ImagePresenter extends BasePresenter&lt;IImageView&gt; implements IImagePresenter {
-private static final String TAG = &quot;ImagePresenter&quot;;
-private IImageModel mImageModel;
-private Subscription mSubscription;
+mHandler.post(new ItemRunnble(mItem))
+</code></pre><h2 id="3、非静态内部类生成的静态变量"><a href="#3、非静态内部类生成的静态变量" class="headerlink" title="3、非静态内部类生成的静态变量"></a>3、非静态内部类生成的静态变量</h2><p>private static MyClass myClass;<br>  private class MyClass {</p>
+<p>  }</p>
+<p>..</p>
+<p>myClass = new MyClass();   </p>
+<p>这种是两者的综合体，只要是非静态内部类就会持有外部类的引用，如果外部类正好是 Activity ，那么会导致 Activity 无法回收；<br>处理方式和第一种很像，记得释放</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>静态变量最容易出现内存泄露，这些静态变量的生命周期和应用程序一致，所有的对象 Object 也不能被释放，<br>而集合类如果不 remove 添加的 Object，则会永远持有这些 Ojbect，也会导致无法释放。</p>
+<p>监听器是一种使用方式，Android 中比较常见的是 Listener，Observer 等，<br>一般被监听者的生命周期要比监听者的生命周期长,当监听者本身不被使用，但又没有移除被监听者对其的引用时就会造成内存无法释放。</p>
+<p>数据库在不使用时也没有关闭，那么这部分内存也就无法回收。</p>
+<p>以下列举注意情况：</p>
+ <ul><br>    <li>遵守生命周期，创建时创建，销毁时记得回收</li><br>    <li>Bitmip 和 Drawable 记得手动回收</li><br>    <li>减少静态变量的使用</li><br>    <li>自定义静态 Handler，和 Handler 回收</li><br>    <li>使用 Application Context,少使用 Activity Context</li><br>    <li>监听器不使用的时候记得释放</li><br>    <li>如果循环中使用较多临时变量，当不使用时及时释放</li><br>  </ul>
 
-public ImagePresenter(IImageView imageView) {
-    attachView(imageView);
-    mImageModel = new ImageModel();
-}
-
-@Override
-public void detachView() {
-    super.detachView();
-    if (mSubscription != null) {
-        mSubscription.unsubscribe();
-    }
-}
-
-@Override
-public void loadImageList() {
-    checkViewAttached();
-    mSubscription = mImageModel.getImageList()
-            .subscribeOn(Schedulers.io())
-            .doOnSubscribe(new Action0() {
-                @Override
-                public void call() {
-                    getMvpBaseView().showProgress();
-                }
-            })
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Observer&lt;List&lt;ImageBean&gt;&gt;() {
-                @Override
-                public void onCompleted() {
-                    getMvpBaseView().hideProgress();
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    getMvpBaseView().hideProgress();
-                    getMvpBaseView().showLoadFailMsg();
-                }
-
-                @Override
-                public void onNext(List&lt;ImageBean&gt; list) {
-                    getMvpBaseView().onSuccess(list);
-                }
-            });
-    }
-}
-
-//Model
-public class ImageModel implements IImageModel {
-
-    private static final String TAG = &quot;ImageModel&quot;;
-
-    public Observable&lt;List&lt;ImageBean&gt;&gt; getImageList() {
-        return Observable.just(Urls.IMAGES_URL).flatMap(new Func1&lt;String, Observable&lt;List&lt;ImageBean&gt;&gt;&gt;() {
-            @Override
-            public Observable&lt;List&lt;ImageBean&gt;&gt; call(final String url) {
-                //可以拼接url
-                return Observable.create(new Observable.OnSubscribe&lt;List&lt;ImageBean&gt;&gt;() {
-
-                    @Override
-                    public void call(final Subscriber&lt;? super List&lt;ImageBean&gt;&gt; subscriber) {
-                        OkHttpUtils.ResultCallback&lt;String&gt; loadNewsCallback = new OkHttpUtils.ResultCallback&lt;String&gt;() {
-                            @Override
-                            public void onSuccess(String response) {
-                                Log.d(TAG, &quot;onSuccess response:&quot; + response);
-                                if(StringUtils.isEmpty(response)){
-                                    subscriber.onError(null);
-                                    return;
-                                }
-                                Gson gson = new Gson();
-                                List&lt;ImageBean&gt; iamgeBeanList = gson.fromJson(response, new TypeToken&lt;List&lt;ImageBean&gt;&gt;() {}.getType());
-                                if(ListUtils.isEmpty(iamgeBeanList)){
-                                    subscriber.onError(null);
-                                    return;
-                                }
-                                subscriber.onNext(iamgeBeanList);
-                                subscriber.onCompleted();
-                            }
-
-                            @Override
-                            public void onFailure(Exception e) {
-                                subscriber.onError(e);
-                            }
-                        };
-                        OkHttpUtils.get(url, loadNewsCallback);
-                    }
-                });
-            }
-        });
-    }
-}
-</code></pre><p>一个完整的MVP思想的使用就结束了，有没有觉得很简单，最初听名字以为是一个框架，学了才知道 MVP 是一种思想，开发多多使用，有问题欢迎留言，<br>也可以frok我的项目 <a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a> 一起学习。</p>
-<h3 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h3><ul>
-<li><a href="http://rocko.xyz/2015/11/07/MVVM_Android-CleanArchitecture/" target="_blank" rel="noopener">MVVM_Android-CleanArchitecture</a></li>
-<li><a href="http://rocko.xyz/2015/02/06/Android%E4%B8%AD%E7%9A%84MVP/" target="_blank" rel="noopener">Android中的MVP</a></li>
-<li><a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>文章中有些话，摘自<a href="http://toughcoder.net/blog/2015/11/29/understanding-android-mvp-pattern/" target="_blank" rel="noopener">说说Android的MVP模式</a>一文</li>
-<li><a href="https://github.com/ribot/android-boilerplate" target="_blank" rel="noopener">android-boilerplate</a></li>
-</ul>
-<h3 id="推荐"><a href="#推荐" class="headerlink" title="推荐"></a>推荐</h3><ul>
-<li><a href="https://github.com/whiskeyfei/WFAndroidDemo/tree/master/WFAndroid_MVP" target="_blank" rel="noopener">WFAndroid_MVP</a> MVP Demo</li>
-<li><a href="https://github.com/whiskeyfei/SimpleNews.io" target="_blank" rel="noopener">SimpleNews.io</a> 我的项目</li>
+<h2 id="参考文章"><a href="#参考文章" class="headerlink" title="参考文章"></a>参考文章</h2><ul>
+<li><a href="http://blog.csdn.net/zhuanglonghai/article/details/382330698" target="_blank" rel="noopener">Android App 内存泄露之Handler</a></li>
+<li><a href="http://www.cnblogs.com/kissazi2/p/4121852.html" target="_blank" rel="noopener">【译】什么导致了Context泄露：Handler&amp;内部类</a></li>
+<li><a href="http://droidyue.com/blog/2014/10/02/the-private-modifier-in-java/" target="_blank" rel="noopener">细话Java：”失效”的private修饰符</a></li>
+<li><a href="http://www.androiddesignpatterns.com/2013/01/inner-class-handler-memory-leak.html" target="_blank" rel="noopener">How to Leak a Context: Handlers &amp; Inner Classes</a></li>
 </ul>
 
           
