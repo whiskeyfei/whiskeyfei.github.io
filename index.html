@@ -1430,6 +1430,177 @@ System.err:     at android.os.Looper.loop(Looper.java:137)
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2017/08/19/android/2017-8-19-simpleNews-7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="無名">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/face.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="無名小子的杂货铺">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/08/19/android/2017-8-19-simpleNews-7/" itemprop="url">SimpleNews 项目的重构之旅(7) － 改头换面&深度清理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-19T22:47:20+09:00">2017-08-19</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/SimpleNews-系列/" itemprop="url" rel="index"><span itemprop="name">SimpleNews 系列</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="主要内容"><a href="#主要内容" class="headerlink" title="主要内容"></a>主要内容</h3><p>有几天没有更新本系列了，这段日子也没有闲着，一直在断断续续更改自己的代码，想把 UI 改改样子，慢慢做成一个成型的可以上线的 APP，不在是自己的练习项目。今天主要介绍两部分：UI 和 清理。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-e70ab02e24fa82fd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/740" alt="概述"></p>
+<h3 id="UI"><a href="#UI" class="headerlink" title="UI"></a>UI</h3><p>先上图看看把</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-7eef50a7162c2e7d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="welcome"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-8c13954bbd7fbd7f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="news"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-2177d17ca2cd7392.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="blog"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-0db5b64fc1e78ead.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="gank.io"></p>
+<p>统一了底部栏，和列表 Item 样式。</p>
+<p>之前的 UI 也是从别的项目 fork 下来， 也没有太关注过这些内容，只想学习里面的代码，到后来自己都看不下去了，确实相同的太多了，现在 UI 样式也是体验了很多App 才形成的，现在 ios 和 Android 很多UI交互都是一样，虽然 Android 有自己的规范，但是跨平台交互方式一样，这一点也很重要，所以就设计现在这个样子，现在看起来还很平常，这只是最初的版本，好多东西还没有添加上，之后会慢慢丰富。</p>
+<p>现在只有三个tab，还有一个我的tab，正在码。</p>
+<p>设计 UI 是一件痛苦的事情(对于开发来说)，可能是审美欠缺，不知道到底好看不好看，不过慢慢学嘛，这几个 tab 的 icon 虽然是从网上找的，但是也经历了 PS 微调，以后还要好好学习 PS。</p>
+<p>去掉了之前的图片数据，新增了博客和推荐，博客的内容都是自己平时的积累，也是放在 github 上，做成接口供请求，当然这是公开的。推荐的内容是使用的 <a href="http://gank.io/" target="_blank" rel="noopener">http://gank.io/</a> 免费 api，平时没事会看看，现在都整合到自己的 App 中。</p>
+<h3 id="深度清理"><a href="#深度清理" class="headerlink" title="深度清理"></a>深度清理</h3><p>在更改完 UI 后，产生了很多废弃的文件，包括类、资源等，这次利用了 AndroidStudio lint 的强大功能，全面清理了无用资源。</p>
+<p>也不是很难，直接看操作好了</p>
+<p>菜单 -&gt; Analyze<br><img src="http://upload-images.jianshu.io/upload_images/877678-11e334ffcf6def3e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="image.png"></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-5c9a1f6d1c27ee2f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="image.png"></p>
+<p>需要清理的：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-7f481452e7267edf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="image.png"></p>
+<p>自动清理完的结果：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/877678-f0c14963f3e9197c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="image.png"></p>
+<p>至此代码中没有无用的资源了，接下来处理重复代码，提高代码复用，有兴趣的可以fork 下看看，交流下。</p>
+<h4 id="SimpleNews-项目的重构之旅其他文章"><a href="#SimpleNews-项目的重构之旅其他文章" class="headerlink" title="SimpleNews 项目的重构之旅其他文章"></a><a href="">SimpleNews 项目的重构之旅其他文章</a></h4><ul>
+<li><a href="http://www.jianshu.com/p/d2101119e7b7" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(1) －项目架构定位 &amp; Gradle 全局配置</a></li>
+<li><a href="http://www.jianshu.com/p/a658021edea8" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(2) － 整理项目 .gitignore 文件</a></li>
+<li><a href="http://www.jianshu.com/p/de207458f12e" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(3) －EventBus 接入</a></li>
+<li><a href="http://www.jianshu.com/p/ff777bb4e1d9" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(4) －Gradle for Android 基础知识汇总</a></li>
+<li><a href="http://www.jianshu.com/p/3c8c69346acf" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(5) － Android Gradle 打包&amp;混淆应用</a></li>
+<li><a href="http://www.jianshu.com/p/37112006f7ed" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(6) － 命名规范 &amp; Android Toolbar</a></li>
+<li><a href="http://www.jianshu.com/p/9cc735021b6a" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(7) － 改头换面&amp;深度清理</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2017/08/19/android/2017-10-30-webview-all/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1836,177 +2007,6 @@ if (url.startsWith(&quot;file://&quot;) {
 <li><a href="https://github.com/Tencent/VasSonic/wiki" target="_blank" rel="noopener">https://github.com/Tencent/VasSonic/wiki</a></li>
 </ul>
 <hr>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://whiskeyfei.github.io/2017/08/19/android/2017-8-19-simpleNews-7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="無名">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/uploads/face.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="無名小子的杂货铺">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/08/19/android/2017-8-19-simpleNews-7/" itemprop="url">SimpleNews 项目的重构之旅(7) － 改头换面&深度清理</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-19T22:47:20+09:00">2017-08-19</time>
-            
-
-            
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/SimpleNews-系列/" itemprop="url" rel="index"><span itemprop="name">SimpleNews 系列</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="主要内容"><a href="#主要内容" class="headerlink" title="主要内容"></a>主要内容</h3><p>有几天没有更新本系列了，这段日子也没有闲着，一直在断断续续更改自己的代码，想把 UI 改改样子，慢慢做成一个成型的可以上线的 APP，不在是自己的练习项目。今天主要介绍两部分：UI 和 清理。</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-e70ab02e24fa82fd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/740" alt="概述"></p>
-<h3 id="UI"><a href="#UI" class="headerlink" title="UI"></a>UI</h3><p>先上图看看把</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-7eef50a7162c2e7d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="welcome"></p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-8c13954bbd7fbd7f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="news"></p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-2177d17ca2cd7392.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="blog"></p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-0db5b64fc1e78ead.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/340" alt="gank.io"></p>
-<p>统一了底部栏，和列表 Item 样式。</p>
-<p>之前的 UI 也是从别的项目 fork 下来， 也没有太关注过这些内容，只想学习里面的代码，到后来自己都看不下去了，确实相同的太多了，现在 UI 样式也是体验了很多App 才形成的，现在 ios 和 Android 很多UI交互都是一样，虽然 Android 有自己的规范，但是跨平台交互方式一样，这一点也很重要，所以就设计现在这个样子，现在看起来还很平常，这只是最初的版本，好多东西还没有添加上，之后会慢慢丰富。</p>
-<p>现在只有三个tab，还有一个我的tab，正在码。</p>
-<p>设计 UI 是一件痛苦的事情(对于开发来说)，可能是审美欠缺，不知道到底好看不好看，不过慢慢学嘛，这几个 tab 的 icon 虽然是从网上找的，但是也经历了 PS 微调，以后还要好好学习 PS。</p>
-<p>去掉了之前的图片数据，新增了博客和推荐，博客的内容都是自己平时的积累，也是放在 github 上，做成接口供请求，当然这是公开的。推荐的内容是使用的 <a href="http://gank.io/" target="_blank" rel="noopener">http://gank.io/</a> 免费 api，平时没事会看看，现在都整合到自己的 App 中。</p>
-<h3 id="深度清理"><a href="#深度清理" class="headerlink" title="深度清理"></a>深度清理</h3><p>在更改完 UI 后，产生了很多废弃的文件，包括类、资源等，这次利用了 AndroidStudio lint 的强大功能，全面清理了无用资源。</p>
-<p>也不是很难，直接看操作好了</p>
-<p>菜单 -&gt; Analyze<br><img src="http://upload-images.jianshu.io/upload_images/877678-11e334ffcf6def3e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="image.png"></p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-5c9a1f6d1c27ee2f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="image.png"></p>
-<p>需要清理的：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-7f481452e7267edf.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="image.png"></p>
-<p>自动清理完的结果：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/877678-f0c14963f3e9197c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/540" alt="image.png"></p>
-<p>至此代码中没有无用的资源了，接下来处理重复代码，提高代码复用，有兴趣的可以fork 下看看，交流下。</p>
-<h4 id="SimpleNews-项目的重构之旅其他文章"><a href="#SimpleNews-项目的重构之旅其他文章" class="headerlink" title="SimpleNews 项目的重构之旅其他文章"></a><a href="">SimpleNews 项目的重构之旅其他文章</a></h4><ul>
-<li><a href="http://www.jianshu.com/p/d2101119e7b7" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(1) －项目架构定位 &amp; Gradle 全局配置</a></li>
-<li><a href="http://www.jianshu.com/p/a658021edea8" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(2) － 整理项目 .gitignore 文件</a></li>
-<li><a href="http://www.jianshu.com/p/de207458f12e" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(3) －EventBus 接入</a></li>
-<li><a href="http://www.jianshu.com/p/ff777bb4e1d9" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(4) －Gradle for Android 基础知识汇总</a></li>
-<li><a href="http://www.jianshu.com/p/3c8c69346acf" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(5) － Android Gradle 打包&amp;混淆应用</a></li>
-<li><a href="http://www.jianshu.com/p/37112006f7ed" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(6) － 命名规范 &amp; Android Toolbar</a></li>
-<li><a href="http://www.jianshu.com/p/9cc735021b6a" target="_blank" rel="noopener">SimpleNews 项目的重构之旅(7) － 改头换面&amp;深度清理</a></li>
-</ul>
 
           
         
